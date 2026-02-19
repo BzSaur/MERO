@@ -1,4 +1,5 @@
-require('dotenv').config({ path: '../../.env' });
+const dotenvPath = require('path').resolve(__dirname, '../../.env');
+require('dotenv').config({ path: dotenvPath });
 
 const express = require('express');
 const session = require('express-session');

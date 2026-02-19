@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* .npmrc ./
+COPY apps/web/package.json ./apps/web/
+
+RUN pnpm install --frozen-lockfile || pnpm install
+
+COPY apps/web/ ./apps/web/
+
+EXPOSE 4000
+
+CMD ["node", "apps/web/app.js"]

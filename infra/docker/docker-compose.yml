@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mero_secret}
       POSTGRES_DB: ${POSTGRES_DB:-mero_db}
     ports:
-      - '5433:5432'
+      - '${DB_PORT:-5433}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
       - backups:/backups
@@ -22,6 +22,7 @@ services:
     build:
       context: ../../
       dockerfile: infra/docker/Dockerfile
+      target: production
     container_name: mero-api
     restart: unless-stopped
     env_file:
@@ -29,10 +30,25 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-mero}:${POSTGRES_PASSWORD:-mero_secret}@db:5432/${POSTGRES_DB:-mero_db}?schema=public
     ports:
-      - '3000:3000'
+      - '${API_PORT:-3000}:3000'
     depends_on:
       db:
         condition: service_healthy
+
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.web
+    container_name: mero-web
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      API_URL: http://api:3000/api
+    ports:
+      - '${WEB_PORT:-4000}:4000'
+    depends_on:
+      - api
 
   nginx:
     image: nginx:alpine
@@ -40,12 +56,11 @@ services:
     restart: unless-stopped
     ports:
       - '80:80'
-      - '443:443'
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - api
+      - web
 
 volumes:
   pgdata:
