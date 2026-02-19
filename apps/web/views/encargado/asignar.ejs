@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/icons') %>
+  <%- include('../partials/nav') %>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="page-header">
+        <div>
+          <h1>Asignaciones</h1>
+          <p class="page-header__sub">Escanea el QR del empleado para asignarlo a un área</p>
+        </div>
+        <a href="/encargado" class="btn btn--ghost">
+          <svg class="icon"><use href="#icon-back"/></svg>
+          Volver
+        </a>
+      </div>
+
+      <%- include('../partials/flash') %>
+
+      <div class="grid-2" style="align-items:start">
+
+        <%# ── Formulario scan QR ── %>
+        <div class="card">
+          <div class="card__header">
+            <span class="card__title">Escanear QR</span>
+          </div>
+
+          <form method="POST" action="/encargado/asignar/scan">
+            <div class="form-group">
+              <label class="form-label" for="uuidQr">UUID del empleado</label>
+              <input
+                class="form-control mono"
+                type="text"
+                id="uuidQr"
+                name="uuidQr"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                required
+                autofocus
+              >
+              <small style="color:var(--ink-dim); display:block; margin-top:.35rem">
+                Escanea con lector QR o ingresa el UUID manualmente
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="areaId">Área destino</label>
+              <select class="form-control" id="areaId" name="areaId" required>
+                <option value="">— Seleccionar área —</option>
+                <% areas.forEach(a => { %>
+                  <option value="<%= a.id %>"><%= a.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn--primary">
+              <svg class="icon"><use href="#icon-qr"/></svg>
+              Asignar
+            </button>
+          </form>
+        </div>
+
+        <%# ── Asignaciones activas ── %>
+        <div class="card">
+          <div class="card__header">
+            <span class="card__title">Activas ahora</span>
+            <span class="badge badge--ok"><%= asignaciones.length %> empleados</span>
+          </div>
+
+          <% if (!asignaciones.length) { %>
+            <div class="empty">
+              <p class="empty__text">Sin asignaciones activas.</p>
+            </div>
+          <% } else { %>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Empleado</th>
+                    <th>Area</th>
+                    <th>Desde</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% asignaciones.forEach(a => { %>
+                    <tr>
+                      <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
+                      <td><%= a.area?.nombre %></td>
+                      <td class="td-mono"><%= fmtDate(a.createdAt) %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

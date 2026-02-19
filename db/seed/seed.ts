@@ -123,6 +123,7 @@ async function main() {
     where: { email: 'admin@mero.local' },
     update: {},
     create: {
+      nombre: 'Administrador',
       email: 'admin@mero.local',
       passwordHash,
       rol: Rol.ADMIN,

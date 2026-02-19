@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <%- include('../../partials/head') %>
+</head>
+<body>
+  <%- include('../../partials/icons') %>
+  <%- include('../../partials/nav') %>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="page-header">
+        <div>
+          <h1>Estándares</h1>
+          <p class="page-header__sub">Producción esperada por hora (subtarea + modelo)</p>
+        </div>
+        <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
+          <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Areas</a>
+          <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
+          <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
+        </div>
+      </div>
+
+      <%- include('../../partials/flash') %>
+
+      <%# ── Formulario ── %>
+      <div class="card" style="margin-bottom:var(--gap-lg)">
+        <div class="card__header">
+          <span class="card__title">Nuevo estándar</span>
+        </div>
+        <form method="POST" action="/admin/catalogos/estandares">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="subtareaId">Subtarea</label>
+              <select class="form-control" id="subtareaId" name="subtareaId" required>
+                <option value="">— Seleccionar —</option>
+                <% subtareas.forEach(s => { %>
+                  <option value="<%= s.id %>"><%= s.area?.nombre %> / <%= s.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="modeloId">Modelo</label>
+              <select class="form-control" id="modeloId" name="modeloId" required>
+                <option value="">— Seleccionar —</option>
+                <% modelos.forEach(m => { %>
+                  <option value="<%= m.id %>"><%= m.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cantidadEstandar">Unidades / hora</label>
+              <input class="form-control" type="number" id="cantidadEstandar" name="cantidadEstandar" min="1" required placeholder="50">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="vigenteDesdeFecha">Vigente desde</label>
+              <input class="form-control" type="date" id="vigenteDesdeFecha" name="vigenteDesdeFecha" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn--primary">
+            <svg class="icon"><use href="#icon-plus"/></svg>
+            Crear estándar
+          </button>
+        </form>
+      </div>
+
+      <%# ── Listado ── %>
+      <div class="card">
+        <div class="card__header">
+          <span class="card__title">Estándares registrados</span>
+          <span class="badge badge--none"><%= estandares.length %></span>
+        </div>
+        <% if (!estandares.length) { %>
+          <div class="empty"><p class="empty__text">Sin estándares registrados.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subtarea</th>
+                  <th>Modelo</th>
+                  <th>Unid/h</th>
+                  <th class="td-hide-mobile">Vigente desde</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% estandares.forEach(e => { %>
+                  <tr>
+                    <td>
+                      <span style="font-size:.78rem; color:var(--ink-dim)"><%= e.subtarea?.area?.nombre %> / </span>
+                      <%= e.subtarea?.nombre %>
+                    </td>
+                    <td><%= e.modelo?.nombre %></td>
+                    <td class="td-mono"><%= e.cantidadEstandar %></td>
+                    <td class="td-mono td-hide-mobile"><%= e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

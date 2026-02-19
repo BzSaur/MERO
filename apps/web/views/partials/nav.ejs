@@ -1,0 +1,87 @@
+<nav class="nav">
+  <a href="/" class="nav__brand">
+    <svg class="icon" style="font-size:18px"><use href="#icon-logo"/></svg>
+    MERO
+  </a>
+
+  <% if (user) { %>
+    <button class="nav__toggle" onclick="document.querySelector('.nav__links').classList.toggle('open'); this.classList.toggle('open')" aria-label="Menu">
+      <svg class="icon"><use href="#icon-menu"/></svg>
+    </button>
+
+    <ul class="nav__links">
+      <% if (user.rol === 'ADMIN' || user.rol === 'ENCARGADO') { %>
+        <li>
+          <a href="/encargado"
+             class="<%= currentUrl.startsWith('/encargado') && currentUrl !== '/encargado/asignar' ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-capture"/></svg>
+            Captura
+          </a>
+        </li>
+        <li>
+          <a href="/encargado/asignar"
+             class="<%= currentUrl === '/encargado/asignar' ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-assign"/></svg>
+            Asignar
+          </a>
+        </li>
+      <% } %>
+
+      <% if (user.rol === 'ADMIN') { %>
+        <li>
+          <a href="/admin"
+             class="<%= currentUrl === '/admin' ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-dashboard"/></svg>
+            Admin
+          </a>
+        </li>
+        <li>
+          <a href="/admin/usuarios"
+             class="<%= currentUrl.startsWith('/admin/usuarios') ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-users"/></svg>
+            Usuarios
+          </a>
+        </li>
+        <li>
+          <a href="/admin/catalogos/areas"
+             class="<%= currentUrl.startsWith('/admin/catalogos') ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-catalog"/></svg>
+            Catalogos
+          </a>
+        </li>
+        <li>
+          <a href="/admin/auditoria"
+             class="<%= currentUrl.startsWith('/admin/auditoria') ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-audit"/></svg>
+            Auditoria
+          </a>
+        </li>
+      <% } %>
+
+      <% if (user.rol === 'CONSULTOR' || user.rol === 'ADMIN') { %>
+        <li>
+          <a href="/consultor"
+             class="<%= currentUrl === '/consultor' ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-chart"/></svg>
+            Metricas
+          </a>
+        </li>
+        <li>
+          <a href="/consultor/historico"
+             class="<%= currentUrl.startsWith('/consultor/historico') ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-history"/></svg>
+            Historico
+          </a>
+        </li>
+      <% } %>
+    </ul>
+
+    <div class="nav__end">
+      <span class="nav__user"><%= user.nombre %></span>
+      <a href="/logout" class="nav__logout">
+        <svg class="icon"><use href="#icon-logout"/></svg>
+        Salir
+      </a>
+    </div>
+  <% } %>
+</nav>

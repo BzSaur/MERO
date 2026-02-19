@@ -9,6 +9,9 @@ import { Role } from '@mero/shared';
 
 export class UpdateUsuarioDto {
   @IsOptional()
+  nombre?: string;
+
+  @IsOptional()
   @IsEmail()
   email?: string;
 

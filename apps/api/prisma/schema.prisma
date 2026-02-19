@@ -104,6 +104,7 @@ model MeroEmpleado {
 
 model MeroUsuario {
   id           Int      @id @default(autoincrement())
+  nombre       String   @db.VarChar(200)
   email        String   @unique @db.VarChar(200)
   passwordHash String   @map("password_hash") @db.VarChar(255)
   rol          Rol

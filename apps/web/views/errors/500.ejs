@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/icons') %>
+  <% if (user) { %><%- include('../partials/nav') %><% } %>
+
+  <div class="error-page">
+    <div class="error-code">500</div>
+    <p class="error-msg">Error interno del servidor.</p>
+    <a href="/" class="btn btn--ghost">
+      <svg class="icon"><use href="#icon-back"/></svg>
+      Volver al inicio
+    </a>
+  </div>
+</body>
+</html>

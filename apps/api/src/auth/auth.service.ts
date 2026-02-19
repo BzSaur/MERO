@@ -30,7 +30,11 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    return this.generateTokens(user.id, user.email, user.rol);
+    const tokens = this.generateTokens(user.id, user.email, user.rol);
+    return {
+      ...tokens,
+      usuario: { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol, areaId: user.areaId },
+    };
   }
 
   async refresh(refreshToken: string) {

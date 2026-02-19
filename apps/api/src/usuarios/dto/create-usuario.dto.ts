@@ -9,6 +9,9 @@ import {
 import { Role } from '@mero/shared';
 
 export class CreateUsuarioDto {
+  @IsNotEmpty()
+  nombre: string;
+
   @IsEmail()
   email: string;
 

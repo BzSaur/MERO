@@ -1,0 +1,21 @@
+<% if (flash.error && flash.error.length) { %>
+  <ul class="flash-list">
+    <% flash.error.forEach(msg => { %>
+      <li class="flash flash--error"><%= msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+<% if (flash.success && flash.success.length) { %>
+  <ul class="flash-list">
+    <% flash.success.forEach(msg => { %>
+      <li class="flash flash--success"><%= msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+<% if (flash.info && flash.info.length) { %>
+  <ul class="flash-list">
+    <% flash.info.forEach(msg => { %>
+      <li class="flash flash--info"><%= msg %></li>
+    <% }) %>
+  </ul>
+<% } %>

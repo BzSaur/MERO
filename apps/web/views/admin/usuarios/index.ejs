@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <%- include('../../partials/head') %>
+</head>
+<body>
+  <%- include('../../partials/icons') %>
+  <%- include('../../partials/nav') %>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="page-header">
+        <div>
+          <h1>Usuarios</h1>
+          <p class="page-header__sub">Cuentas de acceso al sistema</p>
+        </div>
+        <a href="/admin/usuarios/nuevo" class="btn btn--primary">
+          <svg class="icon"><use href="#icon-plus"/></svg>
+          Nuevo usuario
+        </a>
+      </div>
+
+      <%- include('../../partials/flash') %>
+
+      <div class="card">
+        <% if (!usuarios.length) { %>
+          <div class="empty"><p class="empty__text">Sin usuarios registrados.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th class="td-hide-mobile">Correo</th>
+                  <th>Rol</th>
+                  <th class="td-hide-mobile">Creado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% usuarios.forEach(u => { %>
+                  <tr>
+                    <td><%= u.nombre %></td>
+                    <td class="td-mono td-hide-mobile"><%= u.email %></td>
+                    <td>
+                      <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
+                        <%= u.rol %>
+                      </span>
+                    </td>
+                    <td class="td-mono td-hide-mobile"><%= fmtDate(u.createdAt) %></td>
+                    <td>
+                      <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
+                        <svg class="icon"><use href="#icon-edit"/></svg>
+                        Editar
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
