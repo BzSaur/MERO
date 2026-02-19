@@ -14,7 +14,11 @@ import { AuditoriaModule } from './auditoria/auditoria.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // El .env está en la raíz del monorepo; NestJS corre desde apps/api
+      envFilePath: ['../../.env', '.env'],
+    }),
     LoggerModule.forRoot({
       pinoHttp: {
         transport:
