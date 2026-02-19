@@ -1,0 +1,36 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Logger } from 'nestjs-pino';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.useLogger(app.get(Logger));
+
+  const config = app.get(ConfigService);
+  const port = config.get<number>('API_PORT', 3000);
+  const prefix = config.get<string>('API_PREFIX', '/api');
+  const corsOrigin = config.get<string>('CORS_ORIGIN', 'http://localhost:5173');
+
+  app.setGlobalPrefix(prefix);
+
+  app.enableCors({
+    origin: corsOrigin,
+    credentials: true,
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  await app.listen(port);
+}
+
+bootstrap();

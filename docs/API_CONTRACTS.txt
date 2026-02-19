@@ -1,0 +1,125 @@
+MERO — Contratos de API
+========================
+
+Base URL: /api
+Autenticación: Bearer JWT (excepto POST /api/auth/login)
+
+Roles:
+  CONSULTOR   — Solo lectura. Visualiza áreas y métricas.
+  ENCARGADO   — Captura producción, escanea QR, visualiza métricas de su área.
+  ADMIN       — Todo lo anterior + gestión de catálogos, usuarios y auditoría.
+
+Todas las respuestas de creación/edición incluyen campos de auditoría:
+  createdAt, updatedAt, createdBy (donde aplique)
+
+─── Auth ───────────────────────────────────────────
+
+POST /api/auth/login
+  Body: { email, password }
+  Resp: { accessToken, refreshToken }
+
+POST /api/auth/refresh
+  Body: { refreshToken }
+  Resp: { accessToken, refreshToken }
+
+─── Usuarios (ADMIN) ──────────────────────────────
+
+POST   /api/usuarios          Crear usuario
+  Body: { email, password, rol, areaId? }
+GET    /api/usuarios          Listar usuarios
+GET    /api/usuarios/:id      Detalle usuario
+PATCH  /api/usuarios/:id      Actualizar usuario
+DELETE /api/usuarios/:id      Eliminar usuario
+
+─── Catálogos ─────────────────────────────────────
+
+POST   /api/catalogos/areas              Crear área (ADMIN)
+  Body: { nombre, descripcion? }
+GET    /api/catalogos/areas              Listar áreas activas (con subtareas)
+GET    /api/catalogos/areas/:id          Detalle área
+PATCH  /api/catalogos/areas/:id          Actualizar área (ADMIN)
+DELETE /api/catalogos/areas/:id          Desactivar área (ADMIN)
+
+POST   /api/catalogos/subtareas          Crear subtarea (ADMIN)
+  Body: { areaId, nombre, descripcion? }
+GET    /api/catalogos/subtareas          Listar subtareas activas
+GET    /api/catalogos/subtareas/:id      Detalle subtarea
+PATCH  /api/catalogos/subtareas/:id      Actualizar subtarea (ADMIN)
+DELETE /api/catalogos/subtareas/:id      Desactivar subtarea (ADMIN)
+
+POST   /api/catalogos/modelos            Crear modelo (ADMIN)
+  Body: { nombreSku, descripcion? }
+GET    /api/catalogos/modelos            Listar modelos activos
+GET    /api/catalogos/modelos/:id        Detalle modelo
+PATCH  /api/catalogos/modelos/:id        Actualizar modelo (ADMIN)
+DELETE /api/catalogos/modelos/:id        Desactivar modelo (ADMIN)
+
+POST   /api/catalogos/estandares         Crear estándar (ADMIN)
+  Body: { subtareaId, modeloId, piezasPorHora, vigenteDesde }
+GET    /api/catalogos/estandares         Listar estándares (con subtarea y modelo)
+GET    /api/catalogos/estandares/vigente ?subtareaId=&modeloId=  Estándar vigente
+GET    /api/catalogos/estandares/:id     Detalle estándar
+
+─── Empleados ─────────────────────────────────────
+
+GET    /api/empleados                    Listar empleados activos
+GET    /api/empleados/:id                Detalle empleado
+GET    /api/empleados/qr/:uuidQr         Buscar por UUID de QR
+GET    /api/empleados/:id/qr-image       Descargar imagen QR (PNG)
+POST   /api/empleados/sync              Sync manual desde VITA
+
+Campos de empleado: id, idVita, uuidQr, nombre, apellidos, idAreaVita, activo
+
+─── Asignaciones ──────────────────────────────────
+
+POST   /api/asignaciones/scan            Escaneo QR (ADMIN, ENCARGADO)
+  Body: { uuidQr, areaId, subtareaId, modeloId }
+  Lógica:
+    - Si ya tiene asignación activa en OTRA área → la cierra automáticamente
+    - Si ya tiene asignación activa en la MISMA área → la cierra y crea nueva
+    - Crea nueva asignación activa
+  Resp: asignación creada con relaciones (empleado, area, subtarea, modelo)
+
+GET    /api/asignaciones/activas         ?areaId=  Asignaciones activas del día
+GET    /api/asignaciones/empleado/:id    ?fecha=   Histórico por empleado
+GET    /api/asignaciones/:id             Detalle asignación (con capturas)
+
+─── Capturas ──────────────────────────────────────
+
+POST   /api/capturas                     Registrar captura (ADMIN, ENCARGADO)
+  Body: { asignacionId, slotHora, cantidad }
+  Validaciones:
+    - slotHora debe ser válido para el día (L-V: 8-13,15-17; S: 8-13)
+    - Si ya existe captura para ese slot, se actualiza
+  Resp: captura creada o actualizada
+
+GET    /api/capturas/asignacion/:id      Capturas de una asignación (ordenadas por hora)
+
+─── Métricas ──────────────────────────────────────
+
+GET    /api/metricas/hora                ?fecha=&areaId=
+  Resp: lista con { empleado, area, subtarea, modelo, slotHora, cantidad, estandar, eficienciaPct }
+
+GET    /api/metricas/dia                 ?fecha=&areaId=
+  Resp: agregado por area+subtarea+modelo { totalPiezas, promedioEficiencia, empleadosCount }
+
+GET    /api/metricas/historico           ?desde=&hasta=&areaId=&subtareaId=&modeloId=
+  Resp: asignaciones con capturas para el rango de fechas
+
+GET    /api/metricas/stream              SSE (realtime)
+  Eventos: { type: 'captura'|'asignacion'|'refresh', data: ... }
+
+Fórmula eficiencia: (captura_real / estandar_vigente) × 100
+
+─── Auditoría (ADMIN) ─────────────────────────────
+
+GET    /api/auditoria                    ?desde=&hasta=&usuarioId=&tabla=&limit=
+  Resp: log inmutable { usuarioId, accion, tabla, registroId, datosAntes, datosDespues, ip, timestamp }
+
+─── Horarios de captura ───────────────────────────
+
+Día             Horario Regular              Extensión Opcional
+Lunes-Viernes   08:00–14:00 y 15:00–18:00    18:00–19:00
+Sábados         08:00–14:00                  14:00–17:00
+
+Nota: 14:00–15:00 L-V es hora de comida, no se registran capturas.

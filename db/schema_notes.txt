@@ -1,0 +1,27 @@
+MERO — Notas de esquema de base de datos
+=========================================
+
+Fuente de verdad: apps/api/prisma/schema.prisma
+Migraciones: apps/api/prisma/migrations/
+
+Convenciones:
+- Prefijo "mero_" en todas las tablas
+- snake_case en nombres de columnas (via @map en Prisma)
+- Soft delete en catálogos (campo "activo")
+- Auditoría inmutable (solo INSERT)
+
+Índices críticos:
+- idx_asignacion_empleado_fecha: búsqueda rápida de asignación activa del día
+- idx_captura_asignacion_slot: unicidad lógica de captura por slot
+- idx_estandar_vigente: obtener estándar vigente (más reciente por subtarea+modelo)
+- idx_auditoria_timestamp: consulta cronológica de auditoría
+
+Vistas materializadas (futuro):
+- mv_metricas_hora: asignacion_id, slot_hora, cantidad, estandar, eficiencia_pct
+- mv_metricas_dia: fecha, area_id, subtarea_id, modelo_id, total_piezas, promedio_eficiencia, empleados_count
+- Se implementarán como raw SQL migrations cuando el volumen lo requiera.
+
+Integración VITA:
+- mero_empleados.id_vita referencia al ID del empleado en VITA
+- La sincronización es unidireccional (VITA -> MERO)
+- uuid_qr se genera en MERO, no existe en VITA

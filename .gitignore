@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Prisma
+apps/api/prisma/migrations/**/migration_lock.toml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+infra/docker/nginx/certs/*.pem
+infra/docker/nginx/certs/*.key
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/

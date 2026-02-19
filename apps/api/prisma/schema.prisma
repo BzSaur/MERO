@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───
+
+enum Rol {
+  ADMIN
+  ENCARGADO
+  CONSULTOR
+}
+
+// ─── Catálogos ───
+
+model MeroArea {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @db.VarChar(100)
+  descripcion String?  @db.VarChar(255)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   Int?     @map("created_by")
+
+  subtareas    MeroSubtarea[]
+  asignaciones MeroAsignacion[]
+  usuarios     MeroUsuario[]
+
+  @@map("mero_areas")
+}
+
+model MeroSubtarea {
+  id          Int      @id @default(autoincrement())
+  areaId      Int      @map("area_id")
+  nombre      String   @db.VarChar(100)
+  descripcion String?  @db.VarChar(255)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   Int?     @map("created_by")
+
+  area         MeroArea         @relation(fields: [areaId], references: [id])
+  estandares   MeroEstandar[]
+  asignaciones MeroAsignacion[]
+
+  @@map("mero_subtareas")
+}
+
+model MeroModelo {
+  id          Int      @id @default(autoincrement())
+  nombreSku   String   @map("nombre_sku") @db.VarChar(100)
+  descripcion String?  @db.VarChar(255)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   Int?     @map("created_by")
+
+  estandares   MeroEstandar[]
+  asignaciones MeroAsignacion[]
+
+  @@map("mero_modelos")
+}
+
+model MeroEstandar {
+  id            Int      @id @default(autoincrement())
+  subtareaId    Int      @map("subtarea_id")
+  modeloId      Int      @map("modelo_id")
+  piezasPorHora Float    @map("piezas_por_hora")
+  vigenteDesde  DateTime @map("vigente_desde") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdBy     Int?     @map("created_by")
+
+  subtarea MeroSubtarea @relation(fields: [subtareaId], references: [id])
+  modelo   MeroModelo   @relation(fields: [modeloId], references: [id])
+
+  @@index([subtareaId, modeloId, vigenteDesde(sort: Desc)], name: "idx_estandar_vigente")
+  @@map("mero_estandares")
+}
+
+// ─── Empleados ───
+
+model MeroEmpleado {
+  id         Int      @id @default(autoincrement())
+  idVita     Int      @unique @map("id_vita")
+  uuidQr     String   @unique @map("uuid_qr") @db.VarChar(50)
+  nombre     String   @db.VarChar(200)
+  apellidos  String?  @db.VarChar(200)
+  idAreaVita Int?     @map("id_area_vita")
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  asignaciones MeroAsignacion[]
+
+  @@map("mero_empleados")
+}
+
+// ─── Usuarios del sistema ───
+
+model MeroUsuario {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(200)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  rol          Rol
+  areaId       Int?     @map("area_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  area MeroArea? @relation(fields: [areaId], references: [id])
+
+  @@map("mero_usuarios")
+}
+
+// ─── Core operativo ───
+
+model MeroAsignacion {
+  id         Int      @id @default(autoincrement())
+  empleadoId Int      @map("empleado_id")
+  areaId     Int      @map("area_id")
+  subtareaId Int      @map("subtarea_id")
+  modeloId   Int      @map("modelo_id")
+  fecha      DateTime @db.Date
+  horaInicio String   @map("hora_inicio") @db.VarChar(5)
+  horaFin    String?  @map("hora_fin") @db.VarChar(5)
+  activa     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  empleado MeroEmpleado @relation(fields: [empleadoId], references: [id])
+  area     MeroArea     @relation(fields: [areaId], references: [id])
+  subtarea MeroSubtarea @relation(fields: [subtareaId], references: [id])
+  modelo   MeroModelo   @relation(fields: [modeloId], references: [id])
+  capturas MeroCaptura[]
+
+  @@index([empleadoId, fecha, activa], name: "idx_asignacion_empleado_fecha")
+  @@map("mero_asignaciones")
+}
+
+model MeroCaptura {
+  id           Int      @id @default(autoincrement())
+  asignacionId Int      @map("asignacion_id")
+  slotHora     Int      @map("slot_hora")
+  cantidad     Int
+  capturadoPor Int      @map("capturado_por")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  asignacion MeroAsignacion @relation(fields: [asignacionId], references: [id])
+
+  @@index([asignacionId, slotHora], name: "idx_captura_asignacion_slot")
+  @@map("mero_capturas")
+}
+
+// ─── Auditoría ───
+
+model MeroAuditoria {
+  id            Int      @id @default(autoincrement())
+  usuarioId     Int      @map("usuario_id")
+  accion        String   @db.VarChar(20)
+  tabla         String   @db.VarChar(50)
+  registroId    Int      @map("registro_id")
+  datosAntes    Json?    @map("datos_antes")
+  datosDespues  Json?    @map("datos_despues")
+  ip            String   @db.VarChar(45)
+  timestamp     DateTime @default(now())
+
+  @@index([timestamp(sort: Desc), usuarioId], name: "idx_auditoria_timestamp")
+  @@map("mero_auditoria")
+}

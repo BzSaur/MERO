@@ -1,0 +1,62 @@
+MERO — Arquitectura y Estructura de Repositorio
+====================================================
+
+Contexto
+--------
+MERO (Medición de Eficiencia y Rendimiento Operativo) es el sistema hermano del ERP VITA.
+VITA administra personas; MERO mide productividad operativa por hora en planta.
+Objetivo: asignar empleados (QR) a subtareas y capturar producción por hora para calcular eficiencia en tiempo real vs estándares.
+
+Despliegue objetivo
+-------------------
+- On-premise en Synology NAS
+- Usuarios: 100–200 (concurrencia esperada moderada: Encargados + Consultores)
+- Docker Compose como estándar de despliegue
+- PostgreSQL como fuente única de verdad
+- Backend Node.js (NestJS) monolito modular
+- Realtime: SSE principal + WebSocket auxiliar
+- CQRS ligero: escrituras normalizadas + lecturas optimizadas (vistas materializadas o tablas resumen)
+
+Arquitectura
+------------
+1) Monolito modular (NestJS)
+   - Un solo backend desplegable (1 contenedor)
+   - Módulos separados por dominio (no microservicios)
+   - Reglas de negocio en capa de aplicación/servicios, acceso a datos en repositorios
+
+2) PostgreSQL
+   - Tablas normalizadas (core) para escrituras transaccionales
+   - Lecturas para dashboard optimizadas con vistas materializadas
+
+3) CQRS ligero
+   - Commands: escaneo QR, reasignación, captura, catálogos
+   - Queries: panel encargado, dashboards realtime e históricos
+
+4) Realtime
+   - SSE para push unidireccional de métricas
+   - WebSocket (Socket.IO) solo si se necesita bidireccionalidad
+
+5) Infraestructura (Docker Compose)
+   - api (NestJS) + db (PostgreSQL) + nginx (reverse proxy)
+
+Módulos del backend
+-------------------
+- Auth/Roles: JWT, RBAC (ADMIN / ENCARGADO / CONSULTOR)
+- Catálogos: Áreas, Subtareas, Modelos, Estándares
+- Empleados/QR: sync VITA, generación QR
+- Asignaciones: escaneo QR, reasignación, histórico
+- Capturas: registro por slot horario
+- Métricas: eficiencia, agregados, SSE
+- Auditoría: log inmutable
+
+Integración con VITA
+--------------------
+- Solo lectura. Sync nocturno + on-demand.
+- MERO NO escribe en VITA.
+
+Reglas operativas
+-----------------
+- Escaneo QR crea asignación activa para el día
+- Cada hora se capturan cantidades sin re-escanear
+- Cambio de área cierra asignación anterior automáticamente
+- Histórico y capturas anteriores se conservan

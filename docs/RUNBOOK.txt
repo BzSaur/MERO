@@ -1,0 +1,82 @@
+MERO — Runbook de operación
+============================
+
+─── Requisitos ───
+
+- Node.js >= 20
+- pnpm >= 9
+- Docker y Docker Compose
+- PostgreSQL 16 (vía Docker o nativo)
+
+─── Desarrollo local ───
+
+1. Clonar repo e instalar dependencias:
+   git clone <repo-url>
+   cd mero
+   cp .env.example .env    # Ajustar valores
+   pnpm install
+
+2. Levantar base de datos:
+   pnpm docker:up          # Solo DB y nginx
+   # O directamente:
+   docker compose -f infra/docker/docker-compose.yml up -d db
+
+3. Ejecutar migraciones y seed:
+   pnpm db:generate
+   pnpm db:migrate
+   pnpm db:seed
+
+4. Iniciar API en modo desarrollo:
+   pnpm dev
+
+5. API disponible en http://localhost:3000/api
+
+─── Despliegue con Docker Compose ───
+
+1. Configurar .env con valores de producción
+2. Levantar todos los servicios:
+   pnpm docker:up
+3. Ejecutar migraciones:
+   docker exec mero-api npx prisma migrate deploy
+4. Ejecutar seed (solo primera vez):
+   docker exec mero-api npx ts-node prisma/seed.ts
+
+─── Backups ───
+
+Crear backup:
+   ./scripts/backup_pg.sh
+
+Restaurar backup:
+   ./scripts/restore_pg.sh ./backups/mero_backup_YYYYMMDD_HHMMSS.sql.gz
+
+Los backups se guardan en ./backups/ y se retienen los últimos 30.
+
+─── Monitoreo ───
+
+- Logs API: docker logs -f mero-api
+- Logs DB:  docker logs -f mero-db
+- Health:   curl http://localhost:3000/api
+
+─── TLS / HTTPS ───
+
+1. Colocar certificados en infra/docker/nginx/certs/:
+   - fullchain.pem
+   - privkey.pem
+2. Descomentar bloque HTTPS en infra/docker/nginx/nginx.conf
+3. Descomentar redirect HTTP->HTTPS
+4. Reiniciar nginx: docker restart mero-nginx
+
+─── Troubleshooting ───
+
+Problema: API no conecta a DB
+  - Verificar que mero-db está healthy: docker ps
+  - Verificar DATABASE_URL en .env
+  - Verificar que las migraciones se ejecutaron
+
+Problema: SSE no funciona detrás de nginx
+  - Verificar que proxy_buffering off está en la config
+  - Verificar timeout largo (proxy_read_timeout 300s)
+
+Problema: QR no encontrado al escanear
+  - Ejecutar sync manual: POST /api/empleados/sync
+  - Verificar que el empleado existe en VITA
