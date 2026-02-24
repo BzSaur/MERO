@@ -1,6 +1,7 @@
 # ─── Stage 1: Build ───
 FROM node:20-alpine AS builder
 
+RUN apk add --no-cache openssl
 RUN npm install -g pnpm@9
 
 WORKDIR /app
@@ -21,6 +22,8 @@ RUN pnpm --filter @mero/api build
 
 # ─── Stage 2: Production ───
 FROM node:20-alpine AS production
+
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
