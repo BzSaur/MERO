@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <%- include('../../partials/head') %>
+</head>
+<body>
+  <%- include('../../partials/icons') %>
+  <%- include('../../partials/nav') %>
+
+  <div class="page">
+    <div class="container">
+
+      <div class="page-header">
+        <div>
+          <h1>Empleados</h1>
+          <p class="page-header__sub">Lectura en tiempo real desde VITA (ERP) &mdash; <%= empleados.length %> activos</p>
+        </div>
+        <form action="/admin/empleados/sync" method="POST" style="display:inline">
+          <button type="submit" class="btn btn--primary">
+            <svg class="icon"><use href="#icon-refresh"/></svg>
+            Sincronizar con VITA
+          </button>
+        </form>
+      </div>
+
+      <%- include('../../partials/flash') %>
+
+      <div class="card">
+        <% if (!empleados.length) { %>
+          <div class="empty">
+            <p class="empty__text">No hay empleados sincronizados. Presiona "Sincronizar con VITA" para importarlos.</p>
+          </div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID VITA</th>
+                  <th>Nombre</th>
+                  <th class="td-hide-mobile">Puesto</th>
+                  <th class="td-hide-mobile">Area (VITA)</th>
+                  <th class="td-hide-mobile">Fecha Ingreso</th>
+                  <th>QR</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% empleados.forEach(e => { %>
+                  <tr>
+                    <td class="td-mono"><%= e.idVita %></td>
+                    <td><strong><%= e.nombre %> <%= e.apellidos || '' %></strong></td>
+                    <td class="td-hide-mobile"><%= e.vita?.puesto || '—' %></td>
+                    <td class="td-hide-mobile"><%= e.vita?.area || '—' %></td>
+                    <td class="td-hide-mobile td-mono">
+                      <%= e.vita?.fechaIngreso ? new Date(e.vita.fechaIngreso).toLocaleDateString('es-MX') : '—' %>
+                    </td>
+                    <td>
+                      <a href="/admin/empleados/<%= e.id %>/qr-download"
+                         class="badge badge--ok" title="<%= e.uuidQr %>"
+                         style="text-decoration:none; cursor:pointer" download>
+                        <svg class="icon" style="width:14px;height:14px"><use href="#icon-qr"/></svg>
+                        QR
+                      </a>
+                    </td>
+                    <td>
+                      <a href="/admin/empleados/<%= e.id %>" class="btn btn--ghost btn--sm">
+                        <svg class="icon"><use href="#icon-eye"/></svg>
+                        Ver
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

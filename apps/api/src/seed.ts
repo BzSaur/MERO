@@ -11,7 +11,6 @@
  */
 import { PrismaClient, Rol } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuid } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -146,16 +145,9 @@ async function main() {
   }
   console.log(`   ${MODELOS.length} modelos`);
 
-  // Empleados demo (solo si la tabla está vacía para no pisar datos reales)
+  // Empleados se sincronizan desde VITA — no se crean demos
   const totalEmpleados = await prisma.meroEmpleado.count();
-  if (totalEmpleados === 0) {
-    for (let i = 1; i <= 5; i++) {
-      await prisma.meroEmpleado.create({
-        data: { idVita: i, uuidQr: uuid(), nombre: `Demo ${i}`, apellidos: `Apellido ${i}` },
-      });
-    }
-    console.log('   5 empleados demo');
-  }
+  console.log(`   ${totalEmpleados} empleados (sync desde VITA)`);
 
   // Usuarios (contraseña inicial: Mero#2024, excepto admin@mero.local → admin1234)
   const adminHash = await bcrypt.hash('admin1234', 10);

@@ -43,6 +43,13 @@
           </a>
         </li>
         <li>
+          <a href="/admin/empleados"
+             class="<%= currentUrl.startsWith('/admin/empleados') ? 'active' : '' %>">
+            <svg class="icon"><use href="#icon-person"/></svg>
+            Empleados
+          </a>
+        </li>
+        <li>
           <a href="/admin/catalogos/areas"
              class="<%= currentUrl.startsWith('/admin/catalogos') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-catalog"/></svg>

@@ -74,6 +74,55 @@ router.post('/usuarios/:id', async (req, res) => {
   }
 });
 
+/* ─────────── Empleados (lectura desde VITA) ─────────── */
+router.get('/empleados', async (req, res, next) => {
+  try {
+    const { data: empleados } = await api(req.session.user.token).get('/empleados');
+    res.render('admin/empleados/index', { title: 'Empleados (VITA)', empleados });
+  } catch (err) { next(err); }
+});
+
+router.get('/empleados/:id', async (req, res, next) => {
+  try {
+    const { data: empleado } = await api(req.session.user.token).get(`/empleados/${req.params.id}`);
+    res.render('admin/empleados/detalle', { title: 'Detalle Empleado', empleado });
+  } catch (err) { next(err); }
+});
+
+router.get('/empleados/:id/qr', async (req, res, next) => {
+  try {
+    const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
+      responseType: 'arraybuffer'
+    });
+    res.set('Content-Type', 'image/png');
+    res.set('Content-Disposition', `inline; filename="qr-empleado-${req.params.id}.png"`);
+    res.send(Buffer.from(response.data));
+  } catch (err) { next(err); }
+});
+
+router.get('/empleados/:id/qr-download', async (req, res, next) => {
+  try {
+    const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
+      responseType: 'arraybuffer'
+    });
+    res.set('Content-Type', 'image/png');
+    res.set('Content-Disposition', `attachment; filename="qr-empleado-${req.params.id}.png"`);
+    res.send(Buffer.from(response.data));
+  } catch (err) { next(err); }
+});
+
+router.post('/empleados/sync', async (req, res) => {
+  try {
+    const { data } = await api(req.session.user.token).post('/empleados/sync');
+    req.flash('success', `Sync completado: ${data.sincronizados} sincronizados, ${data.desactivados} desactivados`);
+    res.redirect('/admin/empleados');
+  } catch (err) {
+    const raw = err.response?.data?.message || 'Error al sincronizar';
+    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    res.redirect('/admin/empleados');
+  }
+});
+
 /* ─────────── Catálogos — Áreas ─────────── */
 router.get('/catalogos/areas', async (req, res, next) => {
   try {

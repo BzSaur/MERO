@@ -31,6 +31,9 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-mero}:${POSTGRES_PASSWORD:-mero_secret}@db:5432/${POSTGRES_DB:-mero_db}?schema=public
     ports:
       - '${API_PORT:-3000}:3000'
+    networks:
+      - default
+      - vita_network
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +64,12 @@ services:
     depends_on:
       - api
       - web
+
+networks:
+  default:
+  vita_network:
+    external: true
+    name: erp_erp_network
 
 volumes:
   pgdata:
