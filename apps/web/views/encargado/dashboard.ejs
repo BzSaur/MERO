@@ -91,57 +91,57 @@
       <% } %>
 
       <div class="card card--asignaciones">
-  <div class="card__header">
-    <div class="card__header-left">
-      <span class="card__title">Asignaciones activas</span>
-     <span class="badge badge--none"><%= asignaciones.length %> activas</span>
-    </div>
+        <div class="card__header">
+          <div class="card__header-left">
+            <span class="card__title">Asignaciones activas</span>
+          <span class="badge badge--none"><%= asignaciones.length %> activas</span>
+          </div>
 
-    <a href="/encargado/asignar" class="btn btn--ghost btn--sm">
-      <svg class="icon"><use href="#icon-assign"/></svg>
-      Gestionar
-    </a>
-  </div>
+          <a href="/encargado/asignar" class="btn btn--ghost btn--sm">
+            <svg class="icon"><use href="#icon-assign"/></svg>
+            Gestionar
+          </a>
+        </div>
 
-  <% if (!asignaciones.length) { %>
-    <div class="empty empty--asignaciones">
-      <p class="empty__text">Sin asignaciones activas.</p>
-      <p class="empty__sub">Cuando asignes personal, aparecerán aquí en tiempo real.</p>
-    </div>
-  <% } else { %>
-    <div class="table-wrap table-wrap--asignaciones">
-      <table class="table table--asignaciones">
-        <thead>
-          <tr>
-            <th>Empleado</th>
-            <th>Área</th>
-            <th class="td-hide-mobile">Subtarea</th>
-            <th class="td-hide-mobile">Modelo</th>
-            <th>Desde</th>
-          </tr>
-        </thead>
+        <% if (!asignaciones.length) { %>
+          <div class="empty empty--asignaciones">
+            <p class="empty__text">Sin asignaciones activas.</p>
+            <p class="empty__sub">Cuando asignes personal, aparecerán aquí en tiempo real.</p>
+          </div>
+        <% } else { %>
+          <div class="table-wrap table-wrap--asignaciones">
+            <table class="table table--asignaciones">
+              <thead>
+                <tr>
+                  <th>Empleado</th>
+                  <th>Área</th>
+                  <th class="td-hide-mobile">Subtarea</th>
+                  <th class="td-hide-mobile">Modelo</th>
+                  <th>Desde</th>
+                </tr>
+              </thead>
 
-        <tbody>
-          <% asignaciones.forEach(a => { %>
-            <tr>
-              <td>
-                <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
-              </td>
+              <tbody>
+                <% asignaciones.forEach(a => { %>
+                  <tr>
+                    <td>
+                      <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
+                    </td>
 
-              <td>
-                <span class="badge badge--none"><%= a.area?.nombre %></span>
-              </td>
+                    <td>
+                      <span class="badge badge--none"><%= a.area?.nombre %></span>
+                    </td>
 
-              <td class="td-hide-mobile"><%= a.subtarea?.nombre %></td>
-              <td class="td-hide-mobile"><%= a.modelo?.nombre %></td>
-              <td class="td-mono"><%= fmtDate(a.createdAt) %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  <% } %>
-</div>
+                    <td class="td-hide-mobile"><%= a.subtarea?.nombre %></td>
+                    <td class="td-hide-mobile"><%= a.modelo?.nombre %></td>
+                    <td class="td-mono"><%= fmtDate(a.createdAt) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
     </div>
   </div>
 </body>

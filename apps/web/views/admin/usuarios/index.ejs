@@ -31,7 +31,6 @@
           </div>
         <% } else { %>
 
-          <!-- ✅ Controles (Filtro + Orden) -->
           <div class="users-controls users-controls--light" style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);">
             <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
               <div style="min-width: 220px;">
@@ -103,13 +102,9 @@
     </div>
   </div>
 
-  <!-- Modal reutilizable (usa tu CSS existente) -->
+
   <%- include('../../partials/appModal') %>
-
-  <!-- Alerts -->
   <script src="/js/alerts.js" defer></script>
-
-  <!-- ✅ Filtros usuarios -->
   <script src="/js/usuarios.js" defer></script>
 </body>
 </html>
