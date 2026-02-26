@@ -67,6 +67,7 @@
    Paleta: #2d3250 #424769 #676f9d #f9b17a #ffffff
    ========================================================= */
 
+   
 
 .page--usuarios .page-header h3{
   color: rgba(255,255,255,.92);
@@ -225,6 +226,7 @@ table.table--usuarios tbody tr:hover td{
 .page--usuarios .empty--usuarios{
   color: rgba(255,255,255,.75);
 }
+
 
 /* =========================================================
    USUARIOS — Hover estilo “highlight azul” (como la imagen)
@@ -1073,4 +1075,88 @@ table.table--usuarios tbody tr:hover td{
 .page--usuarios select.form-control option{
   background: #0b1220;
   color: rgba(255,255,255,.92);
+}
+@media (max-width: 640px){
+  .page--usuarios table.table--usuarios thead th{
+    padding: .45rem .6rem;
+  }
+  .page--usuarios table.table--usuarios tbody td{
+    padding: .6rem .6rem;
+  }
+  .page--usuarios table.table--usuarios tbody td:last-child{
+    text-align: right;
+  }
+}
+
+@media (max-width: 640px){
+  .page--usuarios table.table--usuarios{
+    min-width: 820px; /* ajusta si quieres 760/900 */
+  }
+}
+
+
+/* =========================================================
+   AUDITORIA
+   ========================================================= */
+
+   /* Auditoría: badges de acción más legibles */
+.page--auditoria .badge--warn,
+.page--auditoria .badge--fail{
+  color: rgba(255,255,255,.92);
+}
+
+/* ===========================================================
+    METRICAS
+    =========================================================== */
+    /* =========================================================
+   ENCARGADO — Empty card (mismo look “tabla/asignar” en dark)
+   ÚSALA para el bloque "Sin capturas registradas hoy"
+   ========================================================= */
+
+.page--encargado .card--metrics-empty{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(66,71,105,.92) 0%, rgba(45,50,80,.92) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  padding: 1.1rem;
+  color-scheme: dark;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .page--encargado .card--metrics-empty{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+}
+
+.page--encargado .card--metrics-empty .card__header{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding-bottom: .75rem;
+  margin-bottom: .9rem;
+}
+
+.page--encargado .card--metrics-empty .card__title{
+  color: rgba(255,255,255,.78);
+}
+
+/* Empty centrado y legible en dark */
+.page--encargado .card--metrics-empty .empty{
+  padding: 3rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+  color: rgba(255,255,255,.75);
+}
+
+.page--encargado .card--metrics-empty .empty__text{
+  color: rgba(255,255,255,.78);
+}
+
+.page--encargado .card--metrics-empty .empty__sub{
+  color: rgba(255,255,255,.60);
 }

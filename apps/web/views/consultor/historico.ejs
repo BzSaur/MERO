@@ -7,7 +7,7 @@
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar page--auditoria">
     <div class="container">
 
       <div class="page-header">
@@ -24,51 +24,62 @@
       <%- include('../partials/flash') %>
 
       <%# ── Filtros ── %>
-      <form method="GET" action="/consultor/historico">
-        <div class="filter-bar">
-          <div class="form-group">
-            <label class="form-label">Desde</label>
-            <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hasta</label>
-            <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Área</label>
-            <select class="form-control" name="areaId">
-              <option value="">Todas</option>
-              <% areas.forEach(a => { %>
-                <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Subtarea</label>
-            <select class="form-control" name="subtareaId">
-              <option value="">Todas</option>
-              <% subtareas.forEach(s => { %>
-                <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Modelo</label>
-            <select class="form-control" name="modeloId">
-              <option value="">Todos</option>
-              <% modelos.forEach(m => { %>
-                <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div class="form-group" style="align-self:flex-end">
-            <button type="submit" class="btn btn--ghost">
-              <svg class="icon"><use href="#icon-filter"/></svg>
-              Buscar
-            </button>
-          </div>
+      <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+        <div class="card__header">
+          <span class="card__title">Filtros</span>
         </div>
-      </form>
+
+        <form method="GET" action="/consultor/historico">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Desde</label>
+              <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hasta</label>
+              <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Área</label>
+              <select class="form-control" name="areaId">
+                <option value="">Todas</option>
+                <% areas.forEach(a => { %>
+                  <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Subtarea</label>
+              <select class="form-control" name="subtareaId">
+                <option value="">Todas</option>
+                <% subtareas.forEach(s => { %>
+                  <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Modelo</label>
+              <select class="form-control" name="modeloId">
+                <option value="">Todos</option>
+                <% modelos.forEach(m => { %>
+                  <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-group" style="align-self:flex-end">
+              <button type="submit" class="btn btn--primary">
+                <svg class="icon"><use href="#icon-filter"/></svg>
+                Buscar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
 
       <%# ── Resumen ── %>
       <% if (capturas.length > 0) { %>
@@ -98,19 +109,19 @@
       <% } %>
 
       <%# ── Tabla ── %>
-      <div class="card">
+      <div class="card card--asignar card--asignar-act">
         <div class="card__header">
           <span class="card__title">Resultados</span>
-          <span class="badge badge--none"><%= capturas.length %></span>
+          <span class="badge badge--ok"><%= capturas.length %></span>
         </div>
 
         <% if (!capturas.length) { %>
-          <div class="empty">
+          <div class="empty empty--asignar">
             <p class="empty__text">Sin registros para el período seleccionado.</p>
           </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap table-wrap--asignar">
+            <table class="table table--asignar">
               <thead>
                 <tr>
                   <th>Fecha</th>

@@ -7,7 +7,7 @@
   <%- include('../../partials/icons') %>
   <%- include('../../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar">
     <div class="container">
 
       <div class="page-header">
@@ -27,7 +27,7 @@
       <div class="grid-2" style="align-items:start">
 
         <%# ── Formulario nueva area ── %>
-        <div class="card">
+        <div class="card card--asignar">
           <div class="card__header">
             <span class="card__title">Nueva área</span>
           </div>
@@ -48,16 +48,19 @@
         </div>
 
         <%# ── Listado ── %>
-        <div class="card">
+        <div class="card card--asignar card--asignar-act">
           <div class="card__header">
             <span class="card__title">Áreas registradas</span>
-            <span class="badge badge--none"><%= areas.length %></span>
+            <span class="badge badge--ok"><%= areas.length %></span>
           </div>
+
           <% if (!areas.length) { %>
-            <div class="empty"><p class="empty__text">Sin áreas registradas.</p></div>
+            <div class="empty empty--asignar">
+              <p class="empty__text">Sin áreas registradas.</p>
+            </div>
           <% } else { %>
-            <div class="table-wrap">
-              <table>
+            <div class="table-wrap table-wrap--asignar">
+              <table class="table table--asignar">
                 <thead>
                   <tr><th>#</th><th>Nombre</th><th>Descripción</th><th></th></tr>
                 </thead>
@@ -66,7 +69,7 @@
                     <tr>
                       <td class="td-mono"><%= a.id %></td>
                       <td><%= a.nombre %></td>
-                      <td style="color:var(--ink-dim)"><%= a.descripcion || '—' %></td>
+                      <td><%= a.descripcion || '—' %></td>
                       <td>
                         <form method="POST" action="/admin/catalogos/areas/<%= a.id %>/eliminar"
                               onsubmit="return confirm('¿Eliminar área «<%= a.nombre %>»?')">

@@ -61,38 +61,43 @@
 
           <div class="table-wrap table-wrap--usuarios">
             <table class="table table--usuarios" id="usersTable">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th class="td-hide-mobile">Correo</th>
-                  <th>Rol</th>
-                  <th class="td-hide-mobile">Creado</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="usersTbody">
-                <% usuarios.forEach(u => { %>
-                  <tr
-                    data-rol="<%= u.rol %>"
-                    data-created="<%= (new Date(u.createdAt)).getTime() %>"
-                  >
-                    <td><%= u.nombre %></td>
-                    <td class="td-mono td-hide-mobile"><%= u.email %></td>
-                    <td>
-                      <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
-                        <%= u.rol %>
-                      </span>
-                    </td>
-                    <td class="td-mono td-hide-mobile"><%= fmtDate(u.createdAt) %></td>
-                    <td>
-                      <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
-                        <svg class="icon"><use href="#icon-edit"/></svg>
-                        Editar
-                      </a>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
+            <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Creado</th>
+              <th>Editar</th>
+            </tr>
+          </thead>
+
+          <tbody id="usersTbody">
+            <% usuarios.forEach(u => { %>
+              <tr
+                data-rol="<%= u.rol %>"
+                data-created="<%= (new Date(u.createdAt)).getTime() %>"
+              >
+                <td><%= u.nombre %></td>
+
+                <td class="td-mono"><%= u.email %></td>
+
+                <td>
+                  <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
+                    <%= u.rol %>
+                  </span>
+                </td>
+
+                <td class="td-mono"><%= fmtDate(u.createdAt) %></td>
+
+                <td>
+                  <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
+                    <svg class="icon"><use href="#icon-edit"/></svg>
+                    Editar
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
             </table>
           </div>
 

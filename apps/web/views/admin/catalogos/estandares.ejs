@@ -7,13 +7,13 @@
   <%- include('../../partials/icons') %>
   <%- include('../../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar">
     <div class="container">
 
       <div class="page-header">
         <div>
           <h1>Estándares</h1>
-          <p class="page-header__sub">Producción esperada por hora (subtarea + modelo)</p>
+          <p class="page-header__sub"><h4>Producción esperada por hora (subtarea + modelo)</h4></p>
         </div>
         <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
           <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Areas</a>
@@ -25,7 +25,7 @@
       <%- include('../../partials/flash') %>
 
       <%# ── Formulario ── %>
-      <div class="card" style="margin-bottom:var(--gap-lg)">
+      <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
         <div class="card__header">
           <span class="card__title">Nuevo estándar</span>
         </div>
@@ -66,16 +66,19 @@
       </div>
 
       <%# ── Listado ── %>
-      <div class="card">
+      <div class="card card--asignar card--asignar-act">
         <div class="card__header">
           <span class="card__title">Estándares registrados</span>
-          <span class="badge badge--none"><%= estandares.length %></span>
+          <span class="badge badge--ok"><%= estandares.length %></span>
         </div>
+
         <% if (!estandares.length) { %>
-          <div class="empty"><p class="empty__text">Sin estándares registrados.</p></div>
+          <div class="empty empty--asignar">
+            <p class="empty__text">Sin estándares registrados.</p>
+          </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap table-wrap--asignar">
+            <table class="table table--asignar">
               <thead>
                 <tr>
                   <th>Subtarea</th>

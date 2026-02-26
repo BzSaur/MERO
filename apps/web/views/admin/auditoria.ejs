@@ -7,13 +7,13 @@
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar page--auditoria">
     <div class="container">
 
       <div class="page-header">
         <div>
           <h1>Auditoría</h1>
-          <p class="page-header__sub">Registro inmutable de cambios</p>
+          <p class="page-header__sub"><h4>Registro inmutable de cambios</p></h4>
         </div>
         <a href="/admin" class="btn btn--ghost">
           <svg class="icon"><use href="#icon-back"/></svg>
@@ -23,46 +23,59 @@
 
       <%- include('../partials/flash') %>
 
-      <%# ── Filtros ── %>
-      <form method="GET" action="/admin/auditoria">
-        <div class="filter-bar">
-          <div class="form-group">
-            <label class="form-label">Desde</label>
-            <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hasta</label>
-            <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tabla</label>
-            <select class="form-control" name="tabla">
-              <option value="">Todas</option>
-              <% ['mero_usuario','mero_area','mero_subtarea','mero_modelo','mero_estandar',
-                  'mero_empleado','mero_asignacion','mero_captura'].forEach(t => { %>
-                <option value="<%= t %>" <%= filtros.tabla === t ? 'selected' : '' %>><%= t %></option>
-              <% }) %>
-            </select>
-          </div>
-          <div class="form-group" style="align-self:flex-end">
-            <button type="submit" class="btn btn--ghost">
-              <svg class="icon"><use href="#icon-filter"/></svg>
-              Filtrar
-            </button>
-          </div>
+      <%# ── Filtros (mismo look que Áreas) ── %>
+      <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+        <div class="card__header">
+          <span class="card__title">Filtros</span>
         </div>
-      </form>
 
-      <div class="card">
+        <form method="GET" action="/admin/auditoria">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Desde</label>
+              <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hasta</label>
+              <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tabla</label>
+              <select class="form-control" name="tabla">
+                <option value="">Todas</option>
+                <% ['mero_usuario','mero_area','mero_subtarea','mero_modelo','mero_estandar',
+                    'mero_empleado','mero_asignacion','mero_captura'].forEach(t => { %>
+                  <option value="<%= t %>" <%= filtros.tabla === t ? 'selected' : '' %>><%= t %></option>
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="form-group" style="align-self:flex-end">
+              <button type="submit" class="btn btn--primary">
+                <svg class="icon"><use href="#icon-filter"/></svg>
+                Filtrar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <%# ── Tabla con formato de Áreas ── %>
+      <div class="card card--asignar card--asignar-act">
         <div class="card__header">
           <span class="card__title">Registros</span>
-          <span class="badge badge--none"><%= registros.length %></span>
+          <span class="badge badge--ok"><%= registros.length %></span>
         </div>
+
         <% if (!registros.length) { %>
-          <div class="empty"><p class="empty__text">Sin registros para los filtros seleccionados.</p></div>
+          <div class="empty empty--asignar">
+            <p class="empty__text">Sin registros para los filtros seleccionados.</p>
+          </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap table-wrap--asignar">
+            <table class="table table--asignar">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -73,28 +86,37 @@
                   <th class="td-hide-mobile">Detalle</th>
                 </tr>
               </thead>
+
               <tbody>
                 <% registros.forEach(r => { %>
                   <tr>
                     <td class="td-mono" style="white-space:nowrap"><%= fmtDate(r.creadoEn || r.createdAt) %></td>
+
                     <td class="td-hide-mobile"><%= r.usuario?.nombre || r.usuarioId || '—' %></td>
-                    <td class="td-mono" style="font-size:.8rem"><%= r.tabla %></td>
+
+                    <td class="td-mono"><%= r.tabla %></td>
+
                     <td>
                       <span class="badge <%= r.accion === 'DELETE' ? 'badge--fail' : r.accion === 'CREATE' ? 'badge--ok' : 'badge--warn' %>">
                         <%= r.accion %>
                       </span>
                     </td>
+
                     <td class="td-mono td-hide-mobile"><%= r.registroId %></td>
+
                     <td class="td-hide-mobile">
                       <% if (r.datosDespues) { %>
                         <details>
-                          <summary class="btn btn--ghost btn--sm" style="cursor:pointer; list-style:none">
+                          <summary class="btn btn--primary btn--sm" style="cursor:pointer; list-style:none; display:inline-flex">
                             Ver datos
                           </summary>
-                          <pre style="font-size:.75rem; color:var(--ink-dim); margin-top:.5rem; overflow:auto; max-width:400px"><%= JSON.stringify(r.datosDespues, null, 2) %></pre>
+                          <pre class="td-mono"
+                               style="font-size:.75rem; margin-top:.5rem; overflow:auto; max-width:460px; color:rgba(255,255,255,.86)">
+                          <%= JSON.stringify(r.datosDespues, null, 2) %>
+                          </pre>
                         </details>
                       <% } else { %>
-                        <span style="color:var(--ink-muted)">—</span>
+                        <span style="color:rgba(255,255,255,.65)">—</span>
                       <% } %>
                     </td>
                   </tr>
@@ -104,7 +126,6 @@
           </div>
         <% } %>
       </div>
-
     </div>
   </div>
 </body>
