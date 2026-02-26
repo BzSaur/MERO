@@ -52,10 +52,13 @@ cd MERO
 cp .env.example .env
 # Editar .env y cambiar JWT_SECRET y JWT_REFRESH_SECRET por valores seguros
 
-# 3. Construir y levantar todos los contenedores
+# 3. Crear la red externa para VITA (necesaria aunque no uses VITA)
+docker network create erp_erp_network 2>/dev/null || true
+
+# 4. Construir y levantar todos los contenedores
 docker compose -f infra/docker/docker-compose.yml up --build -d
 
-# 4. Verificar que los 4 contenedores estan corriendo
+# 5. Verificar que los 4 contenedores estan corriendo
 docker ps
 ```
 
@@ -69,16 +72,15 @@ Deberias ver:
 | `mero-nginx` | 80      | Reverse proxy (web + api)      |
 
 ```bash
-# 5. Ver logs del API (las migraciones se ejecutan automaticamente)
-docker logs mero-api
-
-# 6. Sembrar datos iniciales
-docker exec mero-api sh -c "cd apps/api && npx prisma db seed"
+# 6. Ver logs del API (las migraciones y seed se ejecutan automaticamente)
+docker logs -f mero-api
 
 # 7. Abrir en el navegador
 # http://localhost        (via nginx)
 # http://localhost:4000   (web directo)
 ```
+
+> **Nota:** El contenedor `mero-api` ejecuta automaticamente las migraciones de Prisma y el seed de datos al iniciar. No necesitas ejecutarlos manualmente.
 
 ### Comandos Docker utiles
 
@@ -95,6 +97,9 @@ docker compose -f infra/docker/docker-compose.yml up --build -d
 # Ver logs en tiempo real
 docker logs -f mero-api
 docker logs -f mero-web
+
+# Re-ejecutar seed manualmente (si necesitas resetear datos)
+docker exec mero-api sh -c "cd /app/apps/api && npx prisma db seed"
 ```
 
 ---
@@ -145,7 +150,7 @@ pnpm db:migrate
 pnpm db:seed
 
 # 9. Iniciar API (terminal 1)
-pnpm dev:api
+pnpm dev
 
 # 10. Iniciar Web (terminal 2)
 pnpm dev:web
@@ -191,7 +196,7 @@ Ver todos los usuarios en `db/seed/seed_usuarios.ts`.
 
 | Comando                | Descripcion                                    |
 |------------------------|------------------------------------------------|
-| `pnpm dev:api`         | Iniciar API en modo desarrollo (hot reload)    |
+| `pnpm dev`             | Iniciar API en modo desarrollo (hot reload)    |
 | `pnpm dev:web`         | Iniciar Web en modo desarrollo (hot reload)    |
 | `pnpm build`           | Compilar el proyecto para produccion           |
 | `pnpm db:generate`     | Regenerar cliente de Prisma                    |
@@ -225,8 +230,11 @@ La base de datos no esta levantada. Ejecutar `docker compose -f infra/docker/doc
 **"P1001: Can't reach database server"**
 Verificar que el contenedor `mero-db` este corriendo: `docker ps`.
 
+**"network erp_erp_network declared as external, but could not be found"**
+Crear la red manualmente: `docker network create erp_erp_network`. Esta red es necesaria para la integracion con VITA.
+
 **El API no arranca en Docker**
-Revisar logs: `docker logs mero-api`. Las migraciones se ejecutan automaticamente al iniciar.
+Revisar logs: `docker logs mero-api`. Las migraciones y seed se ejecutan automaticamente al iniciar.
 
 **Error en migraciones**
 Resetear la base de datos:

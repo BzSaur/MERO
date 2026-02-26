@@ -8,11 +8,11 @@
     "start": "nest start",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:seed:usuarios": "ts-node ../../db/seed/seed_usuarios.ts"
+    "prisma:generate": "dotenv -e ../../.env -- prisma generate",
+    "prisma:migrate": "dotenv -e ../../.env -- prisma migrate dev",
+    "prisma:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
+    "prisma:seed": "dotenv -e ../../.env -- ts-node src/seed.ts",
+    "prisma:seed:usuarios": "dotenv -e ../../.env -- ts-node ../../db/seed/seed_usuarios.ts"
   },
   "prisma": {
     "seed": "node dist/seed.js"
