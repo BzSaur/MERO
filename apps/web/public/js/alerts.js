@@ -1,55 +1,18 @@
 (() => {
-  const modal = document.getElementById('appModal');
-  if (!modal) return;
-
-  const titleEl = document.getElementById('appModalTitle');
-  const bodyEl  = document.getElementById('appModalBody');
-  const footEl  = document.getElementById('appModalFooter');
-
-  const openModal = ({ title = 'Aviso', bodyHTML = '', actions = [] }) => {
-    titleEl.textContent = title;
-    bodyEl.innerHTML = bodyHTML;
-
-    footEl.innerHTML = '';
-    actions.forEach(a => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = a.className || 'btn btn--primary';
-      btn.textContent = a.label || 'OK';
-      btn.addEventListener('click', () => a.onClick && a.onClick());
-      footEl.appendChild(btn);
-    });
-
-    modal.classList.add('is-open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('modal-open');
-
-    // Focus al primer botón (mejor UX)
-    const firstBtn = footEl.querySelector('button');
-    if (firstBtn) firstBtn.focus();
-  };
-
-  const closeModal = () => {
-    modal.classList.remove('is-open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
-  };
-
-  modal.addEventListener('click', (e) => {
-    if (e.target.matches('[data-close]')) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
-  });
-
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, c => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[c]));
 
-  // 1) Si hay flash messages del server, pásalos a modal
+  const hasSwal = typeof window !== 'undefined'
+    && window.Swal
+    && typeof window.Swal.fire === 'function';
+
+  // ─────────────────────────────────────────────
+  // Flash -> SweetAlert2
+  // ─────────────────────────────────────────────
   const flashEls = Array.from(document.querySelectorAll('.flash'));
+
   const errMsgs = flashEls
     .filter(f => f.classList.contains('flash--error'))
     .map(f => f.textContent.trim())
@@ -60,85 +23,95 @@
     .map(f => f.textContent.trim())
     .filter(Boolean);
 
-  if (errMsgs.length) {
-    openModal({
-      title: 'Revisa los datos',
-      bodyHTML: `<ul class="modal__list">${errMsgs.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`,
-      actions: [{ label: 'Entendido', className: 'btn btn--primary', onClick: closeModal }]
-    });
-
-    // opcional: ocultar la lista visual del flash para que no se vea duplicado
+  const hideFlashList = () => {
     const flashList = document.querySelector('.flash-list');
     if (flashList) flashList.style.display = 'none';
-  } else if (okMsgs.length) {
-    openModal({
-      title: 'Listo',
-      bodyHTML: `<ul class="modal__list">${okMsgs.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`,
-      actions: [{ label: 'OK', className: 'btn btn--primary', onClick: closeModal }]
-    });
+  };
 
-    const flashList = document.querySelector('.flash-list');
-    if (flashList) flashList.style.display = 'none';
+  if ((errMsgs.length || okMsgs.length) && hasSwal) {
+    const joinedOk = okMsgs.join(' ').toLowerCase();
+    let okTitle = 'Listo';
+    if (joinedOk.includes('cread')) okTitle = 'Usuario creado';
+    else if (joinedOk.includes('elimin')) okTitle = 'Usuario eliminado';
+    else if (joinedOk.includes('actualiz') || joinedOk.includes('guard')) okTitle = 'Cambios guardados';
+
+    if (errMsgs.length) {
+      window.Swal.fire({
+        icon: 'error',
+        title: 'Revisa los datos',
+        html: `<ul style="text-align:left; margin:0; padding-left:1.1rem">
+                ${errMsgs.map(m => `<li>${esc(m)}</li>`).join('')}
+              </ul>`,
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'btn btn--primary' }
+      });
+      hideFlashList();
+    } else if (okMsgs.length) {
+      window.Swal.fire({
+        icon: 'success',
+        title: okTitle,
+        text: okMsgs.length === 1 ? okMsgs[0] : 'Operación completada.',
+        confirmButtonText: 'OK',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'btn btn--primary' }
+      });
+      hideFlashList();
+    }
   }
 
-  // 2) Confirmación antes de enviar el form
-  const form = document.querySelector('form[action="/encargado/captura"]');
-  if (!form) return;
+  // ─────────────────────────────────────────────
+  // Confirmación Eliminar usuario (SweetAlert2)
+  // ─────────────────────────────────────────────
+  const delForms = Array.from(document.querySelectorAll('form[data-confirm-delete]'));
+  delForms.forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (form.dataset.confirmed === '1') return;
 
-  form.addEventListener('submit', (e) => {
-    if (form.dataset.confirmed === '1') return; // ya confirmado, deja enviar
+      e.preventDefault();
 
-    e.preventDefault();
+      const name = (form.getAttribute('data-user-name') || 'este usuario').trim();
 
-    const asignSel = form.querySelector('#asignacionId');
-    const slotSel  = form.querySelector('#slotHora');
-    const qtyInp   = form.querySelector('#cantidad');
-
-    const errs = [];
-    if (!asignSel?.value) errs.push('Selecciona una asignación activa.');
-    if (!slotSel?.value)  errs.push('Selecciona un slot horario.');
-
-    const raw = (qtyInp?.value || '').trim();
-    const qty = Number(raw);
-
-    if (raw === '') errs.push('Ingresa la cantidad producida.');
-    else if (!Number.isFinite(qty) || !Number.isInteger(qty)) errs.push('La cantidad debe ser un número entero.');
-    else if (qty < 0) errs.push('La cantidad no puede ser negativa.');
-
-    if (errs.length) {
-      openModal({
-        title: 'Faltan datos',
-        bodyHTML: `<ul class="modal__list">${errs.map(m => `<li>${esc(m)}</li>`).join('')}</ul>`,
-        actions: [{ label: 'OK', className: 'btn btn--primary', onClick: closeModal }]
-      });
-      return;
-    }
-
-    const asignText = asignSel.options[asignSel.selectedIndex]?.text || '';
-    const slotText  = slotSel.options[slotSel.selectedIndex]?.text || '';
-
-    openModal({
-      title: 'Confirmar captura',
-      bodyHTML: `
-        <div class="kv">
-          <div class="kv__row"><span>Asignación</span><strong>${esc(asignText)}</strong></div>
-          <div class="kv__row"><span>Slot</span><strong>${esc(slotText)}</strong></div>
-          <div class="kv__row"><span>Cantidad</span><strong>${esc(qty)}</strong></div>
-        </div>
-        <p class="modal__hint">¿Confirmas que estos datos son correctos?</p>
-      `,
-      actions: [
-        { label: 'Cancelar', className: 'btn btn--ghost', onClick: closeModal },
-        {
-          label: 'Confirmar',
-          className: 'btn btn--primary',
-          onClick: () => {
-            form.dataset.confirmed = '1';
-            closeModal();
-            form.submit();
-          }
+      if (!hasSwal) {
+        const ok = window.confirm(`¿Eliminar permanentemente a "${name}"? Esta acción no se puede deshacer.`);
+        if (ok) {
+          form.dataset.confirmed = '1';
+          form.submit();
         }
-      ]
+        return;
+      }
+
+      window.Swal.fire({
+        icon: 'warning',
+        title: '¿Eliminar usuario permanentemente?',
+        html: `
+          <div style="text-align:center">
+            <p style="margin:.25rem 0 .6rem">
+              Se eliminará permanentemente a <strong>${esc(name)}</strong>.
+            </p>
+            <p style="margin:0; opacity:.85">
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        focusCancel: true,
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'btn btn--danger',
+          cancelButton: 'btn btn--ghost'
+        }
+      }).then((r) => {
+        if (!r.isConfirmed) return;
+
+        form.dataset.confirmed = '1';
+        form.submit();
+      });
     });
   });
+
+  // (Tu modal custom sigue funcionando si lo necesitas para /encargado/captura)
 })();

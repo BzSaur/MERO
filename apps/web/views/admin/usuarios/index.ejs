@@ -24,13 +24,44 @@
       <%- include('../../partials/flash') %>
 
       <div class="card card--usuarios">
+
         <% if (!usuarios.length) { %>
           <div class="empty empty--usuarios">
             <p class="empty__text">Sin usuarios registrados.</p>
           </div>
         <% } else { %>
+
+          <!-- ✅ Controles (Filtro + Orden) -->
+          <div class="users-controls users-controls--light" style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);">
+            <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
+              <div style="min-width: 220px;">
+                <label class="form-label" for="rolFilter" style="margin-bottom:.35rem;">Filtrar por rol</label>
+                <select class="form-control" id="rolFilter">
+                  <option value="ALL">Todos</option>
+                  <option value="ADMIN">Administrador</option>
+                  <option value="ENCARGADO">Encargado</option>
+                  <option value="CONSULTOR">Consultor</option>
+                </select>
+              </div>
+
+              <div style="min-width: 260px;">
+                <label class="form-label" for="sortFilter" style="margin-bottom:.35rem;">Orden</label>
+                <select class="form-control" id="sortFilter">
+                  <option value="NEW">Creados recientemente</option>
+                  <option value="OLD">Más antiguos</option>
+                </select>
+              </div>
+
+              <button type="button" class="btn btn--ghost" id="resetFilters" style="margin-top: 1.55rem;">
+                Limpiar
+              </button>
+            </div>
+
+            <span class="badge badge--none" id="usersCount" style="margin-top: 1.55rem;">0 usuarios</span>
+          </div>
+
           <div class="table-wrap table-wrap--usuarios">
-            <table class="table table--usuarios">
+            <table class="table table--usuarios" id="usersTable">
               <thead>
                 <tr>
                   <th>Nombre</th>
@@ -40,9 +71,12 @@
                   <th></th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="usersTbody">
                 <% usuarios.forEach(u => { %>
-                  <tr>
+                  <tr
+                    data-rol="<%= u.rol %>"
+                    data-created="<%= (new Date(u.createdAt)).getTime() %>"
+                  >
                     <td><%= u.nombre %></td>
                     <td class="td-mono td-hide-mobile"><%= u.email %></td>
                     <td>
@@ -62,10 +96,20 @@
               </tbody>
             </table>
           </div>
+
         <% } %>
       </div>
 
     </div>
   </div>
+
+  <!-- Modal reutilizable (usa tu CSS existente) -->
+  <%- include('../../partials/appModal') %>
+
+  <!-- Alerts -->
+  <script src="/js/alerts.js" defer></script>
+
+  <!-- ✅ Filtros usuarios -->
+  <script src="/js/usuarios.js" defer></script>
 </body>
 </html>

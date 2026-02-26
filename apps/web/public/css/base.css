@@ -2,7 +2,8 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 14px; }
+html { overflow-x: hidden;
+        font-size: 14px; }
 
 body {
   font-family: var(--font-ui);
@@ -11,6 +12,7 @@ body {
   min-height: 100vh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a { color: var(--amber); text-decoration: none; }
@@ -39,5 +41,8 @@ code, .mono { font-family: var(--font-mono); }
 }
 
 ::selection { background: var(--amber-lo); color: var(--ink); }
+
+
+
 
 

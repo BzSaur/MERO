@@ -74,6 +74,19 @@ router.post('/usuarios/:id', async (req, res) => {
   }
 });
 
+/* ✅ ELIMINAR USUARIO (nuevo) */
+router.post('/usuarios/:id/eliminar', async (req, res) => {
+  try {
+    await api(req.session.user.token).delete(`/usuarios/${req.params.id}`);
+    req.flash('success', 'Usuario eliminado permanentemente');
+    res.redirect('/admin/usuarios');
+  } catch (err) {
+    const raw = err.response?.data?.message || 'Error al eliminar usuario';
+    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    res.redirect(`/admin/usuarios/${req.params.id}/editar`);
+  }
+});
+
 /* ─────────── Empleados (lectura desde VITA) ─────────── */
 router.get('/empleados', async (req, res, next) => {
   try {

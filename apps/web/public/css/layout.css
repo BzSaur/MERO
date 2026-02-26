@@ -4,9 +4,17 @@
   min-height: 100vh;
   padding-bottom: var(--gap-xl);
   background-color: #252844;
+  overflow-x: hidden;
   background-image: url("https://www.transparenttextures.com/patterns/classy-fabric.png");
 }
 
+/* FIX: permite que items en grid se encojan y no empujen el ancho */
+.grid-stats > *,
+.grid-2 > *,
+.grid-3 > *,
+.grid-4 > *{
+  min-width: 0;
+}
 .container {
   max-width: 1280px;
   margin: 0 auto;
