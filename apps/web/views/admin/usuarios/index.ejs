@@ -7,13 +7,13 @@
   <%- include('../../partials/icons') %>
   <%- include('../../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--usuarios">
     <div class="container">
 
-      <div class="page-header">
+      <div class="page-header page-header--usuarios">
         <div>
           <h1>Usuarios</h1>
-          <p class="page-header__sub">Cuentas de acceso al sistema</p>
+          <p><h3>Cuentas de acceso al sistema</p></h3>
         </div>
         <a href="/admin/usuarios/nuevo" class="btn btn--primary">
           <svg class="icon"><use href="#icon-plus"/></svg>
@@ -23,12 +23,14 @@
 
       <%- include('../../partials/flash') %>
 
-      <div class="card">
+      <div class="card card--usuarios">
         <% if (!usuarios.length) { %>
-          <div class="empty"><p class="empty__text">Sin usuarios registrados.</p></div>
+          <div class="empty empty--usuarios">
+            <p class="empty__text">Sin usuarios registrados.</p>
+          </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap table-wrap--usuarios">
+            <table class="table table--usuarios">
               <thead>
                 <tr>
                   <th>Nombre</th>

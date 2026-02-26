@@ -1,3 +1,41 @@
+/* ── Page ── */
+.page {
+  padding-top: calc(var(--nav-h) + var(--gap-lg));
+  min-height: 100vh;
+  padding-bottom: var(--gap-xl);
+  background-color: #252844;
+  background-image: url("https://www.transparenttextures.com/patterns/classy-fabric.png");
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--gap-lg);
+}
+
+/* ── Page header ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--gap-lg);
+  gap: var(--gap);
+  flex-wrap: wrap;
+}
+
+.page-header__sub {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .85rem;
+  color: var(--ink-dim);
+  margin-top: .25rem;
+}
+
+.page--usuarios .page-header h1{
+  color: rgba(255,255,255,.92);
+  letter-spacing: .01em;
+}
 /* ── Top navigation (dark bar) ── */
 .nav {
   position: fixed;
@@ -102,37 +140,6 @@
   text-decoration: none;
 }
 
-/* ── Page ── */
-.page {
-  padding-top: calc(var(--nav-h) + var(--gap-lg));
-  min-height: 100vh;
-  padding-bottom: var(--gap-xl);
-}
-
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--gap-lg);
-}
-
-/* ── Page header ── */
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--gap-lg);
-  gap: var(--gap);
-  flex-wrap: wrap;
-}
-
-.page-header__sub {
-  display: flex;
-  align-items: center;
-  gap: .35rem;
-  font-size: .85rem;
-  color: var(--ink-dim);
-  margin-top: .25rem;
-}
 
 /* ── Grids ── */
 .grid-stats {

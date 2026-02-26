@@ -7,7 +7,7 @@
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--admin">
     <div class="container">
 
       <div class="page-header">
@@ -34,28 +34,28 @@
         const failCount = metricas.filter(m => m.eficiencia > 0  && m.eficiencia < 70).length;
       %>
 
-      <div class="grid-stats">
-        <div class="stat-card stat-card--gradient stat-card--blue">
-          <div class="stat-card__label">Empleados activos</div>
+      <div class="grid-stats page--encargado">
+      <div class="stat-card stat-card--empleados">
+        <div class="stat-card__label">Empleados activos</div>
           <div class="stat-card__value"><%= totalAsignados %></div>
           <div class="stat-card__sub">en planta ahora</div>
         </div>
-        <div class="stat-card stat-card--gradient stat-card--green">
+        <div class="stat-card stat-card--eficiencia">
           <div class="stat-card__label">Eficiencia promedio</div>
           <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
           <div class="stat-card__sub">todos los slots de hoy</div>
         </div>
-        <div class="stat-card stat-card--gradient stat-card--indigo">
+       <div class="stat-card stat-card--registros">
           <div class="stat-card__label">Slots en verde</div>
           <div class="stat-card__value"><%= okCount %></div>
           <div class="stat-card__sub">eficiencia >= 90%</div>
         </div>
-        <div class="stat-card stat-card--gradient stat-card--orange">
+        <div class="stat-card stat-card--riesgo">
           <div class="stat-card__label">Slots en riesgo</div>
           <div class="stat-card__value"><%= warnCount %></div>
           <div class="stat-card__sub">eficiencia 70-89%</div>
         </div>
-        <div class="stat-card stat-card--gradient stat-card--red">
+        <div class="stat-card stat-card--criticos">
           <div class="stat-card__label">Slots criticos</div>
           <div class="stat-card__value"><%= failCount %></div>
           <div class="stat-card__sub">eficiencia < 70%</div>

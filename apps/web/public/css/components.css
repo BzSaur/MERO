@@ -491,3 +491,1072 @@ select.form-control { cursor: pointer; }
   color: var(--ink-muted);
   font-family: var(--font-mono);
 }
+
+/* =========================================================
+   USUARIOS — theme scoped (NO afecta otras vistas)
+   Paleta: #2d3250 #424769 #676f9d #f9b17a #ffffff
+   ========================================================= */
+
+
+.page--usuarios .page-header h3{
+  color: rgba(255,255,255,.92);
+  letter-spacing: .01em;
+}
+/* Header en oscuro */
+.page--usuarios .page-header h1{
+  color: rgba(255,255,255,.92);
+  letter-spacing: .01em;
+}
+.page--usuarios .page-header__sub{
+  color: rgba(255,255,255,.68);
+}
+
+/* Links dentro de esta vista */
+.page--usuarios a{
+  color: #f9b17a;
+}
+.page--usuarios a:hover{
+  color: #ffd2ad;
+}
+
+/* Botón Nuevo usuaio */
+.page--usuarios .btn--primary{
+  background: #146fe6d7;
+  color: #ffffff;
+ 
+}
+.page--usuarios .btn--primary:hover{
+  background: #ffd2ad;
+  border-color: #ffd2ad;
+  color: #2d3250;
+
+}
+
+/* Botón ghost (Editar) solo aquí */
+.page--usuarios .btn--ghost{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.82);
+}
+.page--usuarios .btn--ghost:hover{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(249,177,122,.28);
+  color: rgba(255,255,255,.95);
+}
+
+/* Card “glass” solo para Usuarios */
+.card--usuarios{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(66,71,105,.92) 0%, rgba(45,50,80,.92) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  padding: 1.1rem;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .card--usuarios{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+}
+
+.card--usuarios::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  pointer-events:none;
+  opacity: .9;
+}
+
+/* Wrap */
+.table-wrap--usuarios{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tabla “premium” sin tocar las tablas globales */
+table.table--usuarios{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;  
+  font-size: .92rem;
+}
+
+/* Encabezado */
+table.table--usuarios thead th{
+  padding: .55rem .8rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.72);
+  border-bottom: none; 
+  white-space: nowrap;
+}
+
+/* Celdas */
+table.table--usuarios tbody td{
+  padding: .7rem .8rem;
+  color: rgba(255,255,255,.88);
+  background: rgba(255, 255, 255, 0.045);
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  vertical-align: middle;
+}
+
+/* Bordes laterales + esquinas redondeadas por fila */
+table.table--usuarios tbody tr td:first-child{
+  border-left: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px 0 0 12px;
+}
+table.table--usuarios tbody tr td:last-child{
+  border-right: 1px solid rgba(255,255,255,.08);
+  border-radius: 0 12px 12px 0;
+}
+
+/* Hover con acento naranja */
+table.table--usuarios tbody tr:hover td{
+  background: rgba(249,177,122,.10);
+  border-top-color: rgba(249,177,122,.22);
+  border-bottom-color: rgba(249,177,122,.18);
+}
+
+/* Tipografía mono (correo/fecha) */
+.page--usuarios .td-mono{
+  color: rgba(255,255,255,.72);
+}
+
+/* Badges adaptadas a la paleta (solo aquí) */
+.page--usuarios .badge{
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.page--usuarios .badge--warn{
+  background: rgba(249,177,122,.16);
+  color: #f9b17a;
+  border-color: rgba(249,177,122,.28);
+}
+
+.page--usuarios .badge--ok{
+  background: rgba(103,111,157,.22);
+  color: rgba(255,255,255,.92);
+  border-color: rgba(255,255,255,.14);
+}
+
+.page--usuarios .badge--none{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.72);
+  border-color: rgba(255,255,255,.10);
+}
+
+/* Empty state en dark */
+.page--usuarios .empty--usuarios{
+  color: rgba(255,255,255,.75);
+}
+
+/* =========================================================
+   USUARIOS — Hover estilo “highlight azul” (como la imagen)
+   PÉGALO AL FINAL del bloque de Usuarios para que sobreescriba
+   ========================================================= */
+
+.page--usuarios table.table--usuarios tbody tr{
+  transition: transform .14s ease, filter .14s ease;
+}
+
+.page--usuarios table.table--usuarios tbody td{
+  transition: background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease;
+}
+
+/* Hover: fila azul tipo “pill” */
+.page--usuarios table.table--usuarios tbody tr:hover{
+  transform: translateY(-1px);
+}
+
+.page--usuarios table.table--usuarios tbody tr:hover td{
+  background-color: rgba(37,99,235,.92);
+  color: rgba(255,255,255,.96);
+  border-top-color: rgba(255,255,255,.18);
+  border-bottom-color: rgba(0,0,0,.20);
+  box-shadow: 0 16px 42px rgba(37,99,235,.35);
+}
+
+/* Para que correo/fecha también se vean blancos en hover */
+.page--usuarios table.table--usuarios tbody tr:hover .td-mono{
+  color: rgba(255,255,255,.90);
+}
+
+/* Botón Editar más “clean” sobre azul */
+.page--usuarios table.table--usuarios tbody tr:hover .btn--ghost{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95);
+}
+.page--usuarios table.table--usuarios tbody tr:hover .btn--ghost:hover{
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.22);
+}
+
+/* Badges legibles sobre azul */
+.page--usuarios table.table--usuarios tbody tr:hover .badge{
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95);
+}
+
+
+/* =========================================
+   DASHBOARD ENCARGADO – STAT CARDS "GLASS"
+   ========================================= */
+
+.page--encargado .stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgba(255,255,255,.14);
+  background: radial-gradient(circle at top left, rgba(249,177,122,.28), transparent 55%)
+              ,linear-gradient(145deg, rgba(66,71,105,.96), rgba(45,50,80,.98));
+  box-shadow: 0 22px 60px rgba(0,0,0,.55);
+  color: #ffffff;
+}
+
+@supports (backdrop-filter: blur(14px)) {
+  .page--encargado .stat-card {
+    backdrop-filter: blur(16px) saturate(125%);
+    -webkit-backdrop-filter: blur(16px) saturate(125%);
+  }
+}
+
+/* “Glow” suave en borde superior derecho */
+.page--encargado .stat-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(249,177,122,.55), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(59,130,246,.38), transparent 55%);
+  opacity: .40;
+  pointer-events: none;
+}
+
+/* Separar label / valor / subtítulo */
+.page--encargado .stat-card__label {
+  font-size: .70rem;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+  margin-bottom: .45rem;
+}
+
+.page--encargado .stat-card__value {
+  font-family: var(--font-mono);
+  font-size: 2.3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 18px rgba(0,0,0,.60);
+}
+
+/* pequeño chip debajo del número (ej: "asignados ahora") */
+.page--encargado .stat-card__sub {
+  margin-top: .55rem;
+  font-size: .78rem;
+  color: rgba(255,255,255,.80);
+}
+
+/* Strip decorativo inferior tipo “barra de carga” */
+.page--encargado .stat-card__meter {
+  margin-top: .8rem;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.55);
+  overflow: hidden;
+  position: relative;
+}
+.page--encargado .stat-card__meter-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #f9b17a, #4f46e5, #22c55e);
+  box-shadow: 0 0 12px rgba(249,177,122,.9);
+}
+
+/* Variantes por tipo de dato */
+.page--encargado .stat-card--empleados {
+  background: radial-gradient(circle at top left, rgba(59,130,246,.42), transparent 55%),
+              linear-gradient(145deg, #1d4ed8, #312e81);
+}
+
+.page--encargado .stat-card--eficiencia {
+  background: radial-gradient(circle at top left, rgba(16,185,129,.42), transparent 55%),
+              linear-gradient(145deg, #047857, #14532d);
+}
+
+.page--encargado .stat-card--registros {
+  background: radial-gradient(circle at top left, rgba(129,140,248,.44), transparent 55%),
+              linear-gradient(145deg, #4f46e5, #1e1b4b);
+}
+
+.page--encargado .stat-card--riesgo {
+  background:
+    radial-gradient(circle at top left, rgba(249,177,122,.52), transparent 55%),
+    linear-gradient(145deg, #f97316, #9a3412);
+}
+
+.page--encargado .stat-card--criticos {
+  background:
+    radial-gradient(circle at top left, rgba(249,177,122,.22), transparent 55%),
+    radial-gradient(circle at 100% 0%, rgba(239,68,68,.38), transparent 55%),
+    linear-gradient(145deg, #ef4444, #7f1d1d);
+}
+
+/* Hover sutil “levanta” la card */
+.page--encargado .stat-card {
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+}
+.page--encargado .stat-card:hover {
+  transform: translateY(-2px);
+ 
+  box-shadow: 0 26px 70px rgba(15,23,42,.85);
+}
+
+/* Boton Nuevo usuario */
+.page--usuarios .page-header--usuarios .btn--primary{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 10px 24px rgba(37,99,235,.28), 0 1px 2px rgba(0,0,0,.20);
+}
+.page--usuarios .page-header--usuarios .btn--primary:hover{
+  background: linear-gradient(180deg, #4f8cff 0%, #1d4ed8 100%);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 14px 30px rgba(37,99,235,.34), 0 2px 4px rgba(0,0,0,.22);
+  transform: translateY(-1px);
+}
+.page--usuarios .page-header--usuarios .btn--primary:active{
+  transform: translateY(0px);
+  box-shadow: 0 8px 18px rgba(37,99,235,.26), 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* Botón Registrar captura (mismo look que Nuevo usuario) */
+.page--encargado .page-header--encargado .btn--primary{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 10px 24px rgba(37,99,235,.28), 0 1px 2px rgba(0,0,0,.20);
+}
+
+.page--encargado .page-header--encargado .btn--primary:hover{
+  background: linear-gradient(180deg, #4f8cff 0%, #1d4ed8 100%);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 14px 30px rgba(37,99,235,.34), 0 2px 4px rgba(0,0,0,.22);
+  transform: translateY(-1px);
+}
+
+.page--encargado .page-header--encargado .btn--primary:active{
+  transform: translateY(0px);
+  box-shadow: 0 8px 18px rgba(37,99,235,.26), 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* =========================================================
+   ENCARGADO — ASIGNACIONES ACTIVAS (mismo formato que Usuarios)
+   ========================================================= */
+
+.page--encargado .card--asignaciones{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(66,71,105,.92) 0%, rgba(45,50,80,.92) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  padding: 1.1rem;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .page--encargado .card--asignaciones{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+}
+
+.page--encargado .card--asignaciones .card__header{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding-bottom: .75rem;
+  margin-bottom: .9rem;
+}
+
+.page--encargado .card--asignaciones .card__title{
+  color: rgba(255,255,255,.78);
+}
+
+.page--encargado .card--asignaciones .btn--ghost{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.82);
+}
+.page--encargado .card--asignaciones .btn--ghost:hover{
+  background: rgba(255,255,255,.08);
+ 
+  color: rgba(255,255,255,.95);
+}
+
+/* Wrap */
+.page--encargado .table-wrap--asignaciones{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tabla “premium” (pill rows) */
+.page--encargado table.table--asignaciones{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  font-size: .92rem;
+}
+
+/* Encabezado */
+.page--encargado table.table--asignaciones thead th{
+  padding: .55rem .8rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.72);
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+/* Celdas */
+.page--encargado table.table--asignaciones tbody td{
+  padding: .7rem .8rem;
+  color: rgba(255,255,255,.88);
+  background: rgba(255, 255, 255, 0.045);
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  vertical-align: middle;
+}
+
+/* Bordes laterales + esquinas por fila */
+.page--encargado table.table--asignaciones tbody tr td:first-child{
+  border-left: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px 0 0 12px;
+}
+.page--encargado table.table--asignaciones tbody tr td:last-child{
+  border-right: 1px solid rgba(255,255,255,.08);
+  border-radius: 0 12px 12px 0;
+}
+
+/* Tipografía mono (fecha) */
+.page--encargado table.table--asignaciones .td-mono{
+  color: rgba(255,255,255,.72);
+}
+
+/* Badges legibles en dark */
+.page--encargado .card--asignaciones .badge{
+  border: 1px solid rgba(255,255,255,.12);
+}
+.page--encargado .card--asignaciones .badge--none{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.78);
+  border-color: rgba(255,255,255,.10);
+}
+
+/* Hover estilo “highlight azul” (como Usuarios) */
+.page--encargado table.table--asignaciones tbody tr{
+  transition: transform .14s ease, filter .14s ease;
+}
+.page--encargado table.table--asignaciones tbody td{
+  transition: background .14s ease, color .14s ease, border-color .14s ease, box-shadow .14s ease;
+}
+
+.page--encargado table.table--asignaciones tbody tr:hover{
+  transform: translateY(-1px);
+}
+
+.page--encargado table.table--asignaciones tbody tr:hover td{
+  background-color: rgba(37,99,235,.92);
+  color: rgba(255,255,255,.96);
+  border-top-color: rgba(255,255,255,.18);
+  border-bottom-color: rgba(0,0,0,.20);
+  box-shadow: 0 16px 42px rgba(37,99,235,.35);
+}
+
+/* Que la fecha mono también se vea blanca al hover */
+.page--encargado table.table--asignaciones tbody tr:hover .td-mono{
+  color: rgba(255,255,255,.90);
+}
+
+/* Badges sobre azul */
+.page--encargado table.table--asignaciones tbody tr:hover .badge{
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95);
+}
+
+/* Empty state en dark */
+.page--encargado .empty--asignaciones{
+  color: rgba(255,255,255,.75);
+}
+.page--encargado .empty--asignaciones .empty__sub{
+  color: rgba(255,255,255,.60);
+}
+
+/* Fix: contador "0 activas" legible en el card oscuro */
+.page--encargado .card--asignaciones .pill{
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .22rem .6rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+.page--encargado .card--asignaciones .pill--info{
+  color: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+/* =========================================================
+   CAPTURA — Cards premium (solo esta vista)
+   ========================================================= */
+
+.page--captura .page-header h1{
+  color: rgba(255,255,255,.92);
+}
+.page--captura .page-header__sub{
+  color: rgba(255,255,255,.70);
+}
+
+/* Cards glass oscuro */
+.page--captura .card--captura{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(66,71,105,.92) 0%, rgba(45,50,80,.92) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  padding: 1.1rem;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .page--captura .card--captura{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+}
+
+/* Header de card */
+.page--captura .card--captura .card__header{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding-bottom: .75rem;
+  margin-bottom: .9rem;
+}
+.page--captura .card--captura .card__title{
+  color: rgba(255,255,255,.78);
+}
+
+/* Form controls en dark (sin romper global) */
+.page--captura .card--captura .form-label{
+  color: rgba(255,255,255,.72);
+}
+
+.page--captura .card--captura .form-control{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.92);
+}
+
+.page--captura .card--captura .form-control::placeholder{
+  color: rgba(255,255,255,.55);
+}
+
+.page--captura .card--captura .form-control:focus{
+  border-color: rgba(59,130,246,.55);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+}
+
+/* Botón ghost dentro de cards dark */
+.page--captura .card--captura .btn--ghost{
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.82);
+}
+.page--captura .card--captura .btn--ghost:hover{
+  background: rgba(255,255,255,.08);
+
+  color: rgba(255,255,255,.95);
+}
+
+/* Empty state dark */
+.page--captura .empty--captura{
+  color: rgba(255,255,255,.75);
+}
+.page--captura .empty--captura .empty__text{
+  color: rgba(255,255,255,.78);
+}
+
+/* =========================================================
+   CAPTURA — Tabla premium tipo Usuarios (solo esta vista)
+   ========================================================= */
+
+.page--captura .table-wrap--captura{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page--captura table.table--captura{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  font-size: .92rem;
+}
+
+.page--captura table.table--captura thead th{
+  padding: .55rem .8rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.72);
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.page--captura table.table--captura tbody td{
+  padding: .7rem .8rem;
+  color: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.045);
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  vertical-align: middle;
+}
+
+.page--captura table.table--captura tbody tr td:first-child{
+  border-left: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px 0 0 12px;
+}
+.page--captura table.table--captura tbody tr td:last-child{
+  border-right: 1px solid rgba(255,255,255,.08);
+  border-radius: 0 12px 12px 0;
+}
+
+/* Hover azul tipo “highlight” */
+.page--captura table.table--captura tbody tr{
+  transition: transform .14s ease;
+}
+.page--captura table.table--captura tbody tr:hover{
+  transform: translateY(-1px);
+}
+.page--captura table.table--captura tbody tr:hover td{
+  background-color: rgba(37,99,235,.92);
+  color: rgba(255,255,255,.96);
+  border-top-color: rgba(255,255,255,.18);
+  border-bottom-color: rgba(0,0,0,.20);
+  box-shadow: 0 16px 42px rgba(37,99,235,.35);
+}
+
+/* Captura: Asignaciones activas (empty centrado y limpio) */
+.page--captura .card--captura-asig .empty{
+  padding: 3rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+}
+
+.page--captura .card--captura-asig .empty__text{
+  color: rgba(255,255,255,.78);
+}
+
+.page--captura .card--captura-asig .empty__sub{
+  color: rgba(255,255,255,.60);
+}
+
+/* Fuerza los controles nativos (select/dropdown, scrollbars) en modo dark */
+.page--captura{
+  color-scheme: dark;
+}
+
+/* Intenta oscurecer opciones (no todos los navegadores lo respetan igual) */
+.page--captura select.form-control option{
+  background: #0b1220;
+  color: rgba(255,255,255,.92);
+}
+
+/* =========================================================
+   CAPTURA — Botones (mismo look premium del dashboard)
+   Solo afecta la vista .page--captura
+   ========================================================= */
+
+/* Botón Volver (ghost) */
+.page--captura .page-header .btn--ghost{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.88);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  border-radius: 12px;
+  padding: .55rem 1.05rem;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.page--captura .page-header .btn--ghost:hover{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(249,177,122,.30);
+  color: rgba(255,255,255,.96);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15,23,42,.35);
+}
+
+.page--captura .page-header .btn--ghost:active{
+  transform: translateY(0);
+  box-shadow: 0 10px 22px rgba(0,0,0,.22);
+}
+
+/* Botón Guardar captura (primary) */
+.page--captura .btn--primary{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-color: rgba(255,255,255,.18);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37,99,235,.28), 0 1px 2px rgba(0,0,0,.20);
+  border-radius: 12px;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+
+/* Hover “brilloso” */
+.page--captura .btn--primary:hover{
+  background: linear-gradient(180deg, #4f8cff 0%, #1d4ed8 100%);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 14px 30px rgba(37,99,235,.34), 0 2px 4px rgba(0,0,0,.22);
+  transform: translateY(-1px);
+}
+
+/* Active */
+.page--captura .btn--primary:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(37,99,235,.26), 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* =========================================================
+   MODAL (Alertas + Confirmación) — reusable
+   ========================================================= */
+.modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  z-index: 9999;
+}
+
+.modal.is-open{ display: flex; }
+
+.modal__backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.58);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .modal__backdrop{
+    backdrop-filter: blur(6px) saturate(120%);
+    -webkit-backdrop-filter: blur(6px) saturate(120%);
+  }
+}
+
+.modal__card{
+  position: relative;
+  width: min(560px, calc(100% - 1.5rem));
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(66,71,105,.94) 0%, rgba(45,50,80,.96) 100%);
+  box-shadow: 0 30px 90px rgba(0,0,0,.55);
+  overflow: hidden;
+}
+
+.modal__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .95rem 1.05rem;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.modal__title{
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.92);
+}
+
+.modal__body{
+  padding: 1rem 1.05rem;
+  color: rgba(255,255,255,.86);
+}
+
+.modal__footer{
+  display: flex;
+  justify-content: flex-end;
+  gap: .6rem;
+  padding: .9rem 1.05rem 1.05rem;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.modal__list{
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.modal__list li{ margin: .35rem 0; }
+
+.modal__hint{
+  margin-top: .85rem;
+  color: rgba(255,255,255,.72);
+  font-size: .9rem;
+}
+
+/* Resumen estilo "key-value" */
+.kv{
+  display: grid;
+  gap: .6rem;
+}
+.kv__row{
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: .75rem;
+  padding: .65rem .75rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+}
+.kv__row span{
+  color: rgba(255,255,255,.70);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.kv__row strong{
+  color: rgba(255,255,255,.94);
+  font-weight: 600;
+}
+
+body.modal-open{ overflow: hidden; }
+
+/* =========================================================
+   ASIGNAR — Cards premium (solo esta vista)
+   ========================================================= */
+
+.page--asignar .page-header h1{
+  color: rgba(255,255,255,.92);
+}
+.page--asignar .page-header__sub{
+  color: rgba(255,255,255,.70);
+}
+
+/* Botón Volver (ghost) */
+.page--asignar .page-header .btn--ghost{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.88);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  border-radius: 12px;
+  padding: .55rem 1.05rem;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+.page--asignar .page-header .btn--ghost:hover{
+  background: rgba(255,255,255,.10);
+  
+  color: rgba(255,255,255,.96);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(15,23,42,.35);
+}
+.page--asignar .page-header .btn--ghost:active{
+  transform: translateY(0);
+  box-shadow: 0 10px 22px rgba(0,0,0,.22);
+}
+
+/* Cards glass oscuro */
+.page--asignar .card--asignar{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(66,71,105,.92) 0%, rgba(45,50,80,.92) 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  padding: 1.1rem;
+}
+@supports (backdrop-filter: blur(10px)) {
+  .page--asignar .card--asignar{
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+  }
+}
+
+/* Header de card */
+.page--asignar .card--asignar .card__header{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding-bottom: .75rem;
+  margin-bottom: .9rem;
+}
+.page--asignar .card--asignar .card__title{
+  color: rgba(255,255,255,.78);
+}
+
+/* Badge en dark (contador empleados) */
+.page--asignar .card--asignar .badge{
+  border: 1px solid rgba(255,255,255,.12);
+}
+.page--asignar .card--asignar .badge--ok{
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.90);
+  border-color: rgba(255,255,255,.14);
+}
+
+/* Form controls en dark (sin romper global) */
+.page--asignar .card--asignar .form-label{
+  color: rgba(255,255,255,.72);
+}
+.page--asignar .card--asignar .form-control{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.92);
+}
+.page--asignar .card--asignar .form-control::placeholder{
+  color: rgba(255,255,255,.55);
+}
+.page--asignar .card--asignar .form-control:focus{
+  border-color: rgba(59,130,246,.55);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.18);
+}
+
+/* Texto helper debajo del input */
+.page--asignar .card--asignar small{
+  color: rgba(255,255,255,.65) !important;
+}
+
+/* Botón primary (Asignar) */
+.page--asignar .btn--primary{
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-color: rgba(255,255,255,.18);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37,99,235,.28), 0 1px 2px rgba(0,0,0,.20);
+  border-radius: 12px;
+  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease;
+}
+.page--asignar .btn--primary:hover{
+  background: linear-gradient(180deg, #4f8cff 0%, #1d4ed8 100%);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 14px 30px rgba(37,99,235,.34), 0 2px 4px rgba(0,0,0,.22);
+  transform: translateY(-1px);
+}
+.page--asignar .btn--primary:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(37,99,235,.26), 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* Tabla premium tipo “pill rows” (solo esta vista) */
+.page--asignar .table-wrap--asignar{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page--asignar table.table--asignar{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  font-size: .92rem;
+}
+
+.page--asignar table.table--asignar thead th{
+  padding: .55rem .8rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.72);
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.page--asignar table.table--asignar tbody td{
+  padding: .7rem .8rem;
+  color: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.045);
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  vertical-align: middle;
+}
+
+.page--asignar table.table--asignar tbody tr td:first-child{
+  border-left: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px 0 0 12px;
+}
+.page--asignar table.table--asignar tbody tr td:last-child{
+  border-right: 1px solid rgba(255,255,255,.08);
+  border-radius: 0 12px 12px 0;
+}
+
+.page--asignar table.table--asignar .td-mono{
+  color: rgba(255,255,255,.72);
+}
+
+/* Hover azul “highlight” */
+.page--asignar table.table--asignar tbody tr{
+  transition: transform .14s ease;
+}
+.page--asignar table.table--asignar tbody tr:hover{
+  transform: translateY(-1px);
+}
+.page--asignar table.table--asignar tbody tr:hover td{
+  background-color: rgba(37,99,235,.92);
+  color: rgba(255,255,255,.96);
+  border-top-color: rgba(255,255,255,.18);
+  border-bottom-color: rgba(0,0,0,.20);
+  box-shadow: 0 16px 42px rgba(37,99,235,.35);
+}
+.page--asignar table.table--asignar tbody tr:hover .td-mono{
+  color: rgba(255,255,255,.90);
+}
+
+/* Empty state centrado y con altura similar al ejemplo */
+.page--asignar .empty--asignar{
+  color: rgba(255,255,255,.75);
+  padding: 3rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  text-align: center;
+}
+.page--asignar .empty--asignar .empty__text{
+  color: rgba(255,255,255,.78);
+}
+
+/* Fuerza controles nativos en dark (solo esta vista) */
+.page--asignar{
+  color-scheme: dark;
+}
+.page--asignar select.form-control option{
+  background: #0b1220;
+  color: rgba(255,255,255,.92);
+}
+
+/* =========================================
+   FIX: raya blanca derecha (overflow-x)
+   PÉGALO AL FINAL de components.css
+   ========================================= */
+
+
+
+
+/* En grids, permite que los hijos se “encojan” y no empujen el ancho */
+.grid-stats > *,
+.grid-2 > *,
+.grid-3 > *{
+  min-width: 0;
+}

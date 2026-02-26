@@ -3,17 +3,37 @@
 <head>
   <%- include('../partials/head') %>
 </head>
+<!-- Modal (alertas + confirmación) -->
+<div class="modal" id="appModal" aria-hidden="true">
+  <div class="modal__backdrop" data-close></div>
+
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+    <div class="modal__header">
+      <h3 class="modal__title" id="appModalTitle">Aviso</h3>
+
+      <button type="button" class="btn btn--icon btn--ghost modal__close" data-close aria-label="Cerrar">
+        ✕
+      </button>
+    </div>
+
+    <div class="modal__body" id="appModalBody"></div>
+
+    <div class="modal__footer" id="appModalFooter"></div>
+  </div>
+</div>
+
+<script src="/js/alerts.js" defer></script>
 <body>
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--captura">
     <div class="container">
 
       <div class="page-header">
         <div>
           <h1>Registrar Captura</h1>
-          <p class="page-header__sub">Ingresa la producción por slot horario</p>
+          <p class="page-header__sub"><h3>Ingresa la producción por slot horario</h3></p>
         </div>
         <a href="/encargado" class="btn btn--ghost">
           <svg class="icon"><use href="#icon-back"/></svg>
@@ -26,12 +46,12 @@
       <div class="grid-2" style="align-items:start">
 
         <%# ── Formulario ── %>
-        <div class="card">
+        <div class="card card--captura">
           <div class="card__header">
             <span class="card__title">Nueva captura</span>
           </div>
 
-          <form method="POST" action="/encargado/captura">
+          <form method="POST" action="/encargado/captura" novalidate>
             <div class="form-group">
               <label class="form-label" for="asignacionId">Asignación activa</label>
               <select class="form-control" id="asignacionId" name="asignacionId" required>
@@ -75,21 +95,21 @@
         </div>
 
         <%# ── Asignaciones activas ── %>
-        <div class="card">
+        <div class="card card--captura card--captura-asig">
           <div class="card__header">
             <span class="card__title">Asignaciones activas</span>
           </div>
 
           <% if (!asignaciones.length) { %>
-            <div class="empty">
+            <div class="empty empty--captura">
               <p class="empty__text">Sin asignaciones activas.</p>
               <a href="/encargado/asignar" class="btn btn--ghost btn--sm" style="margin-top:.75rem">
                 Gestionar asignaciones
               </a>
             </div>
           <% } else { %>
-            <div class="table-wrap">
-              <table>
+           <div class="table-wrap table-wrap--captura">
+            <table class="table table--captura">
                 <thead>
                   <tr>
                     <th>Empleado</th>

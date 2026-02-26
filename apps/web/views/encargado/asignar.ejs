@@ -7,13 +7,13 @@
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar">
     <div class="container">
 
       <div class="page-header">
         <div>
           <h1>Asignaciones</h1>
-          <p class="page-header__sub">Escanea el QR del empleado para asignarlo a un área</p>
+          <p class="page-header__sub"><h4>Escanea el QR del empleado para asignarlo a un área</p></h4>
         </div>
         <a href="/encargado" class="btn btn--ghost">
           <svg class="icon"><use href="#icon-back"/></svg>
@@ -26,7 +26,7 @@
       <div class="grid-2" style="align-items:start">
 
         <%# ── Formulario scan QR ── %>
-        <div class="card">
+        <div class="card card--asignar">
           <div class="card__header">
             <span class="card__title">Escanear QR</span>
           </div>
@@ -66,19 +66,19 @@
         </div>
 
         <%# ── Asignaciones activas ── %>
-        <div class="card">
+        <div class="card card--asignar card--asignar-act">
           <div class="card__header">
             <span class="card__title">Activas ahora</span>
             <span class="badge badge--ok"><%= asignaciones.length %> empleados</span>
           </div>
 
           <% if (!asignaciones.length) { %>
-            <div class="empty">
+            <div class="empty empty--asignar">
               <p class="empty__text">Sin asignaciones activas.</p>
             </div>
           <% } else { %>
-            <div class="table-wrap">
-              <table>
+            <div class="table-wrap table-wrap--asignar">
+              <table class="table table--asignar">
                 <thead>
                   <tr>
                     <th>Empleado</th>
