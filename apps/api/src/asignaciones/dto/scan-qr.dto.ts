@@ -1,8 +1,7 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsUUID } from 'class-validator';
 
 export class ScanQrDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID()
   uuidQr: string;
 
   @IsInt()

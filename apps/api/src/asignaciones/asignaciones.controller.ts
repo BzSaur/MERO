@@ -1,48 +1,61 @@
 import {
-  Body,
   Controller,
   Get,
+  Post,
+  Patch,
+  Body,
   Param,
   ParseIntPipe,
-  Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { AsignacionesService } from './asignaciones.service';
 import { ScanQrDto } from './dto/scan-qr.dto';
 
 @Controller('asignaciones')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class AsignacionesController {
-  constructor(private readonly service: AsignacionesService) {}
+  constructor(private readonly asignaciones: AsignacionesService) {}
 
-  /** Escaneo de QR: crea o reasigna al empleado */
+  /**
+   * Crear asignación por escaneo (QR → empleado)
+   */
   @Post('scan')
-  @Roles('ADMIN', 'ENCARGADO')
   scan(@Body() dto: ScanQrDto) {
-    return this.service.scan(dto);
+    return this.asignaciones.scan(dto);
   }
 
-  /** Asignaciones activas del día (opcional: filtrar por área) */
+  /**
+   * Listar asignaciones activas del día (opcional filtro por área)
+   */
   @Get('activas')
-  findActivas(@Query('areaId') areaId?: number) {
-    return this.service.findActivas(areaId);
+  activas(@Query('areaId') areaId?: string) {
+    const parsed = areaId ? parseInt(areaId, 10) : undefined;
+    return this.asignaciones.findActivas(Number.isFinite(parsed) ? parsed : undefined);
   }
 
-  /** Histórico de asignaciones de un empleado */
+  /**
+   * Listar asignaciones por empleado (opcional fecha YYYY-MM-DD)
+   */
   @Get('empleado/:empleadoId')
-  findByEmpleado(
+  byEmpleado(
     @Param('empleadoId', ParseIntPipe) empleadoId: number,
     @Query('fecha') fecha?: string,
   ) {
-    return this.service.findByEmpleado(empleadoId, fecha);
+    return this.asignaciones.findByEmpleado(empleadoId, fecha);
   }
 
+  /**
+   * Obtener asignación por id
+   */
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  one(@Param('id', ParseIntPipe) id: number) {
+    return this.asignaciones.findOne(id);
+  }
+
+  /**
+   * Finalizar asignación (horaFin=ahora CDMX, activa=false)
+   */
+  @Patch(':id/finalizar')
+  finalizar(@Param('id', ParseIntPipe) id: number) {
+    return this.asignaciones.finalizar(id);
   }
 }

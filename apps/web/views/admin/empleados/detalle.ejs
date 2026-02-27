@@ -30,10 +30,9 @@
 
       <%- include('../../partials/flash') %>
 
-      <!-- Información de VITA -->
+      <!-- Cards -->
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:var(--gap);">
 
-        <!-- Datos personales -->
         <div class="card">
           <div class="card__header">
             <span class="card__title">
@@ -62,7 +61,6 @@
           </div>
         </div>
 
-        <!-- Datos laborales (VITA) -->
         <div class="card">
           <div class="card__header">
             <span class="card__title">
@@ -114,7 +112,6 @@
           </div>
         </div>
 
-        <!-- Código QR -->
         <div class="card">
           <div class="card__header">
             <span class="card__title">
@@ -137,7 +134,6 @@
           </div>
         </div>
 
-        <!-- Estado en MERO -->
         <div class="card">
           <div class="card__header">
             <span class="card__title">
@@ -176,6 +172,7 @@
             Asignaciones Recientes
           </span>
         </div>
+
         <% if (!empleado.asignaciones || !empleado.asignaciones.length) { %>
           <div class="empty">
             <p class="empty__text">Este empleado no tiene asignaciones registradas.</p>
@@ -198,17 +195,16 @@
                 <% empleado.asignaciones.forEach(a => { %>
                   <tr>
                     <td class="td-mono">
-                      <%= a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX') : '—' %>
+                      <%= a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) : '—' %>
                     </td>
                     <td><%= a.areaId || '—' %></td>
                     <td class="td-hide-mobile"><%= a.subtareaId || '—' %></td>
                     <td class="td-hide-mobile"><%= a.modeloId || '—' %></td>
-                    <td class="td-hide-mobile td-mono">
-                      <%= a.horaInicio ? new Date(a.horaInicio).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '—' %>
-                    </td>
-                    <td class="td-hide-mobile td-mono">
-                      <%= a.horaFin ? new Date(a.horaFin).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '—' %>
-                    </td>
+
+                    <!-- horaInicio/horaFin son strings HH:mm -->
+                    <td class="td-hide-mobile td-mono"><%= a.horaInicio || '—' %></td>
+                    <td class="td-hide-mobile td-mono"><%= a.horaFin || '—' %></td>
+
                     <td>
                       <% if (a.activa) { %>
                         <span class="badge badge--ok">Activa</span>

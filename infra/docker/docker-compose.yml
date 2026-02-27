@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-mero}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mero_secret}
       POSTGRES_DB: ${POSTGRES_DB:-mero_db}
+      TZ: America/Mexico_City
     ports:
       - '${DB_PORT:-5433}:5432'
     volumes:
@@ -28,9 +29,10 @@ services:
     env_file:
       - ../../.env
     environment:
+      TZ: America/Mexico_City
       DATABASE_URL: postgresql://${POSTGRES_USER:-mero}:${POSTGRES_PASSWORD:-mero_secret}@db:5432/${POSTGRES_DB:-mero_db}?schema=public
     ports:
-      - '${API_PORT:-3000}:3000'
+      - '${API_PORT:-3002}:3000'
     networks:
       - default
       - vita_network
@@ -47,6 +49,7 @@ services:
     env_file:
       - ../../.env
     environment:
+      TZ: America/Mexico_City
       API_URL: http://api:3000/api
     ports:
       - '${WEB_PORT:-4000}:4000'

@@ -1,7 +1,43 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmpleadosService } from '../empleados/empleados.service';
 import { ScanQrDto } from './dto/scan-qr.dto';
+
+/**
+ * CDMX: devuelve fecha (para @db.Date) y hora (HH:mm) correctas.
+ */
+function nowMxParts() {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
+
+  const parts = fmt.formatToParts(new Date());
+  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+
+  const yyyy = get('year')!;
+  const mm = get('month')!;
+  const dd = get('day')!;
+  const HH = get('hour')!;
+  const MM = get('minute')!;
+
+  const fechaStr = `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD (CDMX)
+  const horaStr = `${HH}:${MM}`;          // HH:mm (CDMX)
+
+  // @db.Date: guardamos el “día CDMX” como medianoche UTC de ese día
+  const fechaDate = new Date(`${fechaStr}T00:00:00.000Z`);
+
+  return { fechaDate, horaStr };
+}
 
 @Injectable()
 export class AsignacionesService {
@@ -11,46 +47,61 @@ export class AsignacionesService {
   ) {}
 
   /**
-   * Flujo principal de escaneo QR:
-   * 1. Buscar empleado por uuid_qr
-   * 2. Si tiene asignación activa en OTRA área → cerrarla (hora_fin = ahora)
-   * 3. Si tiene asignación activa en la MISMA área → reasignar subtarea/modelo
-   * 4. Crear nueva asignación activa
+   * QR → asigna:
+   * - cierra cualquier asignación activa previa (sin importar fecha)
+   * - crea nueva con fecha/hora CDMX
    */
   async scan(dto: ScanQrDto) {
     const empleado = await this.empleados.findByQr(dto.uuidQr);
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split('T')[0];
-    const horaActual = `${hoy.getHours().toString().padStart(2, '0')}:${hoy.getMinutes().toString().padStart(2, '0')}`;
+    if (!empleado) throw new NotFoundException('Empleado no encontrado por QR');
+    if (!empleado.activo) throw new BadRequestException('Empleado inactivo');
 
-    // Buscar asignación activa del empleado
+    const { fechaDate, horaStr } = nowMxParts();
+
+    // Cierra la última activa (sin filtrar por fecha)
     const activa = await this.prisma.meroAsignacion.findFirst({
-      where: {
-        empleadoId: empleado.id,
-        fecha: new Date(fechaHoy),
-        activa: true,
-      },
+      where: { empleadoId: empleado.id, activa: true },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (activa) {
-      // Cerrar asignación anterior
       await this.prisma.meroAsignacion.update({
         where: { id: activa.id },
-        data: { activa: false, horaFin: horaActual },
+        data: { activa: false, horaFin: horaStr },
       });
     }
 
-    // Crear nueva asignación
+    // Crea nueva asignación activa
     return this.prisma.meroAsignacion.create({
       data: {
         empleadoId: empleado.id,
         areaId: dto.areaId,
         subtareaId: dto.subtareaId,
         modeloId: dto.modeloId,
-        fecha: new Date(fechaHoy),
-        horaInicio: horaActual,
+        fecha: fechaDate,
+        horaInicio: horaStr,
+        horaFin: null,
         activa: true,
       },
+      include: {
+        empleado: true,
+        area: true,
+        subtarea: true,
+        modelo: true,
+      },
+    });
+  }
+
+  async finalizar(id: number) {
+    const asg = await this.prisma.meroAsignacion.findUnique({ where: { id } });
+    if (!asg) throw new NotFoundException('Asignación no encontrada');
+    if (!asg.activa) throw new BadRequestException('La asignación ya está finalizada');
+
+    const { horaStr } = nowMxParts();
+
+    return this.prisma.meroAsignacion.update({
+      where: { id },
+      data: { activa: false, horaFin: horaStr },
       include: {
         empleado: true,
         area: true,
@@ -61,10 +112,11 @@ export class AsignacionesService {
   }
 
   async findActivas(areaId?: number) {
-    const hoy = new Date().toISOString().split('T')[0];
+    const { fechaDate } = nowMxParts();
+
     return this.prisma.meroAsignacion.findMany({
       where: {
-        fecha: new Date(hoy),
+        fecha: fechaDate,
         activa: true,
         ...(areaId ? { areaId } : {}),
       },
@@ -74,6 +126,7 @@ export class AsignacionesService {
         subtarea: true,
         modelo: true,
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -81,7 +134,7 @@ export class AsignacionesService {
     return this.prisma.meroAsignacion.findMany({
       where: {
         empleadoId,
-        ...(fecha ? { fecha: new Date(fecha) } : {}),
+        ...(fecha ? { fecha: new Date(`${fecha}T00:00:00.000Z`) } : {}),
       },
       include: {
         area: true,
@@ -89,7 +142,7 @@ export class AsignacionesService {
         modelo: true,
         capturas: true,
       },
-      orderBy: { fecha: 'desc' },
+      orderBy: [{ fecha: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -104,6 +157,7 @@ export class AsignacionesService {
         capturas: true,
       },
     });
+
     if (!asignacion) throw new NotFoundException('Asignación no encontrada');
     return asignacion;
   }
