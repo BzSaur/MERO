@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as QRCode from 'qrcode';
+import sharp from 'sharp';
+import * as path from 'path';
 import { PrismaService } from '../prisma/prisma.service';
 import { VitaSyncService } from './vita-sync.service';
 
@@ -19,37 +21,19 @@ import { VitaSyncService } from './vita-sync.service';
 @Injectable()
 export class EmpleadosService {
   constructor(
-    private readonly prisma: PrismaService,      // Acceso a base de datos MERO
-    private readonly vitaSync: VitaSyncService,  // Servicio para consultar datos en VITA (read-only)
+    private readonly prisma: PrismaService, // Acceso a base de datos MERO
+    private readonly vitaSync: VitaSyncService, // Servicio para consultar datos en VITA (read-only)
   ) {}
 
-  /**
-   * Obtiene todos los empleados activos de MERO.
-   *
-   * Flujo:
-   * 1. Se consultan empleados activos en BD local (MERO).
-   * 2. Se consulta lista completa en VITA.
-   * 3. Se construye un Map para búsqueda eficiente por ID.
-   * 4. Se enriquecen los datos MERO con información fresca de VITA.
-   *
-   * Importante:
-   * MERO no duplica toda la información laboral,
-   * solo mantiene lo necesario y consulta VITA para datos actualizados.
-   */
   async findAll() {
-    // 1️⃣ Obtener empleados activos desde MERO
     const empleadosMero = await this.prisma.meroEmpleado.findMany({
       where: { activo: true },
       orderBy: { nombre: 'asc' },
     });
 
-    // 2️⃣ Obtener datos frescos desde VITA
     const vitaEmpleados = await this.vitaSync.queryVitaEmpleados();
-
-    // 3️⃣ Crear mapa para acceso rápido por ID_Vita
     const vitaMap = new Map(vitaEmpleados.map((v) => [v.ID_Empleado, v]));
 
-    // 4️⃣ Enriquecer cada empleado MERO con datos de VITA
     return empleadosMero.map((emp) => {
       const vita = vitaMap.get(emp.idVita);
 
@@ -67,28 +51,15 @@ export class EmpleadosService {
     });
   }
 
-  /**
-   * Obtiene un empleado específico por ID interno de MERO.
-   *
-   * Incluye:
-   * - Últimas 10 asignaciones del empleado.
-   * - Datos enriquecidos desde VITA.
-   *
-   * Lanza excepción 404 si no existe.
-   */
   async findOne(id: number) {
     const empleado = await this.prisma.meroEmpleado.findUnique({
       where: { id },
       include: { asignaciones: { take: 10, orderBy: { fecha: 'desc' } } },
     });
 
-    if (!empleado)
-      throw new NotFoundException('Empleado no encontrado');
+    if (!empleado) throw new NotFoundException('Empleado no encontrado');
 
-    // Consultar información detallada desde VITA
-    const vita = await this.vitaSync.getVitaEmpleadoDetalle(
-      empleado.idVita,
-    );
+    const vita = await this.vitaSync.getVitaEmpleadoDetalle(empleado.idVita);
 
     return {
       ...empleado,
@@ -104,55 +75,85 @@ export class EmpleadosService {
     };
   }
 
-  /**
-   * Busca un empleado utilizando su UUID de QR.
-   *
-   * Este método es usado cuando se escanea un QR.
-   * El QR contiene únicamente el campo `uuidQr`.
-   *
-   * Seguridad actual:
-   * - No hay expiración.
-   * - No hay firma.
-   * - Solo se valida existencia en BD.
-   */
   async findByQr(uuidQr: string) {
     const empleado = await this.prisma.meroEmpleado.findUnique({
       where: { uuidQr },
     });
 
-    if (!empleado)
-      throw new NotFoundException(
-        'Empleado no encontrado por QR',
-      );
+    if (!empleado) throw new NotFoundException('Empleado no encontrado por QR');
 
     return empleado;
   }
 
   /**
-   * Genera la imagen PNG del QR asociado a un empleado.
+   * Genera el QR del empleado con watermark (logo tenue al centro).
    *
-   * Flujo:
-   * 1. Busca empleado por ID interno.
-   * 2. Toma su campo `uuidQr`.
-   * 3. Genera imagen PNG con la librería `qrcode`.
-   *
-   * El QR contiene únicamente el UUID persistido en base de datos.
-   *
-   * Retorna:
-   * - Buffer binario listo para enviarse como imagen HTTP.
+   * IMPORTANTE:
+   * - El watermark debe ir ENCIMA del QR (no abajo), porque el QR tiene fondo blanco opaco.
+   * - La opacidad se controla en el SVG (no dependemos de `opacity` en sharp).
    */
   async generateQrImage(id: number): Promise<Buffer> {
-    const empleado = await this.prisma.meroEmpleado.findUnique({
-      where: { id },
-    });
+  const empleado = await this.prisma.meroEmpleado.findUnique({
+    where: { id },
+  });
 
-    if (!empleado)
-      throw new NotFoundException('Empleado no encontrado');
+  if (!empleado) throw new NotFoundException('Empleado no encontrado');
 
-    return QRCode.toBuffer(empleado.uuidQr, {
-      type: 'png',
-      width: 300,
-      margin: 2,
-    });
-  }
+  // ===== Config segura =====
+  const SIZE = 600;          // generamos grande y luego bajamos a 300
+  const MARGIN = 3;          // quiet zone
+  const LOGO_RATIO = 0.18;   // 15%–20% recomendado
+  const PAD_RATIO = 1.25;    // padding blanco alrededor del logo
+  const DARK = '#000000';
+  const LIGHT = '#FFFFFF';
+
+  // Ruta del logo dentro del contenedor (ya confirmaste que existe)
+  const logoPath = path.join(process.cwd(), 'apps/api/assets/logo.png');
+
+  // 1) QR base con alta tolerancia (permite “tapar” el centro)
+  const qrPng = await QRCode.toBuffer(empleado.uuidQr, {
+    type: 'png',
+    width: SIZE,
+    margin: MARGIN,
+    errorCorrectionLevel: 'H',
+    color: { dark: DARK, light: LIGHT },
+  });
+
+  // 2) Medir QR para calcular tamaños
+  const meta = await sharp(qrPng).metadata();
+  const w = meta.width ?? SIZE;
+  const h = meta.height ?? SIZE;
+  const qrSize = Math.min(w, h);
+
+  const logoSize = Math.round(qrSize * LOGO_RATIO);
+  const padSize = Math.round(logoSize * PAD_RATIO);
+
+  // 3) Preparar logo (centrado)
+  const logo = await sharp(logoPath)
+    .resize(logoSize, logoSize, { fit: 'contain' })
+    .png()
+    .toBuffer();
+
+  // 4) Crear cuadro blanco (padding) + logo encima
+  const whitePad = await sharp({
+    create: {
+      width: padSize,
+      height: padSize,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .composite([{ input: logo, gravity: 'center' }])
+    .png()
+    .toBuffer();
+
+  // 5) Componer: QR + pad blanco con logo al centro
+  const composed = await sharp(qrPng)
+    .composite([{ input: whitePad, gravity: 'center' }])
+    .png()
+    .toBuffer();
+
+  // 6) Salida final tamaño UI
+  return await sharp(composed).resize(300, 300).png().toBuffer();
+}
 }

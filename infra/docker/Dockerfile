@@ -32,8 +32,10 @@ COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/apps/api/assets ./apps/api/assets
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY package.json pnpm-workspace.yaml ./
+
 
 COPY infra/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
