@@ -1,0 +1,45 @@
+/* ── Table ── */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+thead {
+  border-bottom: 2px solid var(--wire);
+}
+
+th {
+  text-align: left;
+  padding: .65rem .75rem;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+td {
+  padding: .65rem .75rem;
+  border-bottom: 1px solid var(--wire);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(59, 130, 246, 0.04); }
+
+.td-mono {
+  font-family: var(--font-mono);
+  font-size: .85rem;
+}
+
+@media (max-width: 640px) {
+  .td-hide-mobile { display: none; }
+  th.td-hide-mobile { display: none; }
+}

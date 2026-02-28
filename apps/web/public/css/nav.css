@@ -1,0 +1,290 @@
+/* Barra superior */
+.nav{
+  background: linear-gradient(180deg, rgba(7, 12, 24, .96), rgba(15, 23, 42, .92));
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .nav{
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+  }
+}
+
+/* Marca */
+.nav__brand{
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.nav__brand svg{
+  color: var(--amber);
+  filter: drop-shadow(0 6px 16px rgba(59,130,246,.25));
+}
+
+/* Toggle */
+.nav__toggle{
+  border-radius: 10px;
+  transition: transform .18s ease, background .18s ease, color .18s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .nav__toggle:hover{ background: rgba(255,255,255,.06); }
+}
+.nav__toggle.open{ transform: rotate(90deg); }
+
+/* LINKS: distribución centrada */
+.nav__links{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 var(--gap);
+  max-width: 980px;
+  position: relative;
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  /* indicador deslizante */
+  --pill-x: 0px;
+  --pill-w: 0px;
+  --pill-visible: 0;
+}
+
+/* 🚫 Quitamos el “rail” gris detrás (era el degradado que se ve feo) */
+.nav__links::before{
+  content: none;
+}
+
+/* Indicador deslizante (hover/active) */
+.nav__links::after{
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+
+  width: var(--pill-w);
+  transform: translateX(var(--pill-x));
+  opacity: var(--pill-visible);
+
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(37,99,235,.28), rgba(30,58,138,.22));
+  border: 1px solid rgba(59,130,246,.28);
+
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.10);
+
+  transition:
+    transform .26s cubic-bezier(.2,.8,.2,1),
+    width .26s cubic-bezier(.2,.8,.2,1),
+    opacity .18s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Botones */
+.nav__links a{
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+
+  padding: .52rem .90rem;
+  border-radius: 999px;
+
+  color: rgba(255,255,255,.70);
+  border: 1px solid transparent;
+  background: transparent;
+
+  font-size: .85rem;
+  font-weight: 520;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.nav__links a .icon{
+  opacity: .85;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+/* Hover SOLO en dispositivos con hover (evita “hover pegado” en touch) */
+@media (hover:hover) and (pointer:fine){
+  .nav__links a:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.10);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    text-decoration: none;
+  }
+  .nav__links a:hover .icon{
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+}
+
+/* Active: sin fondo gris, solo texto blanco (el pill lo pinta el indicador) */
+.nav__links a.active{
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: #ffffff;
+}
+.nav__links a.active .icon{ opacity: 1; }
+
+/* 🚫 Quita el “shine” (era el degradado gris que se notaba) */
+.nav__links a.active::after{ content: none; }
+
+/* Focus sin fondo raro */
+.nav__links a:focus{ outline: none; background: transparent; }
+.nav__links a:focus-visible{
+  outline: 2px solid rgba(59,130,246,.35);
+  outline-offset: 2px;
+}
+
+/* Lado derecho */
+.nav__end{ gap: .75rem; }
+.nav__user{ color: rgba(255,255,255,.60); }
+
+/* Botón Salir (premium) */
+.nav__logout{
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+
+  border-radius: 999px;
+  padding: .46rem .85rem;
+
+  border: 1px solid rgba(255,255,255,.16);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  color: rgba(255,255,255,.86);
+
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease;
+}
+
+.nav__logout .icon{
+  opacity: .95;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+/* Hover con acento naranja (formal) */
+@media (hover:hover) and (pointer:fine){
+  .nav__logout:hover{
+    background: linear-gradient(180deg, rgba(245,158,11,.14), rgba(255,255,255,.03));
+    border-color: rgba(245,158,11,.28);
+    box-shadow:
+      0 12px 26px rgba(0,0,0,.28),
+      inset 0 1px 0 rgba(255,255,255,.10);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+  .nav__logout:hover .icon{
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================
+   SweetAlert2 theme (solo para tu modal)
+   ========================================================== */
+.mero-swal{
+  background: linear-gradient(180deg, rgba(7,12,24,.98), rgba(15,23,42,.96)) !important;
+  color: rgba(255,255,255,.92) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.55) !important;
+}
+
+.mero-swal .swal2-title{
+  color: rgba(255,255,255,.95) !important;
+  letter-spacing: .01em;
+}
+
+.mero-swal .swal2-html-container{
+  color: rgba(255,255,255,.70) !important;
+}
+
+.mero-swal-confirm{
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: .62rem 1.05rem !important;
+  background: linear-gradient(180deg, rgba(245,158,11,.95), rgba(180,83,9,.92)) !important;
+  color: #0b1224 !important;
+  box-shadow: 0 16px 30px rgba(0,0,0,.35) !important;
+}
+
+.mero-swal-cancel{
+  border-radius: 999px !important;
+  padding: .62rem 1.05rem !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  color: rgba(255,255,255,.86) !important;
+}
+@media (hover:hover) and (pointer:fine){
+  .nav__logout:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.24);
+    color: #ffffff;
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+}
+
+/* Responsive: */
+@media (max-width: 768px) {
+  .nav__links{
+    display: none;               
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    margin: 0;
+    max-width: none;
+    padding: var(--gap-sm) var(--gap);
+    border-radius: 0;
+
+    background: linear-gradient(180deg, rgba(7, 12, 24, .98), rgba(15, 23, 42, .96));
+    border-top: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 18px 50px rgba(0,0,0,.45);
+    gap: 4px;
+    z-index: 99;
+  }
+
+  .nav__links.open{ display: flex; }   /* 👈 clave */
+
+  /* En mobile no usamos indicador */
+  .nav__links::after{ display:none; }
+
+  .nav__links a{
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: var(--r-sm);
+    padding: .68rem .85rem;
+  }
+}
+
+
+/* Moderno: si hay un link activo dentro, el pill toma acento naranja */
+.nav__links:has(a.active)::after{
+  background-color: rgb(23, 159, 250);
+  
+  box-shadow:
+    0 12px 26px rgba(0,0,0,.28),
+    0 0 0 1px rgba(245, 158, 11, .10) inset,
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+

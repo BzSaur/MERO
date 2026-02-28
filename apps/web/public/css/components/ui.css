@@ -1,0 +1,145 @@
+/* ── Badge (soft background) ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .2rem .6rem;
+  border-radius: var(--r-sm);
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.badge--ok   { background: var(--signal-ok-bg);   color: #047857; }
+.badge--warn { background: var(--signal-warn-bg);  color: #c2410c; }
+.badge--fail { background: var(--signal-fail-bg);  color: #dc2626; }
+.badge--none { background: var(--panel);            color: var(--ink-dim); }
+
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+}
+.btn:hover { text-decoration: none; }
+
+.btn--primary {
+  background: var(--amber);
+  color: #ffffff;
+  border-color: var(--amber);
+  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
+}
+.btn--primary:hover {
+  background: var(--amber-hi);
+  border-color: var(--amber-hi);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
+}
+
+.btn--ghost {
+  background: var(--surface);
+  color: var(--ink-dim);
+  border-color: var(--wire);
+}
+.btn--ghost:hover {
+  background: var(--panel);
+  color: var(--ink);
+  border-color: var(--wire-hi);
+}
+
+.btn--danger {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: rgba(239, 68, 68, 0.92);
+}
+
+.btn--danger:hover{
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.40);
+  color: rgba(239, 68, 68, 0.98);
+}
+
+.btn--sm   { padding: .35rem .65rem; font-size: .8rem; }
+.btn--icon { padding: .4rem; }
+.btn--full { width: 100%; justify-content: center; }
+
+
+/* ── Flash messages ── */
+.flash-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  margin-bottom: var(--gap);
+}
+
+.flash {
+  padding: .75rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.flash--error   { background: var(--signal-fail-bg); color: #dc2626; }
+.flash--success { background: var(--signal-ok-bg);   color: #047857; }
+.flash--info    { background: var(--amber-lo);       color: var(--amber-hi); }
+
+
+/* ── Efficiency value ── */
+.eff-value {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.eff-value--ok   { color: var(--signal-ok);   }
+.eff-value--warn { color: var(--signal-warn); }
+.eff-value--fail { color: var(--signal-fail); }
+.eff-value--none { color: var(--ink-muted);   }
+
+
+/* ── Icon (SVG sprite) ── */
+/* IMPORTANTE: sin esto tus <svg class="icon"> vuelven a su tamaño default (300x150) */
+.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--wire);
+  margin: var(--gap) 0;
+}
+
+
+/* ── Empty state ── */
+.empty {
+  text-align: center;
+  padding: 3rem var(--gap);
+  color: var(--ink-dim);
+}
+.empty__text { font-size: .9rem; }

@@ -7,13 +7,13 @@
   <%- include('../../partials/icons') %>
   <%- include('../../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--usuarios">
     <div class="container">
 
-      <div class="page-header">
+      <div class="page-header page-header--usuarios">
         <div>
           <h1>Usuarios</h1>
-          <p class="page-header__sub">Cuentas de acceso al sistema</p>
+          <p><h3>Cuentas de acceso al sistema</p></h3>
         </div>
         <a href="/admin/usuarios/nuevo" class="btn btn--primary">
           <svg class="icon"><use href="#icon-plus"/></svg>
@@ -23,47 +23,93 @@
 
       <%- include('../../partials/flash') %>
 
-      <div class="card">
+      <div class="card card--usuarios">
+
         <% if (!usuarios.length) { %>
-          <div class="empty"><p class="empty__text">Sin usuarios registrados.</p></div>
+          <div class="empty empty--usuarios">
+            <p class="empty__text">Sin usuarios registrados.</p>
+          </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th class="td-hide-mobile">Correo</th>
-                  <th>Rol</th>
-                  <th class="td-hide-mobile">Creado</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <% usuarios.forEach(u => { %>
-                  <tr>
-                    <td><%= u.nombre %></td>
-                    <td class="td-mono td-hide-mobile"><%= u.email %></td>
-                    <td>
-                      <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
-                        <%= u.rol %>
-                      </span>
-                    </td>
-                    <td class="td-mono td-hide-mobile"><%= fmtDate(u.createdAt) %></td>
-                    <td>
-                      <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
-                        <svg class="icon"><use href="#icon-edit"/></svg>
-                        Editar
-                      </a>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
+
+          <div class="users-controls users-controls--light" style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);">
+            <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
+              <div style="min-width: 220px;">
+                <label class="form-label" for="rolFilter" style="margin-bottom:.35rem;">Filtrar por rol</label>
+                <select class="form-control" id="rolFilter">
+                  <option value="ALL">Todos</option>
+                  <option value="ADMIN">Administrador</option>
+                  <option value="ENCARGADO">Encargado</option>
+                  <option value="CONSULTOR">Consultor</option>
+                </select>
+              </div>
+
+              <div style="min-width: 260px;">
+                <label class="form-label" for="sortFilter" style="margin-bottom:.35rem;">Orden</label>
+                <select class="form-control" id="sortFilter">
+                  <option value="NEW">Creados recientemente</option>
+                  <option value="OLD">Más antiguos</option>
+                </select>
+              </div>
+
+              <button type="button" class="btn btn--ghost" id="resetFilters" style="margin-top: 1.55rem;">
+                Limpiar
+              </button>
+            </div>
+
+            <span class="badge badge--none" id="usersCount" style="margin-top: 1.55rem;">0 usuarios</span>
+          </div>
+
+          <div class="table-wrap table-wrap--usuarios">
+            <table class="table table--usuarios" id="usersTable">
+            <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Creado</th>
+              <th>Editar</th>
+            </tr>
+          </thead>
+
+          <tbody id="usersTbody">
+            <% usuarios.forEach(u => { %>
+              <tr
+                data-rol="<%= u.rol %>"
+                data-created="<%= (new Date(u.createdAt)).getTime() %>"
+              >
+                <td><%= u.nombre %></td>
+
+                <td class="td-mono"><%= u.email %></td>
+
+                <td>
+                  <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
+                    <%= u.rol %>
+                  </span>
+                </td>
+
+                <td class="td-mono"><%= fmtDate(u.createdAt) %></td>
+
+                <td>
+                  <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
+                    <svg class="icon"><use href="#icon-edit"/></svg>
+                    Editar
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
             </table>
           </div>
+
         <% } %>
       </div>
 
     </div>
   </div>
+
+
+  <%- include('../../partials/appModal') %>
+  <script src="/js/alerts.js" defer></script>
+  <script src="/js/usuarios.js" defer></script>
 </body>
 </html>

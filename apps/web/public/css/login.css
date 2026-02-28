@@ -1,0 +1,15 @@
+/* Login background */
+.login-wrap{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+
+  background-image:
+    
+    url('/img/BackgroundMERO.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed; /
+}

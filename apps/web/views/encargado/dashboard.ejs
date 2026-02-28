@@ -7,15 +7,14 @@
   <%- include('../partials/icons') %>
   <%- include('../partials/nav') %>
 
-  <div class="page">
-    <div class="container">
-
-      <div class="page-header">
+ <div class="page page--encargado">
+  <div class="container">
+    <div class="page-header page-header--encargado">
         <div>
           <h1>Panel Encargado</h1>
           <p class="page-header__sub">
-            <svg class="icon"><use href="#icon-clock"/></svg>
-            <%= hoy %>
+             <h4><svg class="icon" color="white"><use href="#icon-clock"/></svg>
+           <%= hoy %></h4>
           </p>
         </div>
         <a href="/encargado/captura" class="btn btn--primary">
@@ -35,23 +34,29 @@
         });
         const avgEff = countEff ? (sumEff / countEff) : null;
       %>
-      <div class="grid-stats">
-        <div class="stat-card stat-card--gradient stat-card--blue">
-          <div class="stat-card__label">Empleados activos</div>
-          <div class="stat-card__value"><%= totalAsignados %></div>
-          <div class="stat-card__sub">asignados ahora</div>
-        </div>
-        <div class="stat-card stat-card--gradient stat-card--green">
-          <div class="stat-card__label">Eficiencia promedio</div>
-          <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
-          <div class="stat-card__sub">hoy</div>
-        </div>
-        <div class="stat-card stat-card--gradient stat-card--indigo">
-          <div class="stat-card__label">Registros de hoy</div>
-          <div class="stat-card__value"><%= metricas.length %></div>
-          <div class="stat-card__sub">slots capturados</div>
-        </div>
+        <div class="grid-stats page--encargado">
+      <div class="stat-card stat-card--empleados">
+        <div class="stat-card__label">Empleados activos</div>
+        <div class="stat-card__value"><%= totalAsignados %></div>
+        <div class="stat-card__sub">asignados ahora</div>
+        <div class="stat-card__pulse"></div>
       </div>
+
+      <div class="stat-card stat-card--eficiencia">
+        <div class="stat-card__label">Eficiencia promedio</div>
+        <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
+        <div class="stat-card__sub">hoy</div>
+        <div class="stat-card__pulse"></div>
+      </div>
+
+      <div class="stat-card stat-card--registros">
+        <div class="stat-card__label">Registros de hoy</div>
+        <div class="stat-card__value"><%= metricas.length %></div>
+        <div class="stat-card__sub">slots capturados</div>
+        <div class="stat-card__pulse"></div>
+      </div>
+    </div>
+
 
       <% if (metricas.length > 0) { %>
         <%
@@ -85,9 +90,13 @@
         </div>
       <% } %>
 
-      <div class="card">
+      <div class="card card--asignaciones">
         <div class="card__header">
-          <span class="card__title">Asignaciones activas</span>
+          <div class="card__header-left">
+            <span class="card__title">Asignaciones activas</span>
+          <span class="badge badge--none"><%= asignaciones.length %> activas</span>
+          </div>
+
           <a href="/encargado/asignar" class="btn btn--ghost btn--sm">
             <svg class="icon"><use href="#icon-assign"/></svg>
             Gestionar
@@ -95,24 +104,34 @@
         </div>
 
         <% if (!asignaciones.length) { %>
-          <div class="empty"><p class="empty__text">Sin asignaciones activas.</p></div>
+          <div class="empty empty--asignaciones">
+            <p class="empty__text">Sin asignaciones activas.</p>
+            <p class="empty__sub">Cuando asignes personal, aparecerán aquí en tiempo real.</p>
+          </div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap table-wrap--asignaciones">
+            <table class="table table--asignaciones">
               <thead>
                 <tr>
                   <th>Empleado</th>
-                  <th>Area</th>
+                  <th>Área</th>
                   <th class="td-hide-mobile">Subtarea</th>
                   <th class="td-hide-mobile">Modelo</th>
                   <th>Desde</th>
                 </tr>
               </thead>
+
               <tbody>
                 <% asignaciones.forEach(a => { %>
                   <tr>
-                    <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                    <td><%= a.area?.nombre %></td>
+                    <td>
+                      <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
+                    </td>
+
+                    <td>
+                      <span class="badge badge--none"><%= a.area?.nombre %></span>
+                    </td>
+
                     <td class="td-hide-mobile"><%= a.subtarea?.nombre %></td>
                     <td class="td-hide-mobile"><%= a.modelo?.nombre %></td>
                     <td class="td-mono"><%= fmtDate(a.createdAt) %></td>
@@ -123,7 +142,6 @@
           </div>
         <% } %>
       </div>
-
     </div>
   </div>
 </body>

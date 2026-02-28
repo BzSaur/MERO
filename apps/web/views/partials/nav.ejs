@@ -5,7 +5,20 @@
   </a>
 
   <% if (user) { %>
-    <button class="nav__toggle" onclick="document.querySelector('.nav__links').classList.toggle('open'); this.classList.toggle('open')" aria-label="Menu">
+    <button
+      type="button"
+      class="nav__toggle"
+      aria-label="Menu"
+      aria-expanded="false"
+      onclick="
+        (function(btn){
+          const nav = btn.closest('.nav');
+          const links = nav.querySelector('.nav__links');
+          links.classList.toggle('open');
+          btn.classList.toggle('open');
+          btn.setAttribute('aria-expanded', links.classList.contains('open') ? 'true' : 'false');
+        })(this)
+      ">
       <svg class="icon"><use href="#icon-menu"/></svg>
     </button>
 
@@ -29,36 +42,31 @@
 
       <% if (user.rol === 'ADMIN') { %>
         <li>
-          <a href="/admin"
-             class="<%= currentUrl === '/admin' ? 'active' : '' %>">
+          <a href="/admin" class="<%= currentUrl === '/admin' ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-dashboard"/></svg>
             Admin
           </a>
         </li>
         <li>
-          <a href="/admin/usuarios"
-             class="<%= currentUrl.startsWith('/admin/usuarios') ? 'active' : '' %>">
+          <a href="/admin/usuarios" class="<%= currentUrl.startsWith('/admin/usuarios') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-users"/></svg>
             Usuarios
           </a>
         </li>
         <li>
-          <a href="/admin/empleados"
-             class="<%= currentUrl.startsWith('/admin/empleados') ? 'active' : '' %>">
+          <a href="/admin/empleados" class="<%= currentUrl.startsWith('/admin/empleados') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-person"/></svg>
             Empleados
           </a>
         </li>
         <li>
-          <a href="/admin/catalogos/areas"
-             class="<%= currentUrl.startsWith('/admin/catalogos') ? 'active' : '' %>">
+          <a href="/admin/catalogos/areas" class="<%= currentUrl.startsWith('/admin/catalogos') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-catalog"/></svg>
             Catalogos
           </a>
         </li>
         <li>
-          <a href="/admin/auditoria"
-             class="<%= currentUrl.startsWith('/admin/auditoria') ? 'active' : '' %>">
+          <a href="/admin/auditoria" class="<%= currentUrl.startsWith('/admin/auditoria') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-audit"/></svg>
             Auditoria
           </a>
@@ -67,15 +75,13 @@
 
       <% if (user.rol === 'CONSULTOR' || user.rol === 'ADMIN') { %>
         <li>
-          <a href="/consultor"
-             class="<%= currentUrl === '/consultor' ? 'active' : '' %>">
+          <a href="/consultor" class="<%= currentUrl === '/consultor' ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-chart"/></svg>
             Metricas
           </a>
         </li>
         <li>
-          <a href="/consultor/historico"
-             class="<%= currentUrl.startsWith('/consultor/historico') ? 'active' : '' %>">
+          <a href="/consultor/historico" class="<%= currentUrl.startsWith('/consultor/historico') ? 'active' : '' %>">
             <svg class="icon"><use href="#icon-history"/></svg>
             Historico
           </a>
@@ -85,10 +91,57 @@
 
     <div class="nav__end">
       <span class="nav__user"><%= user.nombre %></span>
-      <a href="/logout" class="nav__logout">
-        <svg class="icon"><use href="#icon-logout"/></svg>
-        Salir
-      </a>
+     <a href="/logout" class="nav__logout" id="logoutBtn">
+      <svg class="icon"><use href="#icon-logout"/></svg>
+      Salir
+    </a>
     </div>
   <% } %>
 </nav>
+
+<script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script defer src="/js/nav.js?v=1"></script>
+<script>
+(function(){
+  const nav = document.querySelector('.nav');
+  if(!nav) return;
+
+  const linksWrap = nav.querySelector('.nav__links');
+  if(!linksWrap) return;
+
+  const links = Array.from(linksWrap.querySelectorAll('a'));
+  if(!links.length) return;
+
+  function setPillTo(el, show=true){
+    const wrapRect = linksWrap.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const x = (r.left - wrapRect.left);
+    const w = r.width;
+
+    linksWrap.style.setProperty('--pill-x', x + 'px');
+    linksWrap.style.setProperty('--pill-w', w + 'px');
+    linksWrap.style.setProperty('--pill-visible', show ? '1' : '0');
+  }
+
+  function getActive(){
+    return linksWrap.querySelector('a.active') || links[0];
+  }
+
+  // Inicial: ir al activo
+  const active = getActive();
+  setPillTo(active, true);
+
+  // Recalcular en resize (por fuentes/zoom)
+  window.addEventListener('resize', () => setPillTo(getActive(), true), { passive:true });
+
+  // Hover/focus: mover indicador
+  links.forEach(a => {
+    a.addEventListener('mouseenter', () => setPillTo(a, true));
+    a.addEventListener('focus', () => setPillTo(a, true));
+    a.addEventListener('click', () => setPillTo(a, true)); // antes de navegar
+  });
+
+  // Al salir: volver al activo
+  linksWrap.addEventListener('mouseleave', () => setPillTo(getActive(), true));
+})();
+</script>

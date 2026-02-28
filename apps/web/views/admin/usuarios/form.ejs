@@ -7,7 +7,7 @@
   <%- include('../../partials/icons') %>
   <%- include('../../partials/nav') %>
 
-  <div class="page">
+  <div class="page page--asignar page--usuarios">
     <div class="container">
 
       <div class="page-header">
@@ -22,10 +22,19 @@
 
       <%- include('../../partials/flash') %>
 
-      <div style="max-width: 480px">
-        <div class="card">
-          <form method="POST" action="<%= usuario ? `/admin/usuarios/${usuario.id}` : '/admin/usuarios' %>">
+      <div style="max-width: 720px">
+        <div class="card card--asignar">
+          <div class="card__header">
+            <span class="card__title"><%= usuario ? 'Editar usuario' : 'Nuevo usuario' %></span>
+            <span class="badge badge--ok"><%= usuario ? 'EDITAR' : 'NUEVO' %></span>
+          </div>
 
+          <!-- Form principal -->
+          <form
+            id="userForm"
+            method="POST"
+            action="<%= usuario ? `/admin/usuarios/${usuario.id}` : '/admin/usuarios' %>"
+          >
             <div class="form-group">
               <label class="form-label" for="nombre">Nombre completo</label>
               <input
@@ -75,19 +84,42 @@
                 <% }) %>
               </select>
             </div>
-
-            <div style="display:flex; gap:var(--gap-sm)">
-              <button type="submit" class="btn btn--primary">
-                <svg class="icon"><use href="#icon-check"/></svg>
-                <%= usuario ? 'Guardar cambios' : 'Crear usuario' %>
-              </button>
-              <a href="/admin/usuarios" class="btn btn--ghost">Cancelar</a>
-            </div>
           </form>
+
+          <!-- Form eliminar (solo editar) -->
+          <% if (usuario) { %>
+            <form
+              id="deleteUserForm"
+              method="POST"
+              action="/admin/usuarios/<%= usuario.id %>/eliminar"
+              data-confirm-delete="1"
+              data-user-name="<%= usuario?.nombre || 'este usuario' %>"
+            ></form>
+          <% } %>
+
+          <!-- Botonera -->
+          <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap">
+            <button type="submit" class="btn btn--primary" form="userForm">
+              <svg class="icon"><use href="#icon-check"/></svg>
+              <%= usuario ? 'Guardar cambios' : 'Crear usuario' %>
+            </button>
+
+            <a href="/admin/usuarios" class="btn btn--ghost">Cancelar</a>
+
+            <% if (usuario) { %>
+              <button type="submit" class="btn btn--danger" form="deleteUserForm" style="margin-left:auto">
+                Eliminar
+              </button>
+            <% } %>
+          </div>
+
         </div>
       </div>
 
     </div>
   </div>
+
+  <%- include('../../partials/appModal') %>
+  <script src="/js/alerts.js" defer></script>
 </body>
 </html>
