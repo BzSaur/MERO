@@ -3,81 +3,110 @@
 <head>
   <%- include('../../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
+  <!-- SVG sprite (necesario para <use href="#icon-...">) -->
   <%- include('../../partials/icons') %>
-  <%- include('../../partials/nav') %>
 
-  <div class="page page--asignar">
-    <div class="container">
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <%- include('../../partials/sidebar') %>
 
-      <div class="page-header">
-        <div>
-          <h1>Modelos</h1>
-          <p class="page-header__sub"><h4>SKUs de producto</p></h4>
-        </div>
-        <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
-          <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Areas</a>
-          <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
-          <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estandares</a>
-        </div>
-      </div>
+    <!-- Main -->
+    <div class="main-content">
+      <!-- Navbar -->
+      <%- include('../../partials/navbar') %>
 
-      <%- include('../../partials/flash') %>
+      <main class="content">
+        <div class="page page--asignar">
+          <div class="container">
 
-      <div class="grid-2" style="align-items:start">
+            <div class="page-header">
+              <div>
+                <h1>Modelos</h1>
+                <p class="page-header__sub">SKUs de producto</p>
+              </div>
 
-        <div class="card card--asignar">
-          <div class="card__header">
-            <span class="card__title">Nuevo modelo</span>
+              <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
+                <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Áreas</a>
+                <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
+                <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estándares</a>
+              </div>
+            </div>
+
+            <%- include('../../partials/flash') %>
+
+            <div class="grid-2" style="align-items:start">
+
+              <div class="card card--asignar">
+                <div class="card__header">
+                  <span class="card__title">Nuevo modelo</span>
+                </div>
+
+                <form method="POST" action="/admin/catalogos/modelos">
+                  <div class="form-group">
+                    <label class="form-label" for="nombre">Nombre / SKU</label>
+                    <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Fiberhome">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="descripcion">Descripción</label>
+                    <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
+                  </div>
+
+                  <button type="submit" class="btn btn--primary">
+                    <svg class="icon"><use href="#icon-plus"/></svg>
+                    Crear modelo
+                  </button>
+                </form>
+              </div>
+
+              <div class="card card--asignar card--asignar-act">
+                <div class="card__header">
+                  <span class="card__title">Modelos registrados</span>
+                  <span class="badge badge--ok"><%= modelos.length %></span>
+                </div>
+
+                <% if (!modelos.length) { %>
+                  <div class="empty empty--asignar">
+                    <p class="empty__text">Sin modelos registrados.</p>
+                  </div>
+                <% } else { %>
+                  <div class="table-wrap table-wrap--asignar">
+                    <table class="table table--asignar">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Nombre</th>
+                          <th>Descripción</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <% modelos.forEach(m => { %>
+                          <tr>
+                            <td class="td-mono"><%= m.id %></td>
+                            <td><%= m.nombre %></td>
+                            <td style="color:var(--ink-dim)"><%= m.descripcion || '—' %></td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                <% } %>
+              </div>
+
+            </div>
           </div>
-          <form method="POST" action="/admin/catalogos/modelos">
-            <div class="form-group">
-              <label class="form-label" for="nombre">Nombre / SKU</label>
-              <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Fiberhome">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="descripcion">Descripción</label>
-              <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
-            </div>
-            <button type="submit" class="btn btn--primary">
-              <svg class="icon"><use href="#icon-plus"/></svg>
-              Crear modelo
-            </button>
-          </form>
         </div>
-
-        <div class="card card--asignar card--asignar-act">
-          <div class="card__header">
-            <span class="card__title">Modelos registrados</span>
-            <span class="badge badge--ok"><%= modelos.length %></span>
-          </div>
-
-          <% if (!modelos.length) { %>
-            <div class="empty empty--asignar">
-              <p class="empty__text">Sin modelos registrados.</p>
-            </div>
-          <% } else { %>
-            <div class="table-wrap table-wrap--asignar">
-              <table class="table table--asignar">
-                <thead>
-                  <tr><th>#</th><th>Nombre</th><th>Descripción</th></tr>
-                </thead>
-                <tbody>
-                  <% modelos.forEach(m => { %>
-                    <tr>
-                      <td class="td-mono"><%= m.id %></td>
-                      <td><%= m.nombre %></td>
-                      <td style="color:var(--ink-dim)"><%= m.descripcion || '—' %></td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
-          <% } %>
-        </div>
-
-      </div>
+      </main>
     </div>
   </div>
+
+  <!-- Overlay para mobile (si tu main.js lo usa) -->
+  <div id="sidebarOverlay"></div>
+
+  <!-- JS del layout -->
+  <script src="/js/main.js"></script>
 </body>
 </html>

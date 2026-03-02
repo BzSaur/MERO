@@ -1,0 +1,103 @@
+<%
+  // Evita crash si no mandan currentPath (por ejemplo en /errors/500)
+  const _currentPath =
+    (typeof currentPath !== 'undefined' && currentPath) ||
+    (typeof locals !== 'undefined' && locals.currentPath) ||
+    (typeof req !== 'undefined' && req.path) ||
+    '';
+%>
+
+<!-- Sidebar Drawer -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="/" class="sidebar-brand">
+      <img src="/img/logo_ram.png" alt="Logo" class="sidebar-brand-logo">
+      <span>MERO</span>
+    </a>
+
+    <button class="btn-icon text-white" id="sidebarClose" type="button" title="Cerrar menú" aria-label="Cerrar menú">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-body">
+    <ul class="sidebar-nav">
+
+      <!-- Encargado -->
+      <li class="nav-item">
+        <a href="/encargado" class="nav-link <%= _currentPath === '/encargado' ? 'active' : '' %>">
+          <i class="bi bi-speedometer2"></i>
+          <span>Panel Encargado</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/encargado/asignar" class="nav-link <%= _currentPath.startsWith('/encargado/asignar') ? 'active' : '' %>">
+          <i class="bi bi-qr-code-scan"></i>
+          <span>Asignaciones</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/encargado/captura" class="nav-link <%= _currentPath.startsWith('/encargado/captura') ? 'active' : '' %>">
+          <i class="bi bi-clipboard-check"></i>
+          <span>Captura</span>
+        </a>
+      </li>
+
+      <!-- Consultor -->
+      <li class="nav-item">
+        <a href="/consultor" class="nav-link <%= _currentPath === '/consultor' ? 'active' : '' %>">
+          <i class="bi bi-graph-up"></i>
+          <span>Métricas (Hoy)</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/consultor/historico" class="nav-link <%= _currentPath.startsWith('/consultor/historico') ? 'active' : '' %>">
+          <i class="bi bi-clock-history"></i>
+          <span>Histórico</span>
+        </a>
+      </li>
+
+      <!-- Administración -->
+      <% if (typeof hasRole === 'function' && hasRole('ADMIN', 'SuperAdministrador', 'SUPER_ADMIN')) { %>
+        <li class="nav-item has-submenu">
+          <a href="javascript:void(0)"
+             class="nav-link submenu-toggle <%= _currentPath.startsWith('/admin') ? 'active' : '' %>">
+            <i class="bi bi-gear"></i>
+            <span>Administración</span>
+            <i class="bi bi-chevron-down submenu-arrow"></i>
+          </a>
+
+          <ul class="sidebar-submenu <%= _currentPath.startsWith('/admin') ? 'show' : '' %>">
+            <li>
+              <a href="/admin/usuarios" class="<%= _currentPath.startsWith('/admin/usuarios') ? 'active' : '' %>">
+                <i class="bi bi-person-gear"></i> Usuarios
+              </a>
+            </li>
+
+            <li>
+              <a href="/admin/empleados" class="<%= _currentPath.startsWith('/admin/empleados') ? 'active' : '' %>">
+                <i class="bi bi-people"></i> Empleados
+              </a>
+            </li>
+
+            <li>
+              <a href="/admin/catalogos/areas" class="<%= _currentPath.startsWith('/admin/catalogos') ? 'active' : '' %>">
+                <i class="bi bi-folder"></i> Catálogos
+              </a>
+            </li>
+
+            <li>
+              <a href="/admin/auditoria" class="<%= _currentPath.startsWith('/admin/auditoria') ? 'active' : '' %>">
+                <i class="bi bi-shield-check"></i> Auditoría
+              </a>
+            </li>
+          </ul>
+        </li>
+      <% } %>
+
+    </ul>
+  </div>
+</nav>

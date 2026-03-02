@@ -1,0 +1,85 @@
+/* =========================
+   Dashboard layout (VITA-like)
+   ========================= */
+.dash-grid{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--gap);
+  align-items:start;
+}
+
+.dash-stats{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.card__header--split{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.card__body{
+  padding: var(--gap);
+}
+
+.dash-kpi{
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dash-sub{
+  color: var(--ink-dim);
+  margin-top: .25rem;
+  font-size: .9rem;
+}
+
+/* =========================
+   Quick Actions (VITA style)
+   ========================= */
+.quick-actions{
+  padding: var(--gap);
+  display:flex;
+  flex-direction:column;
+  gap: .65rem;
+}
+
+.quick-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  text-decoration:none;
+  font-weight:700;
+  padding:.7rem .9rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--wire);
+  background: transparent;
+  color: var(--ink);
+  transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.quick-btn i{ font-size: 1rem; }
+
+.quick-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(0,0,0,.08);
+}
+
+/* color variants */
+.quick-btn.is-blue  { border-color:#2f6bff; color:#2f6bff; }
+.quick-btn.is-cyan  { border-color:#00bcd4; color:#00bcd4; }
+.quick-btn.is-green { border-color:#2e9b5f; color:#2e9b5f; }
+.quick-btn.is-amber { border-color:#ff9800; color:#ff9800; }
+.quick-btn.is-gray  { border-color:#7b8794; color:#56606b; }
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 1100px){
+  .dash-grid{ grid-template-columns: 1fr; }
+  .dash-stats{ grid-template-columns: 1fr; }
+  .dash-side{ order: 2; }
+}

@@ -30,11 +30,26 @@ app.use(session({
 // ─── Flash ───
 app.use(flash());
 
-// ─── Template helpers & globals ───
+// ─── Globals / Helpers (ANTES de rutas) ───
 app.use((req, res, next) => {
-  res.locals.user       = req.session.user || null;
-  res.locals.flash      = req.flash();
-  res.locals.currentUrl = req.path;
+  // App name para footer
+  res.locals.appName = process.env.APP_NAME || 'MERO';
+
+  // Sesión user
+  res.locals.user = req.session?.user || null;
+
+  // Flash
+  res.locals.flash = req.flash();
+
+  // Para links activos en sidebar/navbar
+  res.locals.currentPath = req.path;
+
+  // Roles helper (ajusta si tu user guarda rol en otra propiedad)
+  res.locals.hasRole = (...roles) => {
+    const u = res.locals.user;
+    const userRole = (u?.rol || u?.Rol || u?.role || '').toString().toUpperCase();
+    return roles.map(r => String(r).toUpperCase()).includes(userRole);
+  };
 
   // Slot efficiency → CSS modifier
   res.locals.slotClass = (eff) => {

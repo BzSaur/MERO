@@ -3,112 +3,128 @@
 <head>
   <%- include('../../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
   <%- include('../../partials/icons') %>
-  <%- include('../../partials/nav') %>
 
-  <div class="page page--usuarios">
-    <div class="container">
+  <div class="wrapper">
+    <%- include('../../partials/sidebar') %>
 
-      <div class="page-header page-header--usuarios">
-        <div>
-          <h1>Usuarios</h1>
-          <p><h3>Cuentas de acceso al sistema</p></h3>
-        </div>
-        <a href="/admin/usuarios/nuevo" class="btn btn--primary">
-          <svg class="icon"><use href="#icon-plus"/></svg>
-          Nuevo usuario
-        </a>
-      </div>
+    <div class="main-content">
+      <%- include('../../partials/navbar') %>
 
-      <%- include('../../partials/flash') %>
+      <main class="content">
+        <div class="page page--usuarios">
+          <div class="container">
 
-      <div class="card card--usuarios">
-
-        <% if (!usuarios.length) { %>
-          <div class="empty empty--usuarios">
-            <p class="empty__text">Sin usuarios registrados.</p>
-          </div>
-        <% } else { %>
-
-          <div class="users-controls users-controls--light" style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);">
-            <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
-              <div style="min-width: 220px;">
-                <label class="form-label" for="rolFilter" style="margin-bottom:.35rem;">Filtrar por rol</label>
-                <select class="form-control" id="rolFilter">
-                  <option value="ALL">Todos</option>
-                  <option value="ADMIN">Administrador</option>
-                  <option value="ENCARGADO">Encargado</option>
-                  <option value="CONSULTOR">Consultor</option>
-                </select>
+            <div class="page-header page-header--usuarios">
+              <div>
+                <h1>Usuarios</h1>
+                <p class="page-header__sub">Cuentas de acceso al sistema</p>
               </div>
 
-              <div style="min-width: 260px;">
-                <label class="form-label" for="sortFilter" style="margin-bottom:.35rem;">Orden</label>
-                <select class="form-control" id="sortFilter">
-                  <option value="NEW">Creados recientemente</option>
-                  <option value="OLD">Más antiguos</option>
-                </select>
-              </div>
-
-              <button type="button" class="btn btn--ghost" id="resetFilters" style="margin-top: 1.55rem;">
-                Limpiar
-              </button>
+              <a href="/admin/usuarios/nuevo" class="btn btn--primary">
+                <svg class="icon"><use href="#icon-plus"/></svg>
+                Nuevo usuario
+              </a>
             </div>
 
-            <span class="badge badge--none" id="usersCount" style="margin-top: 1.55rem;">0 usuarios</span>
+            <%- include('../../partials/flash') %>
+
+            <div class="card card--usuarios">
+              <% if (!usuarios.length) { %>
+                <div class="empty empty--usuarios">
+                  <p class="empty__text">Sin usuarios registrados.</p>
+                </div>
+              <% } else { %>
+
+                <div
+                  class="users-controls users-controls--light"
+                  style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);"
+                >
+                  <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
+                    <div style="min-width: 220px;">
+                      <label class="form-label" for="rolFilter" style="margin-bottom:.35rem;">Filtrar por rol</label>
+                      <select class="form-control" id="rolFilter">
+                        <option value="ALL">Todos</option>
+                        <option value="ADMIN">Administrador</option>
+                        <option value="ENCARGADO">Encargado</option>
+                        <option value="CONSULTOR">Consultor</option>
+                      </select>
+                    </div>
+
+                    <div style="min-width: 260px;">
+                      <label class="form-label" for="sortFilter" style="margin-bottom:.35rem;">Orden</label>
+                      <select class="form-control" id="sortFilter">
+                        <option value="NEW">Creados recientemente</option>
+                        <option value="OLD">Más antiguos</option>
+                      </select>
+                    </div>
+
+                    <button type="button" class="btn btn--ghost" id="resetFilters" style="margin-top: 1.55rem;">
+                      Limpiar
+                    </button>
+                  </div>
+
+                  <span class="badge badge--none" id="usersCount" style="margin-top: 1.55rem;">0 usuarios</span>
+                </div>
+
+                <div class="table-wrap table-wrap--usuarios">
+                  <table class="table table--usuarios" id="usersTable">
+                    <thead>
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Creado</th>
+                        <th>Editar</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="usersTbody">
+                      <% usuarios.forEach(u => { %>
+                        <tr
+                          data-rol="<%= u.rol %>"
+                          data-created="<%= (new Date(u.createdAt)).getTime() %>"
+                        >
+                          <td><%= u.nombre %></td>
+
+                          <td class="td-mono"><%= u.email %></td>
+
+                          <td>
+                            <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
+                              <%= u.rol %>
+                            </span>
+                          </td>
+
+                          <td class="td-mono"><%= fmtDate(u.createdAt) %></td>
+
+                          <td>
+                            <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
+                              <svg class="icon"><use href="#icon-edit"/></svg>
+                              Editar
+                            </a>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+
+              <% } %>
+            </div>
+
           </div>
-
-          <div class="table-wrap table-wrap--usuarios">
-            <table class="table table--usuarios" id="usersTable">
-            <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Creado</th>
-              <th>Editar</th>
-            </tr>
-          </thead>
-
-          <tbody id="usersTbody">
-            <% usuarios.forEach(u => { %>
-              <tr
-                data-rol="<%= u.rol %>"
-                data-created="<%= (new Date(u.createdAt)).getTime() %>"
-              >
-                <td><%= u.nombre %></td>
-
-                <td class="td-mono"><%= u.email %></td>
-
-                <td>
-                  <span class="badge <%= u.rol === 'ADMIN' ? 'badge--warn' : u.rol === 'ENCARGADO' ? 'badge--ok' : 'badge--none' %>">
-                    <%= u.rol %>
-                  </span>
-                </td>
-
-                <td class="td-mono"><%= fmtDate(u.createdAt) %></td>
-
-                <td>
-                  <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
-                    <svg class="icon"><use href="#icon-edit"/></svg>
-                    Editar
-                  </a>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-            </table>
-          </div>
-
-        <% } %>
-      </div>
-
+        </div>
+      </main>
     </div>
   </div>
 
+  <div id="sidebarOverlay"></div>
 
   <%- include('../../partials/appModal') %>
+
+  <script src="/js/main.js"></script>
   <script src="/js/alerts.js" defer></script>
   <script src="/js/usuarios.js" defer></script>
 </body>

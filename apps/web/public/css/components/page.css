@@ -1160,3 +1160,52 @@ table.table--usuarios tbody tr:hover td{
 .page--encargado .card--metrics-empty .empty__sub{
   color: rgba(255,255,255,.60);
 }
+/* ===== Dashboard layout tipo VITA ===== */
+.dash-grid{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--gap);
+  align-items:start;
+}
+
+.dash-main{ min-width: 0; }
+.dash-side{ min-width: 0; }
+
+@media (max-width: 1024px){
+  .dash-grid{ grid-template-columns: 1fr; }
+}
+
+/* ===== Acciones rápidas estilo VITA ===== */
+.quick-actions-vita{
+  padding: var(--gap);
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+
+.quick-actions-vita .qa{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration:none;
+  background:#fff;
+  border: 1px solid var(--wire);
+  transition: transform .05s ease, box-shadow .15s ease;
+}
+
+.quick-actions-vita .qa:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+
+.quick-actions-vita .qa i{ font-size: 1.05rem; }
+
+.quick-actions-vita .qa--blue{  border-color:#2f6bff; color:#2f6bff; }
+.quick-actions-vita .qa--cyan{  border-color:#00a6ff; color:#00a6ff; }
+.quick-actions-vita .qa--green{ border-color:#22a06b; color:#22a06b; }
+.quick-actions-vita .qa--amber{ border-color:#f2a900; color:#f2a900; }
+.quick-actions-vita .qa--gray{  border-color:#6b7280; color:#374151; }

@@ -3,161 +3,179 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
   <%- include('../partials/icons') %>
-  <%- include('../partials/nav') %>
 
-  <div class="page page--asignar page--auditoria">
-    <div class="container">
+  <div class="wrapper">
+    <%- include('../partials/sidebar') %>
 
-      <div class="page-header">
-        <div>
-          <h1>Histórico</h1>
-          <p class="page-header__sub">Consulta de eficiencia por rango de fechas</p>
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
+
+      <main class="content">
+        <div class="page page--asignar page--auditoria">
+          <div class="container">
+
+            <div class="page-header">
+              <div>
+                <h1>Histórico</h1>
+                <p class="page-header__sub">Consulta de eficiencia por rango de fechas</p>
+              </div>
+
+              <a href="/consultor" class="btn btn--ghost">
+                <svg class="icon"><use href="#icon-back"/></svg>
+                Hoy
+              </a>
+            </div>
+
+            <%- include('../partials/flash') %>
+
+            <%# ── Filtros ── %>
+            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
+                <span class="card__title">Filtros</span>
+              </div>
+
+              <form method="GET" action="/consultor/historico">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Desde</label>
+                    <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Hasta</label>
+                    <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Área</label>
+                    <select class="form-control" name="areaId">
+                      <option value="">Todas</option>
+                      <% areas.forEach(a => { %>
+                        <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Subtarea</label>
+                    <select class="form-control" name="subtareaId">
+                      <option value="">Todas</option>
+                      <% subtareas.forEach(s => { %>
+                        <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Modelo</label>
+                    <select class="form-control" name="modeloId">
+                      <option value="">Todos</option>
+                      <% modelos.forEach(m => { %>
+                        <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="align-self:flex-end">
+                    <button type="submit" class="btn btn--primary">
+                      <svg class="icon"><use href="#icon-filter"/></svg>
+                      Buscar
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <%# ── Resumen ── %>
+            <% if (capturas.length > 0) { %>
+              <%
+                let sumEff = 0, countEff = 0, sumReal = 0;
+                capturas.forEach(c => {
+                  if (c.eficiencia != null) { sumEff += Number(c.eficiencia); countEff++; }
+                  if (c.cantidadReal != null) sumReal += Number(c.cantidadReal);
+                });
+                const avgEff = countEff ? (sumEff / countEff) : null;
+              %>
+
+              <div class="grid-stats" style="margin-bottom:var(--gap-lg)">
+                <div class="stat-card stat-card--gradient stat-card--blue">
+                  <div class="stat-card__label">Eficiencia promedio</div>
+                  <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
+                </div>
+
+                <div class="stat-card stat-card--gradient stat-card--green">
+                  <div class="stat-card__label">Total producido</div>
+                  <div class="stat-card__value"><%= sumReal.toLocaleString('es-MX') %></div>
+                  <div class="stat-card__sub">unidades</div>
+                </div>
+
+                <div class="stat-card stat-card--gradient stat-card--indigo">
+                  <div class="stat-card__label">Registros</div>
+                  <div class="stat-card__value"><%= capturas.length %></div>
+                </div>
+              </div>
+            <% } %>
+
+            <%# ── Tabla ── %>
+            <div class="card card--asignar card--asignar-act">
+              <div class="card__header">
+                <span class="card__title">Resultados</span>
+                <span class="badge badge--ok"><%= capturas.length %></span>
+              </div>
+
+              <% if (!capturas.length) { %>
+                <div class="empty empty--asignar">
+                  <p class="empty__text">Sin registros para el período seleccionado.</p>
+                </div>
+              <% } else { %>
+                <div class="table-wrap table-wrap--asignar">
+                  <table class="table table--asignar">
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Slot</th>
+                        <th>Área</th>
+                        <th class="td-hide-mobile">Subtarea</th>
+                        <th class="td-hide-mobile">Modelo</th>
+                        <th class="td-hide-mobile">Real</th>
+                        <th class="td-hide-mobile">Estándar</th>
+                        <th>Eficiencia</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <% capturas.forEach(c => { %>
+                        <tr>
+                          <td class="td-mono"><%= c.fecha || '—' %></td>
+                          <td class="td-mono"><%= c.slotHora != null ? c.slotHora + ':00' : '—' %></td>
+                          <td><%= c.areaNombre || c.area?.nombre || '—' %></td>
+                          <td class="td-hide-mobile"><%= c.subtareaNombre || c.subtarea?.nombre || '—' %></td>
+                          <td class="td-hide-mobile"><%= c.modeloNombre || c.modelo?.nombre || '—' %></td>
+                          <td class="td-mono td-hide-mobile"><%= c.cantidadReal %></td>
+                          <td class="td-mono td-hide-mobile"><%= c.cantidadEstandar ?? '—' %></td>
+                          <td>
+                            <span class="eff-value <%= effClass(c.eficiencia) %>">
+                              <%= fmtEff(c.eficiencia) %>
+                            </span>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
+            </div>
+
+          </div>
         </div>
-        <a href="/consultor" class="btn btn--ghost">
-          <svg class="icon"><use href="#icon-back"/></svg>
-          Hoy
-        </a>
-      </div>
-
-      <%- include('../partials/flash') %>
-
-      <%# ── Filtros ── %>
-      <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
-        <div class="card__header">
-          <span class="card__title">Filtros</span>
-        </div>
-
-        <form method="GET" action="/consultor/historico">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Desde</label>
-              <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Hasta</label>
-              <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Área</label>
-              <select class="form-control" name="areaId">
-                <option value="">Todas</option>
-                <% areas.forEach(a => { %>
-                  <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
-                <% }) %>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Subtarea</label>
-              <select class="form-control" name="subtareaId">
-                <option value="">Todas</option>
-                <% subtareas.forEach(s => { %>
-                  <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
-                <% }) %>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Modelo</label>
-              <select class="form-control" name="modeloId">
-                <option value="">Todos</option>
-                <% modelos.forEach(m => { %>
-                  <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
-                <% }) %>
-              </select>
-            </div>
-
-            <div class="form-group" style="align-self:flex-end">
-              <button type="submit" class="btn btn--primary">
-                <svg class="icon"><use href="#icon-filter"/></svg>
-                Buscar
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <%# ── Resumen ── %>
-      <% if (capturas.length > 0) { %>
-        <%
-          let sumEff = 0, countEff = 0, sumReal = 0;
-          capturas.forEach(c => {
-            if (c.eficiencia != null) { sumEff += Number(c.eficiencia); countEff++; }
-            if (c.cantidadReal != null) sumReal += Number(c.cantidadReal);
-          });
-          const avgEff = countEff ? (sumEff / countEff) : null;
-        %>
-        <div class="grid-stats" style="margin-bottom:var(--gap-lg)">
-          <div class="stat-card stat-card--gradient stat-card--blue">
-            <div class="stat-card__label">Eficiencia promedio</div>
-            <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
-          </div>
-          <div class="stat-card stat-card--gradient stat-card--green">
-            <div class="stat-card__label">Total producido</div>
-            <div class="stat-card__value"><%= sumReal.toLocaleString('es-MX') %></div>
-            <div class="stat-card__sub">unidades</div>
-          </div>
-          <div class="stat-card stat-card--gradient stat-card--indigo">
-            <div class="stat-card__label">Registros</div>
-            <div class="stat-card__value"><%= capturas.length %></div>
-          </div>
-        </div>
-      <% } %>
-
-      <%# ── Tabla ── %>
-      <div class="card card--asignar card--asignar-act">
-        <div class="card__header">
-          <span class="card__title">Resultados</span>
-          <span class="badge badge--ok"><%= capturas.length %></span>
-        </div>
-
-        <% if (!capturas.length) { %>
-          <div class="empty empty--asignar">
-            <p class="empty__text">Sin registros para el período seleccionado.</p>
-          </div>
-        <% } else { %>
-          <div class="table-wrap table-wrap--asignar">
-            <table class="table table--asignar">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Slot</th>
-                  <th>Area</th>
-                  <th class="td-hide-mobile">Subtarea</th>
-                  <th class="td-hide-mobile">Modelo</th>
-                  <th class="td-hide-mobile">Real</th>
-                  <th class="td-hide-mobile">Estandar</th>
-                  <th>Eficiencia</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% capturas.forEach(c => { %>
-                  <tr>
-                    <td class="td-mono"><%= c.fecha || '—' %></td>
-                    <td class="td-mono"><%= c.slotHora != null ? c.slotHora + ':00' : '—' %></td>
-                    <td><%= c.areaNombre || c.area?.nombre || '—' %></td>
-                    <td class="td-hide-mobile"><%= c.subtareaNombre || c.subtarea?.nombre || '—' %></td>
-                    <td class="td-hide-mobile"><%= c.modeloNombre || c.modelo?.nombre || '—' %></td>
-                    <td class="td-mono td-hide-mobile"><%= c.cantidadReal %></td>
-                    <td class="td-mono td-hide-mobile"><%= c.cantidadEstandar ?? '—' %></td>
-                    <td>
-                      <span class="eff-value <%= effClass(c.eficiencia) %>">
-                        <%= fmtEff(c.eficiencia) %>
-                      </span>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        <% } %>
-      </div>
-
+      </main>
     </div>
   </div>
+
+  <div id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
 </body>
 </html>

@@ -3,179 +3,196 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
   <%- include('../partials/icons') %>
-  <%- include('../partials/nav') %>
 
-  <div class="page page--asignar">
-    <div class="container">
+  <div class="wrapper">
+    <%- include('../partials/sidebar') %>
 
-      <div class="page-header">
-        <div>
-          <h1>Asignaciones</h1>
-          <p class="page-header__sub"><h4>Escanea el QR del empleado para asignarlo a un área</p></h4>
-        </div>
-        <a href="/encargado" class="btn btn--ghost">
-          <svg class="icon"><use href="#icon-back"/></svg>
-          Volver
-        </a>
-      </div>
+    <div class="main-content">
+      <%- include('../partials/navbar') %>
 
-      <%- include('../partials/flash') %>
+      <main class="content">
+        <div class="page page--asignar">
+          <div class="container">
 
-      <div class="grid-2" style="align-items:start">
-
-        <%# ── Formulario scan QR ── %>
-        <div class="card card--asignar">
-          <div class="card__header">
-            <span class="card__title">Escanear QR</span>
-          </div>
-
-          <form method="POST" action="/encargado/asignar/scan">
-
-            <div class="form-group">
-              <label class="form-label" for="uuidQr">UUID del empleado</label>
-              <input
-                class="form-control mono"
-                type="text"
-                id="uuidQr"
-                name="uuidQr"
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                required
-                autofocus
-              >
-              <small style="color:var(--ink-dim); display:block; margin-top:.35rem">
-                Escanea con lector QR o ingresa el UUID manualmente
-              </small>
-            </div>
-
-            <button type="button" class="btn btn--ghost" id="btnScanCam">Escanear con cámara</button>
-
-            <!-- Modal cámara -->
-            <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); place-items:center; z-index:9999;">
-              <div style="background:#fff; padding:16px; border-radius:12px; width:min(640px, 92vw);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <strong>Escanear QR</strong>
-                  <button type="button" class="btn btn--ghost" id="btnCloseQr">Cerrar</button>
-                </div>
-                <video id="qrVideo" style="width:100%; margin-top:12px;" playsinline></video>
-                <small style="display:block; margin-top:8px; color:#666;">Si no te pide permisos, revisa permisos de cámara del navegador.</small>
+            <div class="page-header">
+              <div>
+                <h1>Asignaciones</h1>
+                <p class="page-header__sub">Escanea el QR del empleado para asignarlo a un área</p>
               </div>
+
+              <a href="/encargado" class="btn btn--ghost">
+                <svg class="icon"><use href="#icon-back"/></svg>
+                Volver
+              </a>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="areaId">Área destino</label>
-              <select class="form-control" id="areaId" name="areaId" required>
-                <option value="">— Seleccionar área —</option>
-                <% (areas || []).forEach(a => { %>
-                  <option value="<%= a.id %>"><%= a.nombre %></option>
-                <% }) %>
-              </select>
+            <%- include('../partials/flash') %>
+
+            <div class="grid-2" style="align-items:start">
+
+              <%# ── Formulario scan QR ── %>
+              <div class="card card--asignar">
+                <div class="card__header">
+                  <span class="card__title">Escanear QR</span>
+                </div>
+
+                <form method="POST" action="/encargado/asignar/scan">
+
+                  <div class="form-group">
+                    <label class="form-label" for="uuidQr">UUID del empleado</label>
+                    <input
+                      class="form-control mono"
+                      type="text"
+                      id="uuidQr"
+                      name="uuidQr"
+                      placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                      required
+                      autofocus
+                    >
+                    <small style="color:var(--ink-dim); display:block; margin-top:.35rem">
+                      Escanea con lector QR o ingresa el UUID manualmente
+                    </small>
+                  </div>
+
+                  <button type="button" class="btn btn--ghost" id="btnScanCam">Escanear con cámara</button>
+
+                  <!-- Modal cámara -->
+                  <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); place-items:center; z-index:9999;">
+                    <div style="background:#fff; padding:16px; border-radius:12px; width:min(640px, 92vw);">
+                      <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>Escanear QR</strong>
+                        <button type="button" class="btn btn--ghost" id="btnCloseQr">Cerrar</button>
+                      </div>
+                      <video id="qrVideo" style="width:100%; margin-top:12px;" playsinline></video>
+                      <small style="display:block; margin-top:8px; color:#666;">
+                        Si no te pide permisos, revisa permisos de cámara del navegador.
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="areaId">Área destino</label>
+                    <select class="form-control" id="areaId" name="areaId" required>
+                      <option value="">— Seleccionar área —</option>
+                      <% (areas || []).forEach(a => { %>
+                        <option value="<%= a.id %>"><%= a.nombre %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="subtareaId">Subtarea</label>
+                    <select class="form-control" id="subtareaId" name="subtareaId" required>
+                      <option value="">— Seleccionar subtarea —</option>
+                      <% (subtareas || []).forEach(s => { %>
+                        <option value="<%= s.id %>" data-area="<%= s.areaId %>"><%= s.nombre %></option>
+                      <% }) %>
+                    </select>
+                    <small style="color:var(--ink-dim); display:block; margin-top:.35rem">
+                      Se muestran solo subtareas que corresponden al área elegida.
+                    </small>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="modeloId">Modelo</label>
+                    <select class="form-control" id="modeloId" name="modeloId" required>
+                      <option value="">— Seleccionar modelo —</option>
+                      <% (modelos || []).forEach(m => { %>
+                        <option value="<%= m.id %>"><%= m.nombreSku || m.nombre || m.id %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn--primary">
+                    <svg class="icon"><use href="#icon-qr"/></svg>
+                    Asignar
+                  </button>
+                </form>
+              </div>
+
+              <%# ── Asignaciones activas ── %>
+              <div class="card card--asignar card--asignar-act">
+                <div class="card__header">
+                  <span class="card__title">Activas ahora</span>
+                  <span class="badge badge--ok"><%= (asignaciones || []).length %> empleados</span>
+                </div>
+
+                <% if (!asignaciones.length) { %>
+                  <div class="empty empty--asignar">
+                    <p class="empty__text">Sin asignaciones activas.</p>
+                  </div>
+                <% } else { %>
+                  <div class="table-wrap table-wrap--asignar">
+                    <table class="table table--asignar">
+                      <thead>
+                        <tr>
+                          <th>Empleado</th>
+                          <th>Área</th>
+                          <th>Desde</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <% (asignaciones || []).forEach(a => { %>
+                          <tr>
+                            <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
+                            <td><%= a.area?.nombre || a.areaId || '—' %></td>
+
+                            <td class="td-mono">
+                              <%
+                                let desde = '—';
+                                if (a.fecha && a.horaInicio) {
+                                  const d = new Date(a.fecha);
+                                  const m = String(a.horaInicio).match(/^(\d{1,2}):(\d{2})$/);
+                                  if (!isNaN(d.getTime()) && m) {
+                                    d.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0);
+                                    desde = d.toLocaleString('es-MX', {
+                                      timeZone: 'America/Mexico_City',
+                                      year: 'numeric',
+                                      month: '2-digit',
+                                      day: '2-digit',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    });
+                                  }
+                                } else if (a.createdAt) {
+                                  const d2 = new Date(a.createdAt);
+                                  if (!isNaN(d2.getTime())) {
+                                    desde = d2.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
+                                  }
+                                }
+                              %>
+                              <%= desde %>
+                            </td>
+
+                            <td>
+                              <form method="POST" action="/encargado/asignar/<%= a.id %>/finalizar" style="display:inline">
+                                <button type="submit" class="btn btn--ghost btn--sm">Finalizar</button>
+                              </form>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                <% } %>
+              </div>
+
             </div>
-
-            <div class="form-group">
-              <label class="form-label" for="subtareaId">Subtarea</label>
-              <select class="form-control" id="subtareaId" name="subtareaId" required>
-                <option value="">— Seleccionar subtarea —</option>
-                <% (subtareas || []).forEach(s => { %>
-                  <option value="<%= s.id %>" data-area="<%= s.areaId %>"><%= s.nombre %></option>
-                <% }) %>
-              </select>
-              <small style="color:var(--ink-dim); display:block; margin-top:.35rem">
-                Se muestran solo subtareas que corresponden al área elegida.
-              </small>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="modeloId">Modelo</label>
-              <select class="form-control" id="modeloId" name="modeloId" required>
-                <option value="">— Seleccionar modelo —</option>
-                <% (modelos || []).forEach(m => { %>
-                  <option value="<%= m.id %>"><%= m.nombreSku || m.nombre || m.id %></option>
-                <% }) %>
-              </select>
-            </div>
-
-            <button type="submit" class="btn btn--primary">
-              <svg class="icon"><use href="#icon-qr"/></svg>
-              Asignar
-            </button>
-          </form>
-        </div>
-
-        <%# ── Asignaciones activas ── %>
-        <div class="card card--asignar card--asignar-act">
-          <div class="card__header">
-            <span class="card__title">Activas ahora</span>
-            <span class="badge badge--ok"><%= (asignaciones || []).length %> empleados</span>
           </div>
-
-          <% if (!asignaciones.length) { %>
-            <div class="empty empty--asignar">
-              <p class="empty__text">Sin asignaciones activas.</p>
-            </div>
-          <% } else { %>
-            <div class="table-wrap table-wrap--asignar">
-              <table class="table table--asignar">
-                <thead>
-                  <tr>
-                    <th>Empleado</th>
-                    <th>Área</th>
-                    <th>Desde</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% (asignaciones || []).forEach(a => { %>
-                    <tr>
-                      <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                      <td><%= a.area?.nombre || a.areaId || '—' %></td>
-
-                      <!-- Desde = fecha + horaInicio (guardado como HH:mm en BD) -->
-                      <td class="td-mono">
-                        <%
-                          let desde = '—';
-                          if (a.fecha && a.horaInicio) {
-                            const d = new Date(a.fecha);
-                            const m = String(a.horaInicio).match(/^(\d{1,2}):(\d{2})$/);
-                            if (!isNaN(d.getTime()) && m) {
-                              d.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0);
-                              desde = d.toLocaleString('es-MX', {
-                                timeZone: 'America/Mexico_City',
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              });
-                            }
-                          } else if (a.createdAt) {
-                            // Fallback si por alguna razón no viene fecha/horaInicio
-                            const d2 = new Date(a.createdAt);
-                            if (!isNaN(d2.getTime())) {
-                              desde = d2.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
-                            }
-                          }
-                        %>
-                        <%= desde %>
-                      </td>
-
-                      <td>
-                        <form method="POST" action="/encargado/asignar/<%= a.id %>/finalizar" style="display:inline">
-                          <button type="submit" class="btn btn--ghost btn--sm">Finalizar</button>
-                        </form>
-                      </td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
-          <% } %>
         </div>
-
-      </div>
+      </main>
     </div>
   </div>
+
+  <div id="sidebarOverlay"></div>
+
+  <!-- JS del layout -->
+  <script src="/js/main.js"></script>
 
   <script>
     // Filtrar subtareas por área
@@ -196,7 +213,7 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-    <script>
+  <script>
     const btn = document.getElementById('btnScanCam');
     const modal = document.getElementById('qrModal');
     const closeBtn = document.getElementById('btnCloseQr');
@@ -242,7 +259,7 @@
         return;
       }
 
-      // Fallback: jsQR (requiere leer pixeles del video con canvas)
+      // Fallback: jsQR
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
 

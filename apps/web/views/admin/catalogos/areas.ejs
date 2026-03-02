@@ -3,91 +3,124 @@
 <head>
   <%- include('../../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
+  <!-- SVG sprite (necesario para <use href="#icon-...">) -->
   <%- include('../../partials/icons') %>
-  <%- include('../../partials/nav') %>
 
-  <div class="page page--asignar">
-    <div class="container">
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <%- include('../../partials/sidebar') %>
 
-      <div class="page-header">
-        <div>
-          <h1>Áreas</h1>
-          <p class="page-header__sub"><h4>Zonas de producción</p></h4>
-        </div>
-        <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
-          <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
-          <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
-          <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estandares</a>
-        </div>
-      </div>
+    <!-- Main -->
+    <div class="main-content">
+      <!-- Navbar -->
+      <%- include('../../partials/navbar') %>
 
-      <%- include('../../partials/flash') %>
+      <main class="content">
+        <div class="page page--asignar">
+          <div class="container">
 
-      <div class="grid-2" style="align-items:start">
+            <div class="page-header">
+              <div>
+                <h1>Áreas</h1>
+                <p class="page-header__sub">Zonas de producción</p>
+              </div>
 
-        <%# ── Formulario nueva area ── %>
-        <div class="card card--asignar">
-          <div class="card__header">
-            <span class="card__title">Nueva área</span>
+              <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
+                <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
+                <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
+                <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estándares</a>
+              </div>
+            </div>
+
+            <%- include('../../partials/flash') %>
+
+            <div class="grid-2" style="align-items:start">
+
+              <%# ── Formulario nueva area ── %>
+              <div class="card card--asignar">
+                <div class="card__header">
+                  <span class="card__title">Nueva área</span>
+                </div>
+
+                <form method="POST" action="/admin/catalogos/areas">
+                  <div class="form-group">
+                    <label class="form-label" for="nombre">Nombre</label>
+                    <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Laboratorio Test">
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="descripcion">Descripción</label>
+                    <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
+                  </div>
+
+                  <button type="submit" class="btn btn--primary">
+                    <svg class="icon"><use href="#icon-plus"/></svg>
+                    Crear área
+                  </button>
+                </form>
+              </div>
+
+              <%# ── Listado ── %>
+              <div class="card card--asignar card--asignar-act">
+                <div class="card__header">
+                  <span class="card__title">Áreas registradas</span>
+                  <span class="badge badge--ok"><%= areas.length %></span>
+                </div>
+
+                <% if (!areas.length) { %>
+                  <div class="empty empty--asignar">
+                    <p class="empty__text">Sin áreas registradas.</p>
+                  </div>
+                <% } else { %>
+                  <div class="table-wrap table-wrap--asignar">
+                    <table class="table table--asignar">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Nombre</th>
+                          <th>Descripción</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <% areas.forEach(a => { %>
+                          <tr>
+                            <td class="td-mono"><%= a.id %></td>
+                            <td><%= a.nombre %></td>
+                            <td><%= a.descripcion || '—' %></td>
+                            <td>
+                              <form
+                                method="POST"
+                                action="/admin/catalogos/areas/<%= a.id %>/eliminar"
+                                onsubmit="return confirm('¿Eliminar área «<%= a.nombre %>»?')"
+                              >
+                                <button type="submit" class="btn btn--danger btn--sm" title="Eliminar">
+                                  <svg class="icon"><use href="#icon-trash"/></svg>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      </tbody>
+                    </table>
+                  </div>
+                <% } %>
+              </div>
+
+            </div>
           </div>
-          <form method="POST" action="/admin/catalogos/areas">
-            <div class="form-group">
-              <label class="form-label" for="nombre">Nombre</label>
-              <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Laboratorio Test">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="descripcion">Descripción</label>
-              <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
-            </div>
-            <button type="submit" class="btn btn--primary">
-              <svg class="icon"><use href="#icon-plus"/></svg>
-              Crear área
-            </button>
-          </form>
         </div>
-
-        <%# ── Listado ── %>
-        <div class="card card--asignar card--asignar-act">
-          <div class="card__header">
-            <span class="card__title">Áreas registradas</span>
-            <span class="badge badge--ok"><%= areas.length %></span>
-          </div>
-
-          <% if (!areas.length) { %>
-            <div class="empty empty--asignar">
-              <p class="empty__text">Sin áreas registradas.</p>
-            </div>
-          <% } else { %>
-            <div class="table-wrap table-wrap--asignar">
-              <table class="table table--asignar">
-                <thead>
-                  <tr><th>#</th><th>Nombre</th><th>Descripción</th><th></th></tr>
-                </thead>
-                <tbody>
-                  <% areas.forEach(a => { %>
-                    <tr>
-                      <td class="td-mono"><%= a.id %></td>
-                      <td><%= a.nombre %></td>
-                      <td><%= a.descripcion || '—' %></td>
-                      <td>
-                        <form method="POST" action="/admin/catalogos/areas/<%= a.id %>/eliminar"
-                              onsubmit="return confirm('¿Eliminar área «<%= a.nombre %>»?')">
-                          <button type="submit" class="btn btn--danger btn--sm">
-                            <svg class="icon"><use href="#icon-trash"/></svg>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            </div>
-          <% } %>
-        </div>
-
-      </div>
+      </main>
     </div>
   </div>
+
+  <!-- Overlay para mobile (si tu main.js lo usa) -->
+  <div id="sidebarOverlay"></div>
+
+  <!-- JS del layout -->
+  <script src="/js/main.js"></script>
 </body>
 </html>

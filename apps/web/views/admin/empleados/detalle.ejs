@@ -3,224 +3,243 @@
 <head>
   <%- include('../../partials/head') %>
 </head>
-<body>
+
+<body class="sidebar-collapsed">
   <%- include('../../partials/icons') %>
-  <%- include('../../partials/nav') %>
 
-  <div class="page">
-    <div class="container">
+  <div class="wrapper">
+    <%- include('../../partials/sidebar') %>
 
-      <div class="page-header">
-        <div>
-          <h1><%= empleado.nombre %> <%= empleado.apellidos || '' %></h1>
-          <p class="page-header__sub">
-            ID VITA: <%= empleado.idVita %>
-            <% if (empleado.activo) { %>
-              &nbsp;<span class="badge badge--ok">Activo</span>
-            <% } else { %>
-              &nbsp;<span class="badge badge--fail">Inactivo</span>
-            <% } %>
-          </p>
-        </div>
-        <a href="/admin/empleados" class="btn btn--ghost">
-          <svg class="icon"><use href="#icon-back"/></svg>
-          Regresar
-        </a>
-      </div>
+    <div class="main-content">
+      <%- include('../../partials/navbar') %>
 
-      <%- include('../../partials/flash') %>
+      <main class="content">
+        <div class="page">
+          <div class="container">
 
-      <!-- Cards -->
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:var(--gap);">
-
-        <div class="card">
-          <div class="card__header">
-            <span class="card__title">
-              <svg class="icon"><use href="#icon-person"/></svg>
-              Datos del Empleado
-            </span>
-          </div>
-          <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-            <div>
-              <small style="color:var(--ink-muted)">Nombre Completo</small>
-              <div><strong><%= empleado.nombre %> <%= empleado.apellidos || '' %></strong></div>
-            </div>
-            <div>
-              <small style="color:var(--ink-muted)">ID VITA</small>
-              <div style="font-family:var(--font-mono)"><%= empleado.idVita %></div>
-            </div>
-            <% if (empleado.vita?.email) { %>
-            <div>
-              <small style="color:var(--ink-muted)">
-                <svg class="icon" style="width:14px;height:14px"><use href="#icon-mail"/></svg>
-                Email Corporativo
-              </small>
-              <div><%= empleado.vita.email %></div>
-            </div>
-            <% } %>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__header">
-            <span class="card__title">
-              <svg class="icon"><use href="#icon-briefcase"/></svg>
-              Información Laboral (VITA)
-            </span>
-          </div>
-          <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-            <div>
-              <small style="color:var(--ink-muted)">Puesto</small>
-              <div><strong><%= empleado.vita?.puesto || '—' %></strong></div>
-            </div>
-            <div>
-              <small style="color:var(--ink-muted)">Área</small>
-              <div><strong><%= empleado.vita?.area || '—' %></strong></div>
-            </div>
-            <div>
-              <small style="color:var(--ink-muted)">
-                <svg class="icon" style="width:14px;height:14px"><use href="#icon-calendar"/></svg>
-                Fecha de Ingreso
-              </small>
+            <div class="page-header">
               <div>
-                <strong>
-                  <%= empleado.vita?.fechaIngreso
-                    ? new Date(empleado.vita.fechaIngreso).toLocaleDateString('es-MX')
-                    : '—' %>
-                </strong>
+                <h1><%= empleado.nombre %> <%= empleado.apellidos || '' %></h1>
+                <p class="page-header__sub">
+                  ID VITA: <%= empleado.idVita %>
+                  <% if (empleado.activo) { %>
+                    &nbsp;<span class="badge badge--ok">Activo</span>
+                  <% } else { %>
+                    &nbsp;<span class="badge badge--fail">Inactivo</span>
+                  <% } %>
+                </p>
               </div>
+
+              <a href="/admin/empleados" class="btn btn--ghost">
+                <svg class="icon"><use href="#icon-back"/></svg>
+                Regresar
+              </a>
             </div>
-            <% if (empleado.vita?.fechaIngreso) { %>
-            <div>
-              <small style="color:var(--ink-muted)">Antigüedad</small>
-              <div>
-                <%
-                  const ingreso = new Date(empleado.vita.fechaIngreso);
-                  const hoy = new Date();
-                  let anos = hoy.getFullYear() - ingreso.getFullYear();
-                  let meses = hoy.getMonth() - ingreso.getMonth();
-                  if (meses < 0) { anos--; meses += 12; }
-                  if (hoy.getDate() < ingreso.getDate()) {
-                    meses--;
-                    if (meses < 0) { anos--; meses += 12; }
-                  }
-                %>
-                <strong><%= anos %> año<%= anos !== 1 ? 's' : '' %>, <%= meses %> mes<%= meses !== 1 ? 'es' : '' %></strong>
+
+            <%- include('../../partials/flash') %>
+
+            <!-- Cards -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:var(--gap);">
+
+              <div class="card">
+                <div class="card__header">
+                  <span class="card__title">
+                    <svg class="icon"><use href="#icon-person"/></svg>
+                    Datos del Empleado
+                  </span>
+                </div>
+                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
+                  <div>
+                    <small style="color:var(--ink-muted)">Nombre Completo</small>
+                    <div><strong><%= empleado.nombre %> <%= empleado.apellidos || '' %></strong></div>
+                  </div>
+                  <div>
+                    <small style="color:var(--ink-muted)">ID VITA</small>
+                    <div style="font-family:var(--font-mono)"><%= empleado.idVita %></div>
+                  </div>
+
+                  <% if (empleado.vita?.email) { %>
+                    <div>
+                      <small style="color:var(--ink-muted)">
+                        <svg class="icon" style="width:14px;height:14px"><use href="#icon-mail"/></svg>
+                        Email Corporativo
+                      </small>
+                      <div><%= empleado.vita.email %></div>
+                    </div>
+                  <% } %>
+                </div>
               </div>
-            </div>
-            <% } %>
-          </div>
-        </div>
 
-        <div class="card">
-          <div class="card__header">
-            <span class="card__title">
-              <svg class="icon"><use href="#icon-qr"/></svg>
-              Código QR
-            </span>
-          </div>
-          <div style="padding:var(--gap); display:flex; flex-direction:column; align-items:center; gap:var(--gap-sm);">
-            <img src="/admin/empleados/<%= empleado.id %>/qr"
-                 alt="QR <%= empleado.nombre %>"
-                 style="width:200px; height:200px; border:1px solid var(--wire); border-radius:var(--r-sm); padding:8px; background:#fff;">
-            <small style="color:var(--ink-muted); font-family:var(--font-mono); font-size:0.75em; word-break:break-all; text-align:center">
-              <%= empleado.uuidQr %>
-            </small>
-            <a href="/admin/empleados/<%= empleado.id %>/qr-download"
-               class="btn btn--primary btn--sm" download>
-              <svg class="icon"><use href="#icon-qr"/></svg>
-              Descargar QR
-            </a>
-          </div>
-        </div>
+              <div class="card">
+                <div class="card__header">
+                  <span class="card__title">
+                    <svg class="icon"><use href="#icon-briefcase"/></svg>
+                    Información Laboral (VITA)
+                  </span>
+                </div>
+                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
+                  <div>
+                    <small style="color:var(--ink-muted)">Puesto</small>
+                    <div><strong><%= empleado.vita?.puesto || '—' %></strong></div>
+                  </div>
+                  <div>
+                    <small style="color:var(--ink-muted)">Área</small>
+                    <div><strong><%= empleado.vita?.area || '—' %></strong></div>
+                  </div>
+                  <div>
+                    <small style="color:var(--ink-muted)">
+                      <svg class="icon" style="width:14px;height:14px"><use href="#icon-calendar"/></svg>
+                      Fecha de Ingreso
+                    </small>
+                    <div>
+                      <strong>
+                        <%= empleado.vita?.fechaIngreso
+                          ? new Date(empleado.vita.fechaIngreso).toLocaleDateString('es-MX')
+                          : '—' %>
+                      </strong>
+                    </div>
+                  </div>
 
-        <div class="card">
-          <div class="card__header">
-            <span class="card__title">
-              <svg class="icon"><use href="#icon-logo"/></svg>
-              Estado en MERO
-            </span>
-          </div>
-          <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-            <div>
-              <small style="color:var(--ink-muted)">Estado</small>
-              <div>
-                <% if (empleado.activo) { %>
-                  <span class="badge badge--ok">Activo</span>
-                <% } else { %>
-                  <span class="badge badge--fail">Inactivo</span>
-                <% } %>
+                  <% if (empleado.vita?.fechaIngreso) { %>
+                    <div>
+                      <small style="color:var(--ink-muted)">Antigüedad</small>
+                      <div>
+                        <%
+                          const ingreso = new Date(empleado.vita.fechaIngreso);
+                          const hoy = new Date();
+                          let anos = hoy.getFullYear() - ingreso.getFullYear();
+                          let meses = hoy.getMonth() - ingreso.getMonth();
+                          if (meses < 0) { anos--; meses += 12; }
+                          if (hoy.getDate() < ingreso.getDate()) {
+                            meses--;
+                            if (meses < 0) { anos--; meses += 12; }
+                          }
+                        %>
+                        <strong><%= anos %> año<%= anos !== 1 ? 's' : '' %>, <%= meses %> mes<%= meses !== 1 ? 'es' : '' %></strong>
+                      </div>
+                    </div>
+                  <% } %>
+                </div>
               </div>
-            </div>
-            <div>
-              <small style="color:var(--ink-muted)">Registrado en MERO</small>
-              <div><%= new Date(empleado.createdAt).toLocaleDateString('es-MX') %></div>
-            </div>
-            <div>
-              <small style="color:var(--ink-muted)">Última actualización</small>
-              <div><%= new Date(empleado.updatedAt).toLocaleDateString('es-MX') %></div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Asignaciones recientes -->
-      <div class="card" style="margin-top:var(--gap)">
-        <div class="card__header">
-          <span class="card__title">
-            <svg class="icon"><use href="#icon-clock"/></svg>
-            Asignaciones Recientes
-          </span>
-        </div>
+              <div class="card">
+                <div class="card__header">
+                  <span class="card__title">
+                    <svg class="icon"><use href="#icon-qr"/></svg>
+                    Código QR
+                  </span>
+                </div>
+                <div style="padding:var(--gap); display:flex; flex-direction:column; align-items:center; gap:var(--gap-sm);">
+                  <img
+                    src="/admin/empleados/<%= empleado.id %>/qr"
+                    alt="QR <%= empleado.nombre %>"
+                    style="width:200px; height:200px; border:1px solid var(--wire); border-radius:var(--r-sm); padding:8px; background:#fff;"
+                  >
+                  <small style="color:var(--ink-muted); font-family:var(--font-mono); font-size:0.75em; word-break:break-all; text-align:center">
+                    <%= empleado.uuidQr %>
+                  </small>
+                  <a href="/admin/empleados/<%= empleado.id %>/qr-download" class="btn btn--primary btn--sm" download>
+                    <svg class="icon"><use href="#icon-qr"/></svg>
+                    Descargar QR
+                  </a>
+                </div>
+              </div>
 
-        <% if (!empleado.asignaciones || !empleado.asignaciones.length) { %>
-          <div class="empty">
-            <p class="empty__text">Este empleado no tiene asignaciones registradas.</p>
-          </div>
-        <% } else { %>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Área</th>
-                  <th class="td-hide-mobile">Subtarea</th>
-                  <th class="td-hide-mobile">Modelo</th>
-                  <th class="td-hide-mobile">Hora Inicio</th>
-                  <th class="td-hide-mobile">Hora Fin</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% empleado.asignaciones.forEach(a => { %>
-                  <tr>
-                    <td class="td-mono">
-                      <%= a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) : '—' %>
-                    </td>
-                    <td><%= a.areaId || '—' %></td>
-                    <td class="td-hide-mobile"><%= a.subtareaId || '—' %></td>
-                    <td class="td-hide-mobile"><%= a.modeloId || '—' %></td>
-
-                    <!-- horaInicio/horaFin son strings HH:mm -->
-                    <td class="td-hide-mobile td-mono"><%= a.horaInicio || '—' %></td>
-                    <td class="td-hide-mobile td-mono"><%= a.horaFin || '—' %></td>
-
-                    <td>
-                      <% if (a.activa) { %>
-                        <span class="badge badge--ok">Activa</span>
+              <div class="card">
+                <div class="card__header">
+                  <span class="card__title">
+                    <svg class="icon"><use href="#icon-logo"/></svg>
+                    Estado en MERO
+                  </span>
+                </div>
+                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
+                  <div>
+                    <small style="color:var(--ink-muted)">Estado</small>
+                    <div>
+                      <% if (empleado.activo) { %>
+                        <span class="badge badge--ok">Activo</span>
                       <% } else { %>
-                        <span class="badge badge--none">Finalizada</span>
+                        <span class="badge badge--fail">Inactivo</span>
                       <% } %>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
-        <% } %>
-      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <small style="color:var(--ink-muted)">Registrado en MERO</small>
+                    <div><%= new Date(empleado.createdAt).toLocaleDateString('es-MX') %></div>
+                  </div>
+                  <div>
+                    <small style="color:var(--ink-muted)">Última actualización</small>
+                    <div><%= new Date(empleado.updatedAt).toLocaleDateString('es-MX') %></div>
+                  </div>
+                </div>
+              </div>
 
+            </div>
+
+            <!-- Asignaciones recientes -->
+            <div class="card" style="margin-top:var(--gap)">
+              <div class="card__header">
+                <span class="card__title">
+                  <svg class="icon"><use href="#icon-clock"/></svg>
+                  Asignaciones Recientes
+                </span>
+              </div>
+
+              <% if (!empleado.asignaciones || !empleado.asignaciones.length) { %>
+                <div class="empty">
+                  <p class="empty__text">Este empleado no tiene asignaciones registradas.</p>
+                </div>
+              <% } else { %>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Área</th>
+                        <th class="td-hide-mobile">Subtarea</th>
+                        <th class="td-hide-mobile">Modelo</th>
+                        <th class="td-hide-mobile">Hora Inicio</th>
+                        <th class="td-hide-mobile">Hora Fin</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <% empleado.asignaciones.forEach(a => { %>
+                        <tr>
+                          <td class="td-mono">
+                            <%= a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) : '—' %>
+                          </td>
+
+                          <td><%= a.areaId || '—' %></td>
+                          <td class="td-hide-mobile"><%= a.subtareaId || '—' %></td>
+                          <td class="td-hide-mobile"><%= a.modeloId || '—' %></td>
+
+                          <td class="td-hide-mobile td-mono"><%= a.horaInicio || '—' %></td>
+                          <td class="td-hide-mobile td-mono"><%= a.horaFin || '—' %></td>
+
+                          <td>
+                            <% if (a.activa) { %>
+                              <span class="badge badge--ok">Activa</span>
+                            <% } else { %>
+                              <span class="badge badge--none">Finalizada</span>
+                            <% } %>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
+            </div>
+
+          </div>
+        </div>
+      </main>
     </div>
   </div>
+
+  <div id="sidebarOverlay"></div>
+  <script src="/js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,70 @@
+/* ============================================================
+   RESPONSIVE - Layout-specific breakpoints
+   Bootstrap 5 handles grid, display, and spacing responsiveness.
+   These rules only cover custom VITA layout elements.
+   ============================================================ */
+
+/* ---- Tablet (< 992px): Sidebar becomes drawer ---- */
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* ---- Mobile (< 768px): Compact spacing ---- */
+@media (max-width: 767.98px) {
+  .content-wrapper {
+    padding: 1rem;
+  }
+
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .page-title {
+    font-size: 1rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .card-header .btn {
+    width: 100%;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-icon {
+    font-size: 1.75rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ---- Small mobile (< 576px) ---- */
+@media (max-width: 575.98px) {
+  .content-wrapper {
+    padding: 0.75rem;
+  }
+
+  .stat-card .card-body {
+    padding: 1rem;
+  }
+}

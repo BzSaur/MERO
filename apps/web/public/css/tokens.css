@@ -13,9 +13,9 @@
   --wire:    #e5e7eb;
   --wire-hi: #d1d5db;
 
-  /* ── Primary accent (blue) ── */
-  --amber:    #3b82f6;
-  --amber-hi: #2563eb;
+  /* ── Primary accent (VITA/ERP style) ── */
+  --amber:    #1e3a8a;
+  --amber-hi: #1e40af;
   --amber-lo: #dbeafe;
 
   /* ── Signal (semantic) ── */
@@ -42,6 +42,8 @@
   --gap-sm: .5rem;
   --gap-lg: 1.5rem;
   --gap-xl: 2rem;
-  --nav-h:  56px;
-  --nav-bg: #0f172a;
+  /* ── App shell (VITA-like) ── */
+  --nav-h:  64px;       /* topbar height */
+  --nav-bg: #0f172a;    /* sidebar bg */
+  --sidebar-w: 260px;
 }

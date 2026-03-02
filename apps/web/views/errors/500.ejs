@@ -3,17 +3,47 @@
 <head>
   <%- include('../partials/head') %>
 </head>
-<body>
-  <%- include('../partials/icons') %>
-  <% if (user) { %><%- include('../partials/nav') %><% } %>
 
-  <div class="error-page">
-    <div class="error-code">500</div>
-    <p class="error-msg">Error interno del servidor.</p>
-    <a href="/" class="btn btn--ghost">
-      <svg class="icon"><use href="#icon-back"/></svg>
-      Volver al inicio
-    </a>
-  </div>
+<body class="<%= user ? 'sidebar-collapsed' : '' %>">
+  <%- include('../partials/icons') %>
+
+  <% if (user) { %>
+    <div class="wrapper">
+      <%- include('../partials/sidebar') %>
+
+      <div class="main-content">
+        <%- include('../partials/navbar') %>
+
+        <main class="content">
+          <div class="page">
+            <div class="container">
+              <div class="error-page">
+                <div class="error-code">500</div>
+                <p class="error-msg">Error interno del servidor.</p>
+
+                <a href="/" class="btn btn--ghost">
+                  <svg class="icon"><use href="#icon-back"/></svg>
+                  Volver al inicio
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div id="sidebarOverlay"></div>
+    <script src="/js/main.js"></script>
+  <% } else { %>
+    <div class="error-page">
+      <div class="error-code">500</div>
+      <p class="error-msg">Error interno del servidor.</p>
+
+      <a href="/" class="btn btn--ghost">
+        <svg class="icon"><use href="#icon-back"/></svg>
+        Volver al inicio
+      </a>
+    </div>
+  <% } %>
 </body>
 </html>
