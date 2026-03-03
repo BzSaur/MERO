@@ -17,6 +17,22 @@
   overflow: hidden;
 }
 
+/* Overlay para cerrar al dar click fuera */
+#sidebarOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1040;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+#sidebarOverlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Collapsed state: off-screen */
 body.sidebar-collapsed .sidebar {
   transform: translateX(-100%);
