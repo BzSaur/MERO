@@ -14,64 +14,81 @@
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--usuarios">
+        <!-- Hereda estilos de áreas -->
+        <div class="page page--asignar page--areas page--usuarios">
           <div class="container">
 
-            <div class="page-header page-header--usuarios">
+            <!-- Header -->
+            <div class="page-header">
               <div>
                 <h1>Usuarios</h1>
-                <p class="page-header__sub">Cuentas de acceso al sistema</p>
+                <h2><p class="page-header__sub">Cuentas de acceso al sistema</p></h2>
               </div>
 
-              <!-- ✅ Arriba derecha -->
-              <a href="/admin/usuarios/nuevo" class="btn btn--create">
-                <svg class="icon"><use href="#icon-plus"/></svg>
-                Nuevo usuario
-              </a>
+              <div class="tabs-actions">
+                <a href="/admin/usuarios/nuevo" class="btn btn--create btn--sm">
+                  <svg class="icon"><use href="#icon-plus"/></svg>
+                  Nuevo usuario
+                </a>
+              </div>
             </div>
 
             <%- include('../../partials/flash') %>
 
-            <div class="card card--usuarios">
-              <% if (!usuarios.length) { %>
-                <div class="empty empty--usuarios">
+            <!-- Card filtros -->
+            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
+                <h3><span class="card__title">Filtros</span></h3>
+              </div>
+
+              <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+                <div class="form-group users-controls__field">
+                  <label class="form-label" for="rolFilter">Filtrar por rol</label>
+                  <select class="form-control" id="rolFilter">
+                    <option value="ALL">Todos</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="ENCARGADO">Encargado</option>
+                    <option value="CONSULTOR">Consultor</option>
+                  </select>
+                </div>
+
+                <div class="form-group users-controls__field users-controls__field--wide">
+                  <label class="form-label" for="sortFilter">Orden</label>
+                  <select class="form-control" id="sortFilter">
+                    <option value="NEW">Creados recientemente</option>
+                    <option value="OLD">Más antiguos</option>
+                  </select>
+                </div>
+
+                <div class="form-group users-controls__actions">
+                  <button type="button" class="btn btn--ghost btn--sm" id="resetFilters">
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card tabla usuarios -->
+            <div class="card card--asignar card--asignar-act card--usuarios">
+              <div class="card__header card__header--usuarios">
+                <h3><span class="card__title">Usuarios registrados</span></h3>
+                <span class="badge badge--ok">
+                  <%= (Array.isArray(usuarios) ? usuarios.length : 0) %>
+                </span>
+              </div>
+
+              <%
+                const _usuarios = Array.isArray(usuarios) ? usuarios : [];
+              %>
+
+              <% if (!_usuarios.length) { %>
+                <div class="empty empty--asignar">
                   <p class="empty__text">Sin usuarios registrados.</p>
                 </div>
               <% } else { %>
 
-                <!-- ✅ Filtros con CSS (sin inline) -->
-                <div class="users-controls users-controls--light">
-                  <div class="users-controls__left">
-                    <div class="users-controls__field">
-                      <label class="form-label" for="rolFilter">Filtrar por rol</label>
-                      <select class="form-control" id="rolFilter">
-                        <option value="ALL">Todos</option>
-                        <option value="ADMIN">Administrador</option>
-                        <option value="ENCARGADO">Encargado</option>
-                        <option value="CONSULTOR">Consultor</option>
-                      </select>
-                    </div>
-
-                    <div class="users-controls__field users-controls__field--wide">
-                      <label class="form-label" for="sortFilter">Orden</label>
-                      <select class="form-control" id="sortFilter">
-                        <option value="NEW">Creados recientemente</option>
-                        <option value="OLD">Más antiguos</option>
-                      </select>
-                    </div>
-
-                    <div class="users-controls__actions">
-                      <button type="button" class="btn btn--ghost" id="resetFilters">
-                        Limpiar
-                      </button>
-                    </div>
-                  </div>
-
-                  <span class="badge badge--none users-controls__count" id="usersCount">0 usuarios</span>
-                </div>
-
-                <div class="table-wrap table-wrap--usuarios table-wrap--blue">
-                  <table class="table table--usuarios table--blue" id="usersTable">
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean" id="usersTable">
                     <thead>
                       <tr>
                         <th>Nombre</th>
@@ -83,7 +100,7 @@
                     </thead>
 
                     <tbody id="usersTbody">
-                      <% usuarios.forEach(u => { %>
+                      <% _usuarios.forEach(u => { %>
                         <tr
                           data-rol="<%= u.rol %>"
                           data-created="<%= (new Date(u.createdAt)).getTime() %>"

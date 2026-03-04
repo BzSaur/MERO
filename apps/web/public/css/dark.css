@@ -1,4 +1,63 @@
 /* ============================================================
+   Sweets Alerts
+   ============================================================ */
+/* ============================================================
+   FIX — SweetAlert2 en modo oscuro (incluye paneles inline #fff)
+   ============================================================ */
+
+html[data-theme="dark"] .swal2-popup{
+  background: rgba(2,6,23,.92) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 26px 70px rgba(0,0,0,.55) !important;
+}
+
+html[data-theme="dark"] .swal2-title{
+  color: rgba(226,232,240,.96) !important;
+}
+
+html[data-theme="dark"] .swal2-html-container,
+html[data-theme="dark"] .swal2-content{
+  color: rgba(226,232,240,.78) !important;
+}
+
+html[data-theme="dark"] .swal2-icon.swal2-info,
+html[data-theme="dark"] .swal2-icon.swal2-warning,
+html[data-theme="dark"] .swal2-icon.swal2-success,
+html[data-theme="dark"] .swal2-icon.swal2-error{
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+}
+
+/* Inputs dentro de SweetAlert */
+html[data-theme="dark"] .swal2-input,
+html[data-theme="dark"] .swal2-textarea,
+html[data-theme="dark"] .swal2-select{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  color: rgba(226,232,240,.96) !important;
+  box-shadow: none !important;
+}
+
+/* ⭐ Este bloque es el que arregla TUS paneles embebidos con background:#fff inline */
+html[data-theme="dark"] .swal2-popup div[style*="background:#fff"],
+html[data-theme="dark"] .swal2-popup div[style*="background: #fff"]{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: rgba(226,232,240,.92) !important;
+}
+
+/* Bordes inline que usas en paneles */
+html[data-theme="dark"] .swal2-popup div[style*="border:1px solid"]{
+  border-color: var(--dm-border-2) !important;
+}
+
+/* Botones (ya usas customClass con .btn) */
+html[data-theme="dark"] .swal2-actions .btn{
+  box-shadow: none !important;
+}
+
+
+
+/* ============================================================
    MERO — Dark Mode
    Se activa cuando el JS pone: <html data-theme="dark">
    Este archivo se carga AL FINAL en head.ejs para sobreescribir
@@ -221,4 +280,220 @@ html[data-theme="dark"] .btn--ghost:hover{
   background: rgba(255,255,255,.06) !important;
   border-color: var(--dm-border) !important;
   color: var(--dm-ink) !important;
+}
+
+
+/* ============================================================
+   FIX — Auditoría en modo oscuro (paneles blancos)
+   Depende de:
+   - filtro.css (headers/controls en #fff)
+   - tables.css (wrap/thead en #fff)
+   ============================================================ */
+
+html[data-theme="dark"] .page--auditoria .card--asignar,
+html[data-theme="dark"] .page--auditoria .card--asignar-act{
+  background: transparent !important; /* el “surface” lo damos abajo */
+  border: 0 !important;
+}
+
+/* Card headers (títulos “Filtros” / “Registros”) */
+html[data-theme="dark"] .page--auditoria .card--asignar .card__header,
+html[data-theme="dark"] .page--auditoria .card--asignar-act .card__header{
+  background: var(--dm-surface) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+/* Título */
+html[data-theme="dark"] .page--auditoria .card__title{
+  color: var(--dm-ink-soft) !important;
+}
+
+/* Caja de filtros (users-controls) */
+html[data-theme="dark"] .page--auditoria .users-controls{
+  background: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.28) !important;
+}
+
+/* Labels en filtros */
+html[data-theme="dark"] .page--auditoria .users-controls .form-label{
+  color: var(--dm-ink-soft) !important;
+}
+
+/* Inputs/select (por si algo los regresa a blanco) */
+html[data-theme="dark"] .page--auditoria .users-controls .form-control{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink) !important;
+}
+
+/* Botones de acciones (Filtrar / Limpiar) */
+html[data-theme="dark"] .page--auditoria .users-controls__actions .btn--edit{
+  background: rgba(59,130,246,.14) !important;
+  border-color: rgba(59,130,246,.32) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+html[data-theme="dark"] .page--auditoria .users-controls__actions .btn--ghost{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink-dim) !important;
+}
+
+/* Wrap de tabla (el azul lo vuelves oscuro) */
+html[data-theme="dark"] .page--auditoria .table-wrap--blue{
+  background: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border-2) !important;
+}
+
+/* Header de tabla */
+html[data-theme="dark"] .page--auditoria .table--auditoria thead th{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+/* Body de tabla */
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody td{
+  background: var(--dm-surface) !important;
+  color: var(--dm-ink) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+/* Zebra */
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+
+/* Hover */
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody tr:hover td{
+  background: rgba(59,130,246,.10) !important;
+}
+
+/* Pre JSON dentro de details (que combine con dark) */
+html[data-theme="dark"] .page--auditoria .pre-json{
+  background: rgba(2,6,23,.72) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+/* ============================================================
+   FIX — Áreas en modo oscuro (paneles blancos)
+   ============================================================ */
+
+html[data-theme="dark"] .page--areas .card{
+  background: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.28) !important;
+}
+
+/* Header blanco “Nueva área / Áreas registradas” */
+html[data-theme="dark"] .page--areas .card__header{
+  background: rgba(255,255,255,.03) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--areas .card__title{
+  color: var(--dm-ink-soft) !important;
+}
+
+/* Form strip (users-controls--light suele ser blanco) */
+html[data-theme="dark"] .page--areas .users-controls,
+html[data-theme="dark"] .page--areas .users-controls--light{
+  background: transparent !important; /* lo controla la card */
+  border: 0 !important;
+}
+
+/* Inputs / select */
+html[data-theme="dark"] .page--areas .form-label{
+  color: var(--dm-ink-soft) !important;
+}
+html[data-theme="dark"] .page--areas .form-control{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink) !important;
+}
+html[data-theme="dark"] .page--areas .form-control::placeholder{
+  color: rgba(226,232,240,.45) !important;
+}
+
+/* Tabs (Subtareas/Modelos/Estándares) */
+html[data-theme="dark"] .page--areas .tabs-actions .btn--ghost{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  color: var(--dm-ink-dim) !important;
+}
+html[data-theme="dark"] .page--areas .tabs-actions .btn--ghost:hover{
+  background: rgba(59,130,246,.10) !important;
+  border-color: rgba(59,130,246,.30) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+/* Table wrap clean */
+html[data-theme="dark"] .page--areas .table-wrap--clean{
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* Tabla clean */
+html[data-theme="dark"] .page--areas .table--clean{
+  background: transparent !important;
+}
+html[data-theme="dark"] .page--areas .table--clean thead th{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+html[data-theme="dark"] .page--areas .table--clean tbody td{
+  background: var(--dm-surface) !important;
+  color: var(--dm-ink) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+html[data-theme="dark"] .page--areas .table--clean tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+html[data-theme="dark"] .page--areas .table--clean tbody tr:hover td{
+  background: rgba(59,130,246,.10) !important;
+}
+
+/* Row actions */
+html[data-theme="dark"] .page--areas .row-actions .btn{
+  box-shadow: none !important;
+}
+
+
+/* ============================================================
+   FIX — Empty state (Sin ... registrados) en modo oscuro
+   Aplica para Estándares / Áreas / Subtareas / Modelos
+   ============================================================ */
+
+html[data-theme="dark"] .empty--asignar{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px dashed var(--dm-border-2) !important;
+  border-radius: 18px !important;
+  padding: 26px 18px !important;
+  margin: 16px !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 180px !important;
+}
+
+html[data-theme="dark"] .empty--asignar .empty__text{
+  color: rgba(226,232,240,.82) !important; /* más legible */
+  font-weight: 700 !important;
+  letter-spacing: .01em;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+/* Si por alguna razón el texto contiene <a> o hereda color link */
+html[data-theme="dark"] .empty--asignar .empty__text a{
+  color: rgba(219,234,254,.92) !important;
+  text-decoration: underline;
+}
+
+/* Título del card en dark para que no se apague */
+html[data-theme="dark"] .card__header .card__title{
+  color: rgba(226,232,240,.88) !important;
 }

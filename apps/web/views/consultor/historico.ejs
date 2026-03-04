@@ -20,7 +20,7 @@
             <div class="page-header">
               <div>
                 <h1>Histórico</h1>
-                <p class="page-header__sub">Consulta de eficiencia por rango de fechas</p>
+                <h2><p class="page-header__sub">Consulta de eficiencia por rango de fechas</p></h2>
               </div>
 
               <!-- mismo estilo que "Volver/Hoy" -->
@@ -35,22 +35,36 @@
             <!-- Filtros -->
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
-                <span class="card__title">Filtros</span>
+                <h3><span class="card__title">Filtros</span></h3>
               </div>
 
               <form method="GET" action="/consultor/historico">
-                <!-- ✅ aplica el formato de filtros -->
+                <!-- aplica el formato de filtros -->
                 <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
                   <div class="users-controls__left">
 
                     <div class="form-group users-controls__field">
                       <label class="form-label">Desde</label>
-                      <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
+                      <input
+                        class="form-control"
+                        type="date"
+                        name="desde"
+                        value="<%= filtros.desde || '' %>"
+                        required
+                        max="<%= new Date().toISOString().slice(0,10) %>"
+                      >
                     </div>
 
                     <div class="form-group users-controls__field">
                       <label class="form-label">Hasta</label>
-                      <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
+                      <input
+                        class="form-control"
+                        type="date"
+                        name="hasta"
+                        value="<%= filtros.hasta || '' %>"
+                        required
+                        max="<%= new Date().toISOString().slice(0,10) %>"
+                      >
                     </div>
 
                     <div class="form-group users-controls__field users-controls__field--wide">
@@ -84,11 +98,16 @@
                     </div>
 
                     <div class="form-group users-controls__actions">
-                      <!-- ✅ mismo look de botón -->
+                      <!-- Botón Buscar -->
                       <button type="submit" class="btn btn--edit">
                         <svg class="icon"><use href="#icon-filter"/></svg>
                         Buscar
                       </button>
+
+                      <!-- Botón Limpiar ya estilizado en CSS -->
+                      <a href="/consultor/historico" class="btn btn--ghost">
+                        Limpiar
+                      </a>
                     </div>
 
                   </div>
@@ -129,17 +148,15 @@
             <!-- Resultados -->
             <div class="card card--asignar card--asignar-act">
               <div class="card__header">
-                <span class="card__title">Resultados</span>
+                <h3><span class="card__title">Resultados</span> </h3>
                 <span class="badge badge--ok"><%= capturas.length %></span>
               </div>
 
               <% if (!capturas.length) { %>
-                <!-- ✅ esto ya toma el formato del “cuadro” de estándares -->
                 <div class="empty empty--asignar">
                   <p class="empty__text">Sin registros para el período seleccionado.</p>
                 </div>
               <% } else { %>
-                <!-- ✅ tabla azul -->
                 <div class="table-wrap table-wrap--asignar table-wrap--blue">
                   <table class="table table--asignar table--blue">
                     <thead>
@@ -187,5 +204,16 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+
+  <!-- Refuerzo JS para bloquear fechas futuras incluso si cambian el HTML -->
+  <script>
+    (function () {
+      const today = new Date().toISOString().slice(0,10);
+      const desde = document.querySelector('input[name="desde"]');
+      const hasta = document.querySelector('input[name="hasta"]');
+      if (desde) desde.max = today;
+      if (hasta) hasta.max = today;
+    })();
+  </script>
 </body>
 </html>

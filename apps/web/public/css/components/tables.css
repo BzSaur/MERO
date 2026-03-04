@@ -227,6 +227,8 @@
   }
 }
 
+
+
 /* =========================================================
    ✅ Color de Post, delete, patch etc (NO TOCAR)
    Se dejan igual para que NO se rompan tus badges
@@ -254,4 +256,225 @@
   background: rgba(220, 38, 38, .14);
   color: #b91c1c;
   border-color: rgba(220, 38, 38, .30);
+}
+
+
+/* =========================================================
+   Usuarios, roles
+   ========================================================= */
+   /* ==============================
+   FIX: Badges de ROL visibles (Usuarios)
+   ============================== */
+
+.page--usuarios .table td .badge,
+.page--usuarios .table th .badge{
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Asegura “pill” consistente (por si en clean se hereda raro) */
+.page--usuarios .badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .18rem .55rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: .72rem;
+  letter-spacing: .02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Contraste en modo claro (si alguna regla los deja “pálidos”) */
+:root:not([data-theme="dark"]) .page--usuarios .badge--none{
+  background: rgba(15,23,42,.08) !important;
+  color: rgba(15,23,42,.88) !important;
+}
+
+:root:not([data-theme="dark"]) .page--usuarios .badge--ok{
+  background: rgba(29,78,216,.12) !important;
+  color: rgba(30,58,138,.95) !important;
+}
+
+:root:not([data-theme="dark"]) .page--usuarios .badge--warn{
+  background: rgba(245,158,11,.18) !important;
+  color: rgba(124,45,18,.95) !important;
+}
+
+/* Centrado en la columna ROL para que se vea como antes (opcional) */
+.page--usuarios .table td:nth-child(3),
+.page--usuarios .table th:nth-child(3){
+  text-align: center;
+}
+
+/***************** Panel 17 */
+/* Header de 'Usuarios registrados' con contador pegado */
+.page--usuarios .card__header--usuarios {
+  display: flex;
+  align-items: center;
+  gap: 8px;              /* espacio entre título y badge */
+}
+
+/* El título sin margen extra para que se pegue bien */
+.page--usuarios .card__header--usuarios h3 {
+  margin: 0;
+}
+
+/* Opcional: hace el badge un poco más compacto */
+.page--usuarios .card__header--usuarios .badge {
+  margin-left: 0;
+  transform: translateY(-1px); /* lo alinea verticalmente un poquito mejor */
+}
+
+/* Usuarios: header como el de Áreas, integrado al card */
+.page--usuarios .card--asignar .card__header,
+.page--usuarios .card--asignar-act .card__header {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid rgba(15,23,42,.10);
+  background: #fff;
+}
+
+/* Alinea título + badge en una sola línea */
+.page--usuarios .card__header--usuarios {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page--usuarios .card__header--usuarios h3 {
+  margin: 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   ✅ RESPONSIVE GENERAL (SIN PERDER COLUMNAS) + COMPACTO EN MÓVIL
+   PONER AL FINAL DEL CSS GLOBAL
+   ========================================================= */
+
+/* Wrapper: scroll horizontal sin meter espacios raros */
+.table-wrap{
+  max-width: 100%;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Base tabla: evita layout inflado */
+.table-wrap > table,
+.table{
+  width: 100%;
+  table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* =========================================================
+   MÓVIL/TABLET: tabla normal + scroll, pero más compacta
+   ========================================================= */
+@media (max-width: 720px){
+
+  /* ✅ Respeta las tablas tipo cards */
+  .table--stack thead{ display:none !important; }
+  .table--stack,
+  .table--stack tbody,
+  .table--stack tr,
+  .table--stack td{
+    display:block !important;
+    width:100% !important;
+  }
+
+  /* ✅ Para TODO lo demás: fuerza tabla normal */
+  .table:not(.table--stack) thead,
+  table:not(.table--stack) thead{
+    display: table-header-group !important;
+  }
+  .table:not(.table--stack) tbody,
+  table:not(.table--stack) tbody{
+    display: table-row-group !important;
+  }
+  .table:not(.table--stack) tr,
+  table:not(.table--stack) tr{
+    display: table-row !important;
+  }
+  .table:not(.table--stack) th,
+  .table:not(.table--stack) td,
+  table:not(.table--stack) th,
+  table:not(.table--stack) td{
+    display: table-cell !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+
+    /* ✅ COMPACTO */
+    padding: .55rem .60rem !important;   /* antes .85 .95 */
+    font-size: .85rem !important;        /* antes .92 */
+    line-height: 1.2 !important;
+    vertical-align: middle;
+
+    /* ✅ Evita “huecos” por nowrap */
+    white-space: normal !important;      /* permite 2 líneas si hace falta */
+    word-break: break-word;
+  }
+
+  /* Header aún más compacto */
+  .table:not(.table--stack) thead th,
+  table:not(.table--stack) thead th{
+    font-size: .70rem !important;
+    letter-spacing: .06em !important;
+    padding: .60rem .60rem !important;
+    white-space: nowrap !important; /* header sí conviene en una línea */
+  }
+
+  /* 🚫 Anula reglas que oculten columnas */
+  .table:not(.table--stack) th:nth-child(n),
+  .table:not(.table--stack) td:nth-child(n),
+  table:not(.table--stack) th:nth-child(n),
+  table:not(.table--stack) td:nth-child(n){
+    display: table-cell !important;
+  }
+
+  /* ✅ Scroll: pero sin “inflar” ancho por contenido eterno */
+  .table:not(.table--stack),
+  table:not(.table--stack){
+    min-width: 720px; /* menor que antes (900-980). Ajusta: 680/720/760 */
+  }
+
+  /* Celdas “mono” más pequeñas para ahorrar ancho */
+  .table .td-mono{
+    font-size: .82rem !important;
+  }
+
+  /* JSON/pre: que no estire columnas; scrollea adentro */
+  .table pre,
+  .table code,
+  .pre-json{
+    max-width: 320px;          /* limita el ancho del contenido grande */
+    overflow: auto;
+    white-space: pre;
+  }
+
+  /* Columna de acciones/detalle: evita que se vaya gigante */
+  .table td:last-child,
+  .table th:last-child{
+    white-space: nowrap !important;
+    width: 1%;
+  }
 }
