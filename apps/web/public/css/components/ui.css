@@ -388,3 +388,31 @@
 }
 
 
+
+
+/***********************************
+DASHBOARD
+************************************/
+/* Ajuste de tamaño para el icono del botón central */
+.btn--success-alt i {
+    font-size: 1.1rem !important; /* Tamaño más pequeño y equilibrado */
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Formato base del botón para asegurar alineación */
+.btn--success-alt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Espacio corto entre icono y texto */
+    padding: 0.5rem 1.2rem;
+    height: auto;
+}
+
+/* Ajuste específico para Dark Mode (evita el recuadro blanco del icono) */
+html[data-theme="dark"] .btn--success-alt i {
+    background: transparent !important;
+    color: inherit;
+}

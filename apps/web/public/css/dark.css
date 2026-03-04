@@ -626,3 +626,82 @@ html[data-theme="dark"] .page--captura .users-controls {
   border: 1px solid var(--dm-border-2) !important;
   box-shadow: 0 14px 28px rgba(0,0,0,.28) !important;
 }
+
+/* ============================================================
+   FIX — Dashboard Administrador en Modo Oscuro
+   ============================================================ */
+
+html[data-theme="dark"] .quick-btn {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: var(--dm-border-2) !important;
+    color: var(--dm-ink-dim) !important;
+}
+
+html[data-theme="dark"] .quick-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--dm-ink) !important;
+    border-color: var(--dm-border) !important;
+}
+
+/* Variantes de color en Dark Mode para botones rápidos */
+html[data-theme="dark"] .quick-btn.is-blue  { color: #60a5fa !important; border-color: rgba(96, 165, 250, 0.3) !important; }
+html[data-theme="dark"] .quick-btn.is-green { color: #4ade80 !important; border-color: rgba(74, 222, 128, 0.3) !important; }
+html[data-theme="dark"] .quick-btn.is-cyan  { color: #22d3ee !important; border-color: rgba(34, 211, 238, 0.3) !important; }
+html[data-theme="dark"] .quick-btn.is-amber { color: #fbbf24 !important; border-color: rgba(251, 191, 36, 0.3) !important; }
+html[data-theme="dark"] .quick-btn.is-gray  { color: var(--dm-ink-soft) !important; }
+
+/* Ajuste de Áreas Activas en Dark Mode */
+html[data-theme="dark"] .area-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: var(--dm-border-2) !important;
+    color: var(--dm-ink-dim) !important;
+}
+
+html[data-theme="dark"] .area-item i {
+    color: var(--dm-primary) !important;
+}
+
+/* Fix para el botón de registrar captura central */
+html[data-theme="dark"] .btn--success-alt {
+    background: rgba(74, 222, 128, 0.1) !important;
+    border-color: rgba(74, 222, 128, 0.3) !important;
+    color: #4ade80 !important;
+}
+
+/* Asegurar que todos los títulos sean blancos en Dark Mode */
+html[data-theme="dark"] h1, 
+html[data-theme="dark"] h2, 
+html[data-theme="dark"] h3, 
+html[data-theme="dark"] h4, 
+html[data-theme="dark"] h5,
+html[data-theme="dark"] .card-title,
+html[data-theme="dark"] .page-title {
+    color: #ffffff !important;
+}
+
+/* Texto de bienvenida y etiquetas de estadísticas */
+html[data-theme="dark"] .welcome-header p,
+html[data-theme="dark"] .stat-card__label,
+html[data-theme="dark"] .stat-card__sub {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Ajuste para los Badges de Eficiencia (Verde, Riesgo, Crítico) */
+html[data-theme="dark"] .badge-summary {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Ajuste para los cuadros de "Áreas Activas" */
+html[data-theme="dark"] .area-item {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Efecto hover para las áreas */
+html[data-theme="dark"] .area-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--dm-primary) !important;
+}

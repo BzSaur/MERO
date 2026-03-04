@@ -335,3 +335,33 @@
     margin-left: 0 !important; /* Quita el empuje automático */
   }
 }
+
+
+/*** =========================
+   DASHBOARD
+   ========================= */
+
+   /* ui.css o buttons.css */
+.btn--success-alt {
+  background: #e9f9ef !important; /* Verde suave de fondo */
+  border: 1px solid #7ad7a1 !important;
+  color: #0b6b3a !important;
+  padding: 0.5rem 1.2rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  text-decoration: none;
+  box-shadow: none !important; /* Eliminamos sombras pesadas */
+  transition: all 0.2s ease;
+}
+
+.btn--success-alt:hover {
+  background: #dcf7e6 !important;
+  border-color: #59c988 !important;
+  transform: translateY(-1px);
+}
+
+/* Ajuste para el icono dentro del botón */
+.btn--success-alt i {
+  font-size: 1.1rem;
+  line-height: 0;
+}

@@ -157,3 +157,37 @@ CAPTURA
   display: flex;
   align-items: center;
 }
+
+
+/********************************************
+DASHBOARD
+********************************************/
+
+/* cards.css */
+.grid-stats--metrics {
+  display: grid;
+  /* Cambiado de 3 a 4 columnas para que quepan todas en la misma fila */
+  grid-template-columns: repeat(4, minmax(0, 1fr)); 
+  gap: var(--gap, 14px);
+  margin-bottom: var(--gap-lg, 18px);
+}
+
+/* Reducimos un poco el padding interno para que el contenido no se amontone */
+.stat-card--gradient {
+  padding: 12px 15px; /* Más compacto */
+  min-height: 100px;
+}
+
+.stat-card--gradient .stat-card__value {
+  font-size: 1.8rem; /* Reducido ligeramente para evitar desbordamiento */
+}
+
+/* style.css o ui.css */
+.badge-summary {
+  padding: 0.25rem 0.75rem; /* Reducido de 0.5rem 1rem */
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem; /* Espacio más corto entre icono y texto */
+  border-radius: 20px;
+}
