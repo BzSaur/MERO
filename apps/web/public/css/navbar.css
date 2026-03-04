@@ -148,3 +148,22 @@
   font-size: 0.875rem;
   margin: 0;
 }
+
+
+/* navbar.css */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Asegura separación */
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: nowrap; /* Evita que los iconos bajen de línea */
+}
+
+/* Contenedor de iconos a la derecha */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0; /* No permite que se encoja o desaparezca */
+}

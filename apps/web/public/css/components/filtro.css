@@ -151,6 +151,8 @@
 .page--areas .card--asignar-act .table-wrap{
   padding-left: 16px;
   padding-right: 16px;
+  padding-bottom: 16px;
+  padding-top: 16px;
 }
 
 /* Form controls (misma fila tipo “filtro”) */

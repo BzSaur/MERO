@@ -497,3 +497,132 @@ html[data-theme="dark"] .empty--asignar .empty__text a{
 html[data-theme="dark"] .card__header .card__title{
   color: rgba(226,232,240,.88) !important;
 }
+
+
+/**************************************************
+  DASHBOARD HISTORICO 
+   ********************************************|
+
+   /* ============================================================
+   MÉTRICAS — Stat cards con gradiente (NO apagar en dark mode)
+   Pegar AL FINAL de dark.css
+   ============================================================ */
+
+/* En dark mode, NO uses surface sólido para las cards con gradiente */
+html[data-theme="dark"] .stat-card--gradient{
+  background: none !important; /* resetea lo que impuso dark.css */
+  border-color: rgba(148,163,184,.18) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.45) !important;
+  color: rgba(226,232,240,.92) !important;
+}
+
+/* Gradientes más oscuros (misma familia de colores, pero “night”) */
+html[data-theme="dark"] .stat-card--gradient.stat-card--green{
+  background: linear-gradient(135deg, #0b5a2f, #07361d) !important;
+}
+html[data-theme="dark"] .stat-card--gradient.stat-card--indigo{
+  background: linear-gradient(135deg, #3036b8, #1a1b5c) !important;
+}
+html[data-theme="dark"] .stat-card--gradient.stat-card--blue{
+  background: linear-gradient(135deg, #1346b8, #0b245f) !important;
+}
+html[data-theme="dark"] .stat-card--gradient.stat-card--orange{
+  background: linear-gradient(135deg, #b45309, #5a2a12) !important;
+}
+html[data-theme="dark"] .stat-card--gradient.stat-card--red{
+  background: linear-gradient(135deg, #b91c1c, #4c0f0f) !important;
+}
+
+/* Brillo del círculo (más discreto en dark) */
+html[data-theme="dark"] .stat-card--gradient::after{
+  background: rgba(255,255,255,.08) !important;
+}
+
+/* MÉTRICAS: botón verde en dark mode */
+html[data-theme="dark"] .page--metrics .btn--history{
+  background: #1f7a4a !important;
+  border-color: #1f7a4a !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.35) !important;
+}
+html[data-theme="dark"] .page--metrics .btn--history:hover{
+  background: #226f46 !important;
+  border-color: #226f46 !important;
+}
+
+
+
+/*************************************
+CAPTURA
+**************************************/
+/* Header del card: título izquierda, acciones derecha (fix para dark y light) */
+.card__header--split{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: var(--gap);
+}
+
+.card__header-actions{
+  display:flex;
+  align-items:center;
+  gap: .6rem;
+  flex-wrap: nowrap;
+}
+
+/* evita que el badge se baje a la siguiente línea */
+.card__header-actions .badge{
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   ✅ GENERAL (dark): contador en headers tipo usuarios
+   ========================================================= */
+html[data-theme="dark"] .card__header--usuarios .badge.badge--ok{
+  background: rgba(59,130,246,.18) !important;
+  color: rgba(219,234,254,.95) !important;
+  border: 1px solid rgba(59,130,246,.28) !important;
+}
+
+
+/* ============================================================
+FIX — Select dropdown (opciones) en modo oscuro
+El navegador NO hereda colores del <select> padre en las <option>
+============================================================ */
+
+html[data-theme="dark"] .form-control option,
+html[data-theme="dark"] .form-select option {
+  background-color: #0f172a !important;   /* --dm-surface */
+  color: rgba(226,232,240,.92) !important; /* --dm-ink */
+}
+
+/* Opción deshabilitada / placeholder "— Seleccionar —" */
+html[data-theme="dark"] .form-control option[value=""],
+html[data-theme="dark"] .form-select option[value=""] {
+  color: rgba(148,163,184,.72) !important; /* --dm-ink-soft */
+}
+
+/* Opción seleccionada / hover (algunos navegadores lo respetan) */
+html[data-theme="dark"] .form-control option:checked,
+html[data-theme="dark"] .form-select option:checked {
+  background-color: rgba(59,130,246,.25) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+/* Fix específico para la página de captura */
+html[data-theme="dark"] .page--captura .form-control,
+html[data-theme="dark"] .page--captura .users-controls .form-control {
+  background: rgba(255,255,255,.04) !important;
+  color: var(--dm-ink) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--captura .form-label {
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--captura .users-controls {
+  background: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.28) !important;
+}

@@ -14,19 +14,21 @@
       <%- include('../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--encargado">
+        <!-- ✅ Hereda look de Histórico (cards/table/header) -->
+        <div class="page page--encargado page--metrics page--asignar page--areas">
           <div class="container">
 
-            <div class="page-header page-header--encargado">
+            <div class="page-header">
               <div>
                 <h1>Métricas — Hoy</h1>
-                <p class="page-header__sub" style="display:flex; align-items:center; gap:.5rem;">
-                  <svg class="icon"><use href="#icon-clock"/></svg>
-                  <span><%= hoy %></span>
-                </p>
+                <h2>
+                  <p class="page-header__sub" style="display:flex; align-items:center; gap:.5rem;">
+                    <span><%= hoy %></span>
+                  </p>
+                </h2>
               </div>
 
-              <a href="/consultor/historico" class="btn btn--primary">
+              <a href="/consultor/historico" class="btn btn--back btn--history">
                 <svg class="icon"><use href="#icon-history"/></svg>
                 Ver histórico
               </a>
@@ -42,26 +44,24 @@
               const avgEff = countEff ? (sumEff / countEff) : null;
             %>
 
-            <div class="grid-stats page--encargado">
-              <div class="stat-card stat-card--eficiencia">
+            <!-- ✅ Cards -->
+            <div class="grid-stats grid-stats--metrics" style="margin-bottom:var(--gap-lg)">
+              <div class="stat-card stat-card--gradient stat-card--green">
                 <div class="stat-card__label">Eficiencia global</div>
                 <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
                 <div class="stat-card__sub">promedio todos los slots</div>
-                <div class="stat-card__pulse"></div>
               </div>
 
-              <div class="stat-card stat-card--registros">
+              <div class="stat-card stat-card--gradient stat-card--indigo">
                 <div class="stat-card__label">Slots registrados</div>
                 <div class="stat-card__value"><%= metricas.length %></div>
                 <div class="stat-card__sub">hoy</div>
-                <div class="stat-card__pulse"></div>
               </div>
 
-              <div class="stat-card stat-card--empleados">
+              <div class="stat-card stat-card--gradient stat-card--blue">
                 <div class="stat-card__label">Empleados activos</div>
                 <div class="stat-card__value"><%= asignaciones.length %></div>
                 <div class="stat-card__sub">asignados ahora</div>
-                <div class="stat-card__pulse"></div>
               </div>
             </div>
 
@@ -74,52 +74,54 @@
                 });
               %>
 
-              <div class="card" style="margin-bottom:var(--gap-lg)">
+              <!-- ✅ Panel -->
+              <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
                 <div class="card__header">
-                  <span class="card__title">Slot strip por área</span>
+                  <h3><span class="card__title">Slot strip por área</span></h3>
                   <span class="badge badge--none">Verde &gt;=90% / Ámbar 70-89% / Rojo &lt;70%</span>
                 </div>
 
-                <% Object.entries(byArea).forEach(([area, slots]) => {
-                     let areaSum = 0, areaCount = 0;
-                     slots.forEach(s => { if (s.eficiencia != null) { areaSum += Number(s.eficiencia); areaCount++; } });
-                     const areaAvg = areaCount ? (areaSum / areaCount) : null;
-                %>
-                  <div class="slot-area">
-                    <div class="slot-area__header">
-                      <span class="slot-area__name"><%= area %></span>
-                      <span class="eff-value <%= effClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
-                    </div>
+                <div style="padding: var(--gap) var(--gap-lg);">
+                  <% Object.entries(byArea).forEach(([area, slots]) => {
+                       let areaSum = 0, areaCount = 0;
+                       slots.forEach(s => { if (s.eficiencia != null) { areaSum += Number(s.eficiencia); areaCount++; } });
+                       const areaAvg = areaCount ? (areaSum / areaCount) : null;
+                  %>
+                    <div class="slot-area">
+                      <div class="slot-area__header">
+                        <span class="slot-area__name"><%= area %></span>
+                        <span class="eff-value <%= effClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
+                      </div>
 
-                    <div class="slot-strip slot-strip--lg">
-                      <% slots.forEach(s => { %>
-                        <div
-                          class="slot-strip__seg slot-strip__seg--<%= slotClass(s.eficiencia) %>"
-                          title="<%= s.slotHora %>h -- real: <%= s.cantidadReal %> / est: <%= s.cantidadEstandar %> -- <%= fmtEff(s.eficiencia) %>"
-                        ></div>
-                      <% }) %>
-                    </div>
+                      <div class="slot-strip slot-strip--lg">
+                        <% slots.forEach(s => { %>
+                          <div
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s.eficiencia) %>"
+                            title="<%= s.slotHora %>h -- real: <%= s.cantidadReal %> / est: <%= s.cantidadEstandar %> -- <%= fmtEff(s.eficiencia) %>"
+                          ></div>
+                        <% }) %>
+                      </div>
 
-                    <div class="slot-area__hours">
-                      <% slots.forEach(s => { %>
-                        <span class="slot-area__hour"><%= s.slotHora %>h</span>
-                      <% }) %>
+                      <div class="slot-area__hours">
+                        <% slots.forEach(s => { %>
+                          <span class="slot-area__hour"><%= s.slotHora %>h</span>
+                        <% }) %>
+                      </div>
                     </div>
-                  </div>
-                <% }) %>
+                  <% }) %>
+                </div>
               </div>
 
-              <!-- TABLA con estilo de asignaciones -->
-              <div class="card card--asignaciones">
-                <div class="card__header">
-                  <div class="card__header-left">
-                    <span class="card__title">Detalle por slot</span>
-                    <span class="badge badge--none"><%= metricas.length %> slots</span>
-                  </div>
+              <!-- ✅ RESULTADOS -->
+              <div class="card card--asignar card--asignar-act">
+                <!-- ✅ MISMA CLASE QUE USUARIOS -->
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Resultados</span></h3>
+                  <span class="badge badge--ok"><%= metricas.length %></span>
                 </div>
 
-                <div class="table-wrap table-wrap--asignaciones">
-                  <table class="table table--asignaciones">
+                <div class="table-wrap table-wrap--asignar table-wrap--blue">
+                  <table class="table table--asignar table--blue">
                     <thead>
                       <tr>
                         <th>Área</th>
@@ -150,15 +152,21 @@
               </div>
 
             <% } else { %>
-              <div class="card card--metrics-empty" style="margin-bottom:var(--gap-lg)">
-                <div class="card__header">
-                  <span class="card__title">Métricas Hoy</span>
+
+              <!-- ✅ Empty -->
+              <div class="card card--asignar card--asignar-act">
+                <!-- ✅ MISMA CLASE QUE USUARIOS -->
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Resultados</span></h3>
+                  <span class="badge badge--ok">0</span>
                 </div>
-                <div class="empty">
+
+                <div class="empty empty--asignar">
                   <p class="empty__text">Sin capturas registradas hoy.</p>
                   <p class="empty__sub">Cuando existan capturas, aparecerán aquí en tiempo real.</p>
                 </div>
               </div>
+
             <% } %>
 
           </div>

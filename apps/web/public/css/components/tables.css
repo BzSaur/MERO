@@ -350,8 +350,72 @@
 
 
 
+/******************************************
+   Encargado
+*******************************************/
 
+/* =========================================================
+   MÉTRICAS (clases nuevas en EJS) — CSS mínimo
+   ========================================================= */
 
+/* Header métricas */
+.page-header--metrics{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: var(--gap, 12px);
+  flex-wrap: wrap;
+}
+.page-header__sub--clock{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  margin:.35rem 0 0 0;
+  color: rgba(15,23,42,.65);
+  font-weight: 800;
+}
+
+/* Grid stats */
+.grid-stats--metrics{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap, 14px);
+  margin-bottom: var(--gap-lg, 18px);
+}
+
+/* Card body helper (si tu .card no trae body) */
+.card__body--metrics-strip{ padding: 16px; }
+
+/* Table wrap métricas: usa tu estilo clean */
+.table-wrap--metrics{
+  margin: 16px;
+}
+
+/* Empty bonito */
+.empty--metrics{
+  margin: 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(30,58,138,.22);
+  background: rgba(219,234,254,.22);
+  padding: 22px;
+  text-align:center;
+}
+
+/* Responsive */
+@media (max-width: 980px){
+  .grid-stats--metrics{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px){
+  .table-wrap--metrics{ margin: 12px; }
+  .td-hide-mobile{ display:none !important; }
+
+  /* legend badge no empuja */
+  .badge--legend{
+    white-space: normal;
+    text-align: right;
+  }
+}
 
 
 

@@ -242,3 +242,4 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem(KEY, mode);
   });
 })();
+

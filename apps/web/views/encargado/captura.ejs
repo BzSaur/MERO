@@ -14,16 +14,17 @@
       <%- include('../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--captura">
+        <!-- ✅ Igual que Histórico: page--asignar + page--areas -->
+        <div class="page page--captura page--auditoria page--asignar page--areas">
           <div class="container">
 
-            <div class="page-header">
+            <div class="page-header page-header--auditoria">
               <div>
                 <h1>Registrar Captura</h1>
-                <p class="page-header__sub">Ingresa la producción por slot horario</p>
+                <h2><p class="page-header__sub">Ingresa la producción por slot horario</p></h2>
               </div>
 
-              <a href="/encargado" class="btn btn--ghost">
+              <a href="/encargado" class="btn btn--back">
                 <svg class="icon"><use href="#icon-back"/></svg>
                 Volver
               </a>
@@ -31,96 +32,104 @@
 
             <%- include('../partials/flash') %>
 
-            <div class="grid-2" style="align-items:start">
-
-              <%# ── Formulario ── %>
-              <div class="card card--captura">
-                <div class="card__header">
-                  <span class="card__title">Nueva captura</span>
-                </div>
-
-                <form method="POST" action="/encargado/captura" novalidate>
-                  <div class="form-group">
-                    <label class="form-label" for="asignacionId">Asignación activa</label>
-                    <select class="form-control" id="asignacionId" name="asignacionId" required>
-                      <option value="">— Seleccionar —</option>
-                      <% asignaciones.forEach(a => { %>
-                        <option value="<%= a.id %>">
-                          <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %> — <%= a.area?.nombre %>
-                        </option>
-                      <% }) %>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label" for="slotHora">Slot horario</label>
-                    <select class="form-control" id="slotHora" name="slotHora" required>
-                      <option value="">— Seleccionar —</option>
-                      <% [8,9,10,11,12,13,15,16,17,18].forEach(h => { %>
-                        <option value="<%= h %>"><%= h %>:00 – <%= h+1 %>:00</option>
-                      <% }) %>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label" for="cantidadReal">Cantidad producida</label>
-                    <input
-                      class="form-control"
-                      type="number"
-                      id="cantidadReal"
-                      name="cantidadReal"
-                      min="0"
-                      required
-                      placeholder="0"
-                    >
-                  </div>
-
-                  <button type="submit" class="btn btn--primary">
-                    <svg class="icon"><use href="#icon-check"/></svg>
-                    Guardar captura
-                  </button>
-                </form>
+            <!-- ✅ ARRIBA: Nueva captura (panel tipo "Filtros") -->
+            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
+                <h3><span class="card__title">Nueva captura</span></h3>
               </div>
 
-              <%# ── Asignaciones activas ── %>
-              <div class="card card--captura card--captura-asig">
-                <div class="card__header">
-                  <span class="card__title">Asignaciones activas</span>
-                </div>
+              <form method="POST" action="/encargado/captura" novalidate>
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+                  <div class="users-controls__left">
 
-                <% if (!asignaciones.length) { %>
-                  <div class="empty empty--captura">
-                    <p class="empty__text">Sin asignaciones activas.</p>
-                    <a href="/encargado/asignar" class="btn btn--ghost btn--sm" style="margin-top:.75rem">
-                      Gestionar asignaciones
-                    </a>
-                  </div>
-                <% } else { %>
-                  <div class="table-wrap table-wrap--captura">
-                    <table class="table table--captura">
-                      <thead>
-                        <tr>
-                          <th>Empleado</th>
-                          <th>Área</th>
-                          <th>Subtarea</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
+                    <div class="form-group users-controls__field users-controls__field--wide">
+                      <label class="form-label" for="asignacionId">Asignación activa</label>
+                      <select class="form-control" id="asignacionId" name="asignacionId" required>
+                        <option value="">— Seleccionar —</option>
                         <% asignaciones.forEach(a => { %>
-                          <tr>
-                            <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                            <td><%= a.area?.nombre %></td>
-                            <td><%= a.subtarea?.nombre %></td>
-                          </tr>
+                          <option value="<%= a.id %>">
+                            <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %> — <%= a.area?.nombre %>
+                          </option>
                         <% }) %>
-                      </tbody>
-                    </table>
+                      </select>
+                    </div>
+
+                    <div class="form-group users-controls__field">
+                      <label class="form-label" for="slotHora">Slot horario</label>
+                      <select class="form-control" id="slotHora" name="slotHora" required>
+                        <option value="">— Seleccionar —</option>
+                        <% [8,9,10,11,12,13,15,16,17,18].forEach(h => { %>
+                          <option value="<%= h %>"><%= h %>:00 – <%= h+1 %>:00</option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="form-group users-controls__field">
+                      <label class="form-label" for="cantidadReal">Cantidad producida</label>
+                      <input
+                        class="form-control"
+                        type="number"
+                        id="cantidadReal"
+                        name="cantidadReal"
+                        min="0"
+                        required
+                        placeholder="0"
+                      >
+                    </div>
+
+                    <div class="form-group users-controls__actions">
+                      <button type="submit" class="btn btn--edit">
+                        <svg class="icon"><use href="#icon-check"/></svg>
+                        Guardar captura
+                      </button>
+                    </div>
+
                   </div>
-                <% } %>
+                </div>
+              </form>
+            </div>
+
+            <div class="card card--asignar card--asignar-act">
+              <div class="card__header card__header--usuarios">
+                <h3><span class="card__title">Asignaciones activas</span></h3>
+
+                <span class="badge badge--ok"><%= asignaciones.length %></span>
+
+                <div class="tabs-actions">
+                  <a href="/encargado/asignar" class="btn btn--success btn--sm">
+                    Gestionar asignaciones
+                  </a>
+                </div>
               </div>
 
+              <% if (!asignaciones.length) { %>
+                <div class="empty empty--asignar">
+                  <p class="empty__text">Sin asignaciones activas.</p>
+                </div>
+              <% } else { %>
+                <div class="table-wrap table-wrap--asignar table-wrap--blue">
+                  <table class="table table--asignar table--blue">
+                    <thead>
+                      <tr>
+                        <th>Empleado</th>
+                        <th>Área</th>
+                        <th class="td-hide-mobile">Subtarea</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% asignaciones.forEach(a => { %>
+                        <tr>
+                          <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
+                          <td><%= a.area?.nombre %></td>
+                          <td class="td-hide-mobile"><%= a.subtarea?.nombre %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
             </div>
+
           </div>
         </div>
       </main>
@@ -129,25 +138,6 @@
 
   <div id="sidebarOverlay"></div>
 
-  <!-- Modal global (overlay) -->
-  <div class="modal" id="appModal" aria-hidden="true">
-    <div class="modal__backdrop" data-close></div>
-
-    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
-      <div class="modal__header">
-        <h3 class="modal__title" id="appModalTitle">Aviso</h3>
-
-        <button type="button" class="btn btn--icon btn--ghost modal__close" data-close aria-label="Cerrar">
-          ✕
-        </button>
-      </div>
-
-      <div class="modal__body" id="appModalBody"></div>
-      <div class="modal__footer" id="appModalFooter"></div>
-    </div>
-  </div>
-
-  <!-- Scripts -->
   <script src="/js/main.js"></script>
   <script src="/js/alerts.js" defer></script>
 </body>
