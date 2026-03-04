@@ -23,7 +23,8 @@
                 <p class="page-header__sub">Cuentas de acceso al sistema</p>
               </div>
 
-              <a href="/admin/usuarios/nuevo" class="btn btn--primary">
+              <!-- ✅ Arriba derecha -->
+              <a href="/admin/usuarios/nuevo" class="btn btn--create">
                 <svg class="icon"><use href="#icon-plus"/></svg>
                 Nuevo usuario
               </a>
@@ -38,13 +39,11 @@
                 </div>
               <% } else { %>
 
-                <div
-                  class="users-controls users-controls--light"
-                  style="display:flex; gap:var(--gap); align-items:center; justify-content:space-between; flex-wrap:wrap; padding: var(--gap) var(--gap-lg); border-bottom: 1px solid rgba(255,255,255,.06);"
-                >
-                  <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap;">
-                    <div style="min-width: 220px;">
-                      <label class="form-label" for="rolFilter" style="margin-bottom:.35rem;">Filtrar por rol</label>
+                <!-- ✅ Filtros con CSS (sin inline) -->
+                <div class="users-controls users-controls--light">
+                  <div class="users-controls__left">
+                    <div class="users-controls__field">
+                      <label class="form-label" for="rolFilter">Filtrar por rol</label>
                       <select class="form-control" id="rolFilter">
                         <option value="ALL">Todos</option>
                         <option value="ADMIN">Administrador</option>
@@ -53,24 +52,26 @@
                       </select>
                     </div>
 
-                    <div style="min-width: 260px;">
-                      <label class="form-label" for="sortFilter" style="margin-bottom:.35rem;">Orden</label>
+                    <div class="users-controls__field users-controls__field--wide">
+                      <label class="form-label" for="sortFilter">Orden</label>
                       <select class="form-control" id="sortFilter">
                         <option value="NEW">Creados recientemente</option>
                         <option value="OLD">Más antiguos</option>
                       </select>
                     </div>
 
-                    <button type="button" class="btn btn--ghost" id="resetFilters" style="margin-top: 1.55rem;">
-                      Limpiar
-                    </button>
+                    <div class="users-controls__actions">
+                      <button type="button" class="btn btn--ghost" id="resetFilters">
+                        Limpiar
+                      </button>
+                    </div>
                   </div>
 
-                  <span class="badge badge--none" id="usersCount" style="margin-top: 1.55rem;">0 usuarios</span>
+                  <span class="badge badge--none users-controls__count" id="usersCount">0 usuarios</span>
                 </div>
 
-                <div class="table-wrap table-wrap--usuarios">
-                  <table class="table table--usuarios" id="usersTable">
+                <div class="table-wrap table-wrap--usuarios table-wrap--blue">
+                  <table class="table table--usuarios table--blue" id="usersTable">
                     <thead>
                       <tr>
                         <th>Nombre</th>
@@ -88,7 +89,6 @@
                           data-created="<%= (new Date(u.createdAt)).getTime() %>"
                         >
                           <td><%= u.nombre %></td>
-
                           <td class="td-mono"><%= u.email %></td>
 
                           <td>
@@ -100,7 +100,7 @@
                           <td class="td-mono"><%= fmtDate(u.createdAt) %></td>
 
                           <td>
-                            <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--ghost btn--sm">
+                            <a href="/admin/usuarios/<%= u.id %>/editar" class="btn btn--edit btn--sm">
                               <svg class="icon"><use href="#icon-edit"/></svg>
                               Editar
                             </a>

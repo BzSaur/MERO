@@ -5,28 +5,26 @@
 </head>
 
 <body class="sidebar-collapsed">
-  <!-- SVG sprite (necesario para <use href="#icon-...">) -->
   <%- include('../partials/icons') %>
 
   <div class="wrapper">
-    <!-- Sidebar -->
     <%- include('../partials/sidebar') %>
 
-    <!-- Main -->
     <div class="main-content">
-      <!-- Navbar -->
       <%- include('../partials/navbar') %>
 
       <main class="content">
         <div class="page page--asignar page--auditoria">
           <div class="container">
-            <div class="page-header">
+
+            <!-- ✅ Volver arriba derecha -->
+            <div class="page-header page-header--auditoria">
               <div>
                 <h1>Auditoría</h1>
-                <p class="page-header__sub">Registro inmutable de cambios</p>
+                <h2><p class="page-header__sub">Registro inmutable de cambios</p></h2>
               </div>
 
-              <a href="/admin" class="btn btn--ghost">
+              <a href="/admin" class="btn btn--back">
                 <svg class="icon"><use href="#icon-back"/></svg>
                 Volver
               </a>
@@ -34,25 +32,40 @@
 
             <%- include('../partials/flash') %>
 
-            <%# ── Filtros (mismo look que Áreas) ── %>
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
-                <span class="card__title">Filtros</span>
+                <h3><span class="card__title">Filtros</span></h3>
               </div>
 
+              <%
+                const today = new Date().toISOString().slice(0, 10);
+              %>
+
               <form method="GET" action="/admin/auditoria">
-                <div class="form-row">
-                  <div class="form-group">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+                  <div class="form-group users-controls__field">
                     <label class="form-label">Desde</label>
-                    <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>">
+                    <input
+                      class="form-control"
+                      type="date"
+                      name="desde"
+                      value="<%= filtros.desde || '' %>"
+                      max="<%= today %>"
+                    >
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field">
                     <label class="form-label">Hasta</label>
-                    <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>">
+                    <input
+                      class="form-control"
+                      type="date"
+                      name="hasta"
+                      value="<%= filtros.hasta || '' %>"
+                      max="<%= today %>"
+                    >
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field users-controls__field--wide">
                     <label class="form-label">Tabla</label>
                     <select class="form-control" name="tabla">
                       <option value="">Todas</option>
@@ -63,20 +76,24 @@
                     </select>
                   </div>
 
-                  <div class="form-group" style="align-self:flex-end">
-                    <button type="submit" class="btn btn--primary">
+                  <div class="form-group users-controls__actions">
+                    <button type="submit" class="btn btn--edit">
                       <svg class="icon"><use href="#icon-filter"/></svg>
                       Filtrar
                     </button>
+
+                    <!-- ✅ Limpiar (quita querystring / filtros) -->
+                    <a href="/admin/auditoria" class="btn btn--ghost">
+                      Limpiar
+                    </a>
                   </div>
                 </div>
               </form>
             </div>
 
-            <%# ── Tabla con formato de Áreas ── %>
             <div class="card card--asignar card--asignar-act">
               <div class="card__header">
-                <span class="card__title">Registros</span>
+                <h3><span class="card__title">Registros</span></h3>
                 <span class="badge badge--ok"><%= registros.length %></span>
               </div>
 
@@ -85,16 +102,18 @@
                   <p class="empty__text">Sin registros para los filtros seleccionados.</p>
                 </div>
               <% } else { %>
-                <div class="table-wrap table-wrap--asignar">
-                  <table class="table table--asignar">
+
+                <div class="table-wrap table-wrap--asignar table-wrap--blue">
+                  <!-- ✅ sin table--stack, para que en móvil sea igual que desktop (con scroll) -->
+                  <table class="table table--blue table--auditoria">
                     <thead>
                       <tr>
                         <th>Fecha</th>
-                        <th class="td-hide-mobile">Usuario</th>
+                        <th>Usuario</th>
                         <th>Tabla</th>
                         <th>Acción</th>
-                        <th class="td-hide-mobile">Registro ID</th>
-                        <th class="td-hide-mobile">Detalle</th>
+                        <th>Registro ID</th>
+                        <th>Detalle</th>
                       </tr>
                     </thead>
 
@@ -105,9 +124,7 @@
                             <%= fmtDate(r.creadoEn || r.createdAt) %>
                           </td>
 
-                          <td class="td-hide-mobile">
-                            <%= r.usuario?.nombre || r.usuarioId || '—' %>
-                          </td>
+                          <td><%= r.usuario?.nombre || r.usuarioId || '—' %></td>
 
                           <td class="td-mono"><%= r.tabla %></td>
 
@@ -117,22 +134,19 @@
                             </span>
                           </td>
 
-                          <td class="td-mono td-hide-mobile"><%= r.registroId %></td>
+                          <td class="td-mono"><%= r.registroId %></td>
 
-                          <td class="td-hide-mobile">
+                          <td>
                             <% if (r.datosDespues) { %>
                               <details>
-                                <summary class="btn btn--primary btn--sm" style="cursor:pointer; list-style:none; display:inline-flex">
+                                <summary class="btn btn--edit btn--sm" style="cursor:pointer; list-style:none; display:inline-flex">
                                   Ver datos
                                 </summary>
 
-                                <pre
-                                  class="td-mono"
-                                  style="font-size:.75rem; margin-top:.5rem; overflow:auto; max-width:460px; color:rgba(255,255,255,.86)"
-                                ><%= JSON.stringify(r.datosDespues, null, 2) %></pre>
+                                <pre class="td-mono pre-json"><%= JSON.stringify(r.datosDespues, null, 2) %></pre>
                               </details>
                             <% } else { %>
-                              <span style="color:rgba(255,255,255,.65)">—</span>
+                              <span style="color:rgba(15,23,42,.55)">—</span>
                             <% } %>
                           </td>
                         </tr>
@@ -140,18 +154,17 @@
                     </tbody>
                   </table>
                 </div>
+
               <% } %>
             </div>
+
           </div>
         </div>
       </main>
     </div>
   </div>
 
-  <!-- Overlay para mobile (si tu main.js lo usa) -->
   <div id="sidebarOverlay"></div>
-
-  <!-- JS del layout -->
   <script src="/js/main.js"></script>
 </body>
 </html>

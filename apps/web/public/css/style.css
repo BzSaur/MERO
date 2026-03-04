@@ -4,7 +4,7 @@
     }
     
     body {
-      background-color: #f8fafc;
+      background-color: #ffffff;
       color: #0f172a;
     }
     
@@ -15,7 +15,7 @@
     
     .main-content {
       flex: 1;
-      background-color: #f8fafc;
+      background-color: #F0F2F5; /*----------->FONDO GENERAL BACKGROUND */
       display: flex;
       flex-direction: column;
     }

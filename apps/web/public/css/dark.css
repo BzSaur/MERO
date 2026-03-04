@@ -1,0 +1,224 @@
+/* ============================================================
+   MERO — Dark Mode
+   Se activa cuando el JS pone: <html data-theme="dark">
+   Este archivo se carga AL FINAL en head.ejs para sobreescribir
+   los colores claros que están hardcodeados en style.css/components.
+   ============================================================ */
+
+html[data-theme="dark"]{
+  color-scheme: dark;
+
+  /* Base background / surfaces */
+  --dm-bg: #0b1220;
+  --dm-surface: #0f172a;
+  --dm-surface-2: #111c33;
+  --dm-border: rgba(148,163,184,.22);
+  --dm-border-2: rgba(148,163,184,.16);
+  --dm-ink: rgba(226,232,240,.92);
+  --dm-ink-dim: rgba(148,163,184,.92);
+  --dm-ink-soft: rgba(148,163,184,.72);
+
+  /* Brand adjustments (no cambian tu identidad, solo mejoran contraste) */
+  --dm-primary: #3b82f6;
+  --dm-primary-2: rgba(59,130,246,.18);
+}
+
+/* ============================================================
+   Global / layout
+   ============================================================ */
+
+html[data-theme="dark"] body{
+  background-color: var(--dm-bg) !important;
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .main-content{
+  background-color: var(--dm-bg) !important;
+}
+
+/* Títulos (tu base.css los pone negros hardcodeados) */
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4{
+  color: var(--dm-ink) !important;
+}
+
+/* ============================================================
+   Navbar
+   ============================================================ */
+
+html[data-theme="dark"] .navbar{
+  background: var(--dm-surface) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.18) !important;
+}
+
+html[data-theme="dark"] .navbar .page-title{
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .navbar .btn-icon{
+  background: rgba(255,255,255,.02) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink-dim) !important;
+}
+
+html[data-theme="dark"] .navbar .btn-icon:hover{
+  background: rgba(255,255,255,.05) !important;
+  color: var(--dm-primary) !important;
+  border-color: var(--dm-border) !important;
+}
+
+/* User dropdown */
+html[data-theme="dark"] .user-dropdown-toggle{
+  background: rgba(255,255,255,.02) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .user-name{
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .dropdown-menu{
+  background: var(--dm-surface) !important;
+  border-color: var(--dm-border-2) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.32) !important;
+}
+
+html[data-theme="dark"] .dropdown-header{
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .dropdown-header strong{ color: var(--dm-ink) !important; }
+html[data-theme="dark"] .dropdown-header small{ color: var(--dm-ink-soft) !important; }
+
+html[data-theme="dark"] .dropdown-item{
+  color: var(--dm-ink-dim) !important;
+}
+
+html[data-theme="dark"] .dropdown-item:hover{
+  background: rgba(255,255,255,.04) !important;
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .dropdown-divider{
+  background: var(--dm-border-2) !important;
+}
+
+/* ============================================================
+   Cards / panels
+   ============================================================ */
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .table-wrap--clean,
+html[data-theme="dark"] .page--auditoria .table-wrap--blue{
+  background: var(--dm-surface) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .card__title,
+html[data-theme="dark"] .stat-label{
+  color: var(--dm-ink-soft) !important;
+}
+
+/* Texto secundario típico */
+html[data-theme="dark"] .page-header__sub,
+html[data-theme="dark"] .welcome-header p,
+html[data-theme="dark"] .date-badge{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .date-badge{
+  background: rgba(255,255,255,.03) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--dm-border-2) !important;
+}
+
+/* ============================================================
+   Forms (inputs/select)
+   ============================================================ */
+
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .form-control::placeholder{
+  color: rgba(148,163,184,.75) !important;
+}
+
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus{
+  border-color: rgba(59,130,246,.55) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.16) !important;
+}
+
+/* Calendario (icono) */
+html[data-theme="dark"] input[type="date"]{
+  color-scheme: dark;
+}
+
+/* ============================================================
+   Tables (incluye Auditoría)
+   ============================================================ */
+
+html[data-theme="dark"] .table--clean thead th,
+html[data-theme="dark"] .page--auditoria .table--auditoria thead th{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .table--clean tbody td,
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody td{
+  background: var(--dm-surface) !important;
+  color: var(--dm-ink) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .table--clean tbody tr:nth-child(even) td,
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+
+html[data-theme="dark"] .table--clean tbody tr:hover td,
+html[data-theme="dark"] .page--auditoria .table--auditoria tbody tr:hover td{
+  background: rgba(59,130,246,.10) !important;
+}
+
+html[data-theme="dark"] .table--clean .td-mono,
+html[data-theme="dark"] .page--auditoria .table--auditoria .td-mono{
+  color: rgba(148,163,184,.90) !important;
+}
+
+/* ============================================================
+   Buttons (ghost/edit) — para que no se “apaguen”
+   ============================================================ */
+
+html[data-theme="dark"] .btn--edit{
+  background: rgba(59,130,246,.12) !important;
+  border-color: rgba(59,130,246,.30) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+html[data-theme="dark"] .btn--edit:hover{
+  background: rgba(59,130,246,.32) !important;
+  border-color: rgba(59,130,246,.45) !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .btn--ghost{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink-dim) !important;
+}
+
+html[data-theme="dark"] .btn--ghost:hover{
+  background: rgba(255,255,255,.06) !important;
+  border-color: var(--dm-border) !important;
+  color: var(--dm-ink) !important;
+}

@@ -5,29 +5,25 @@
 </head>
 
 <body class="sidebar-collapsed">
-  <!-- SVG sprite (necesario para <use href="#icon-...">) -->
   <%- include('../../partials/icons') %>
 
   <div class="wrapper">
-    <!-- Sidebar -->
     <%- include('../../partials/sidebar') %>
 
-    <!-- Main -->
     <div class="main-content">
-      <!-- Navbar -->
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--asignar">
+        <div class="page page--asignar page--areas">
           <div class="container">
 
             <div class="page-header">
               <div>
                 <h1>Modelos</h1>
-                <p class="page-header__sub">SKUs de producto</p>
+                <h2><p class="page-header__sub">SKUs de producto</p></h2>
               </div>
 
-              <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
+              <div class="tabs-actions">
                 <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Áreas</a>
                 <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
                 <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estándares</a>
@@ -36,77 +32,108 @@
 
             <%- include('../../partials/flash') %>
 
-            <div class="grid-2" style="align-items:start">
+            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
+                <h3><span class="card__title">Nuevo modelo</span></h3>
+              </div>
 
-              <div class="card card--asignar">
-                <div class="card__header">
-                  <span class="card__title">Nuevo modelo</span>
-                </div>
+              <form method="POST" action="/admin/catalogos/modelos">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
 
-                <form method="POST" action="/admin/catalogos/modelos">
-                  <div class="form-group">
+                  <div class="form-group users-controls__field">
                     <label class="form-label" for="nombre">Nombre / SKU</label>
                     <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Fiberhome">
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field users-controls__field--wide">
                     <label class="form-label" for="descripcion">Descripción</label>
                     <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
                   </div>
 
-                  <button type="submit" class="btn btn--primary">
-                    <svg class="icon"><use href="#icon-plus"/></svg>
-                    Crear modelo
-                  </button>
-                </form>
-              </div>
+                  <div class="form-group users-controls__actions">
+                    <button type="submit" class="btn btn--create btn--sm">
+                      <svg class="icon"><use href="#icon-plus"/></svg>
+                      Crear modelo
+                    </button>
+                  </div>
 
-              <div class="card card--asignar card--asignar-act">
-                <div class="card__header">
-                  <span class="card__title">Modelos registrados</span>
-                  <span class="badge badge--ok"><%= modelos.length %></span>
                 </div>
+              </form>
+            </div>
 
-                <% if (!modelos.length) { %>
-                  <div class="empty empty--asignar">
-                    <p class="empty__text">Sin modelos registrados.</p>
-                  </div>
-                <% } else { %>
-                  <div class="table-wrap table-wrap--asignar">
-                    <table class="table table--asignar">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Nombre</th>
-                          <th>Descripción</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        <% modelos.forEach(m => { %>
-                          <tr>
-                            <td class="td-mono"><%= m.id %></td>
-                            <td><%= m.nombre %></td>
-                            <td style="color:var(--ink-dim)"><%= m.descripcion || '—' %></td>
-                          </tr>
-                        <% }) %>
-                      </tbody>
-                    </table>
-                  </div>
-                <% } %>
+            <div class="card card--asignar card--asignar-act">
+              <div class="card__header">
+                <h3><span class="card__title">Modelos registrados</span></h3>
+                <span class="badge badge--ok"><%= modelos.length %></span>
               </div>
 
+              <% if (!modelos.length) { %>
+                <div class="empty empty--asignar">
+                  <p class="empty__text">Sin modelos registrados.</p>
+                </div>
+              <% } else { %>
+
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      <% modelos.forEach(m => { %>
+                        <tr>
+                          <td class="td-mono"><%= m.id %></td>
+                          <td><%= m.nombre %></td>
+                          <td><%= m.descripcion || '—' %></td>
+                          <td>
+                            <div class="row-actions">
+
+                              <button
+                                type="button"
+                                class="btn btn--edit btn--sm btn--icon"
+                                title="Editar"
+                                data-edit-kind="modelo"
+                                data-update-action="/admin/catalogos/modelos/<%= m.id %>/editar"
+                                data-id="<%= m.id %>"
+                                data-nombre="<%= m.nombre %>"
+                                data-descripcion="<%= m.descripcion || '' %>"
+                              >
+                                <svg class="icon"><use href="#icon-edit"/></svg>
+                              </button>
+
+                              <form
+                                method="POST"
+                                action="/admin/catalogos/modelos/<%= m.id %>/eliminar"
+                                data-confirm-delete
+                                data-kind="modelo"
+                                data-nombre="<%= m.nombre %>"
+                                data-descripcion="<%= m.descripcion || '—' %>"
+                              >
+                                <button type="submit" class="btn btn--danger btn--sm btn--icon" title="Eliminar">
+                                  <svg class="icon"><use href="#icon-trash"/></svg>
+                                </button>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
             </div>
           </div>
         </div>
       </main>
     </div>
   </div>
-
-  <!-- Overlay para mobile (si tu main.js lo usa) -->
   <div id="sidebarOverlay"></div>
-
-  <!-- JS del layout -->
   <script src="/js/main.js"></script>
+  <script src="/js/alerts.js" defer></script>
 </body>
 </html>

@@ -14,7 +14,7 @@
       <%- include('../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--asignar page--auditoria">
+        <div class="page page--asignar page--auditoria page--areas">
           <div class="container">
 
             <div class="page-header">
@@ -23,7 +23,8 @@
                 <p class="page-header__sub">Consulta de eficiencia por rango de fechas</p>
               </div>
 
-              <a href="/consultor" class="btn btn--ghost">
+              <!-- mismo estilo que "Volver/Hoy" -->
+              <a href="/consultor" class="btn btn--back">
                 <svg class="icon"><use href="#icon-back"/></svg>
                 Hoy
               </a>
@@ -31,65 +32,71 @@
 
             <%- include('../partials/flash') %>
 
-            <%# ── Filtros ── %>
+            <!-- Filtros -->
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
                 <span class="card__title">Filtros</span>
               </div>
 
               <form method="GET" action="/consultor/historico">
-                <div class="form-row">
-                  <div class="form-group">
-                    <label class="form-label">Desde</label>
-                    <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
-                  </div>
+                <!-- ✅ aplica el formato de filtros -->
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+                  <div class="users-controls__left">
 
-                  <div class="form-group">
-                    <label class="form-label">Hasta</label>
-                    <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
-                  </div>
+                    <div class="form-group users-controls__field">
+                      <label class="form-label">Desde</label>
+                      <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required>
+                    </div>
 
-                  <div class="form-group">
-                    <label class="form-label">Área</label>
-                    <select class="form-control" name="areaId">
-                      <option value="">Todas</option>
-                      <% areas.forEach(a => { %>
-                        <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
-                      <% }) %>
-                    </select>
-                  </div>
+                    <div class="form-group users-controls__field">
+                      <label class="form-label">Hasta</label>
+                      <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required>
+                    </div>
 
-                  <div class="form-group">
-                    <label class="form-label">Subtarea</label>
-                    <select class="form-control" name="subtareaId">
-                      <option value="">Todas</option>
-                      <% subtareas.forEach(s => { %>
-                        <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
-                      <% }) %>
-                    </select>
-                  </div>
+                    <div class="form-group users-controls__field users-controls__field--wide">
+                      <label class="form-label">Área</label>
+                      <select class="form-control" name="areaId">
+                        <option value="">Todas</option>
+                        <% areas.forEach(a => { %>
+                          <option value="<%= a.id %>" <%= filtros.areaId == a.id ? 'selected' : '' %>><%= a.nombre %></option>
+                        <% }) %>
+                      </select>
+                    </div>
 
-                  <div class="form-group">
-                    <label class="form-label">Modelo</label>
-                    <select class="form-control" name="modeloId">
-                      <option value="">Todos</option>
-                      <% modelos.forEach(m => { %>
-                        <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
-                      <% }) %>
-                    </select>
-                  </div>
+                    <div class="form-group users-controls__field users-controls__field--wide">
+                      <label class="form-label">Subtarea</label>
+                      <select class="form-control" name="subtareaId">
+                        <option value="">Todas</option>
+                        <% subtareas.forEach(s => { %>
+                          <option value="<%= s.id %>" <%= filtros.subtareaId == s.id ? 'selected' : '' %>><%= s.nombre %></option>
+                        <% }) %>
+                      </select>
+                    </div>
 
-                  <div class="form-group" style="align-self:flex-end">
-                    <button type="submit" class="btn btn--primary">
-                      <svg class="icon"><use href="#icon-filter"/></svg>
-                      Buscar
-                    </button>
+                    <div class="form-group users-controls__field users-controls__field--wide">
+                      <label class="form-label">Modelo</label>
+                      <select class="form-control" name="modeloId">
+                        <option value="">Todos</option>
+                        <% modelos.forEach(m => { %>
+                          <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="form-group users-controls__actions">
+                      <!-- ✅ mismo look de botón -->
+                      <button type="submit" class="btn btn--edit">
+                        <svg class="icon"><use href="#icon-filter"/></svg>
+                        Buscar
+                      </button>
+                    </div>
+
                   </div>
                 </div>
               </form>
             </div>
 
-            <%# ── Resumen ── %>
+            <!-- Resumen -->
             <% if (capturas.length > 0) { %>
               <%
                 let sumEff = 0, countEff = 0, sumReal = 0;
@@ -119,7 +126,7 @@
               </div>
             <% } %>
 
-            <%# ── Tabla ── %>
+            <!-- Resultados -->
             <div class="card card--asignar card--asignar-act">
               <div class="card__header">
                 <span class="card__title">Resultados</span>
@@ -127,12 +134,14 @@
               </div>
 
               <% if (!capturas.length) { %>
+                <!-- ✅ esto ya toma el formato del “cuadro” de estándares -->
                 <div class="empty empty--asignar">
                   <p class="empty__text">Sin registros para el período seleccionado.</p>
                 </div>
               <% } else { %>
-                <div class="table-wrap table-wrap--asignar">
-                  <table class="table table--asignar">
+                <!-- ✅ tabla azul -->
+                <div class="table-wrap table-wrap--asignar table-wrap--blue">
+                  <table class="table table--asignar table--blue">
                     <thead>
                       <tr>
                         <th>Fecha</th>
@@ -167,6 +176,7 @@
                   </table>
                 </div>
               <% } %>
+
             </div>
 
           </div>

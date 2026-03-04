@@ -5,29 +5,25 @@
 </head>
 
 <body class="sidebar-collapsed">
-  <!-- SVG sprite (necesario para <use href="#icon-...">) -->
   <%- include('../../partials/icons') %>
 
   <div class="wrapper">
-    <!-- Sidebar -->
     <%- include('../../partials/sidebar') %>
 
-    <!-- Main -->
     <div class="main-content">
-      <!-- Navbar -->
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--asignar">
+        <div class="page page--asignar page--areas">
           <div class="container">
 
             <div class="page-header">
               <div>
                 <h1>Estándares</h1>
-                <p class="page-header__sub">Producción esperada por hora (subtarea + modelo)</p>
+                <h2><p class="page-header__sub">Producción esperada por hora (subtarea + modelo)</p></h2>
               </div>
 
-              <div style="display:flex; gap:var(--gap-sm); flex-wrap:wrap">
+              <div class="tabs-actions">
                 <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Áreas</a>
                 <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
                 <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
@@ -36,15 +32,16 @@
 
             <%- include('../../partials/flash') %>
 
-            <%# ── Formulario ── %>
+            
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
-                <span class="card__title">Nuevo estándar</span>
+                <h3><span class="card__title">Nuevo estándar</span></h3>
               </div>
 
               <form method="POST" action="/admin/catalogos/estandares">
-                <div class="form-row">
-                  <div class="form-group">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+
+                  <div class="form-group users-controls__field users-controls__field--wide">
                     <label class="form-label" for="subtareaId">Subtarea</label>
                     <select class="form-control" id="subtareaId" name="subtareaId" required>
                       <option value="">— Seleccionar —</option>
@@ -54,7 +51,7 @@
                     </select>
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field">
                     <label class="form-label" for="modeloId">Modelo</label>
                     <select class="form-control" id="modeloId" name="modeloId" required>
                       <option value="">— Seleccionar —</option>
@@ -64,42 +61,43 @@
                     </select>
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field">
                     <label class="form-label" for="cantidadEstandar">Unidades / hora</label>
-                    <input
-                      class="form-control"
-                      type="number"
-                      id="cantidadEstandar"
-                      name="cantidadEstandar"
-                      min="1"
-                      required
-                      placeholder="50"
-                    >
+                    <input class="form-control" type="number" id="cantidadEstandar" name="cantidadEstandar" min="1" required placeholder="50">
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group users-controls__field">
                     <label class="form-label" for="vigenteDesdeFecha">Vigente desde</label>
+                   <%
+                      const pad2 = (n) => String(n).padStart(2,'0');
+                      const hoy = new Date();
+                      const hoyStr = `${hoy.getFullYear()}-${pad2(hoy.getMonth()+1)}-${pad2(hoy.getDate())}`;
+                    %>
+
                     <input
                       class="form-control"
                       type="date"
                       id="vigenteDesdeFecha"
                       name="vigenteDesdeFecha"
                       required
+                      max="<%= hoyStr %>"
                     >
                   </div>
-                </div>
 
-                <button type="submit" class="btn btn--primary">
-                  <svg class="icon"><use href="#icon-plus"/></svg>
-                  Crear estándar
-                </button>
+                  <div class="form-group users-controls__actions">
+                    <button type="submit" class="btn btn--create btn--sm">
+                      <svg class="icon"><use href="#icon-plus"/></svg>
+                      Crear estándar
+                    </button>
+                  </div>
+
+                </div>
               </form>
             </div>
 
-            <%# ── Listado ── %>
             <div class="card card--asignar card--asignar-act">
               <div class="card__header">
-                <span class="card__title">Estándares registrados</span>
+                <h3><span class="card__title">Estándares registrados</span></h3>
                 <span class="badge badge--ok"><%= estandares.length %></span>
               </div>
 
@@ -108,33 +106,69 @@
                   <p class="empty__text">Sin estándares registrados.</p>
                 </div>
               <% } else { %>
-                <div class="table-wrap table-wrap--asignar">
-                  <table class="table table--asignar">
+
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean">
                     <thead>
                       <tr>
                         <th>Subtarea</th>
                         <th>Modelo</th>
                         <th>Unid/h</th>
                         <th class="td-hide-mobile">Vigente desde</th>
+                        <th></th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      <% estandares.forEach(e => { %>
+                      <% estandares.forEach(e => { 
+                          const vigenteISO = e.vigenteDesde ? new Date(e.vigenteDesde).toISOString().slice(0,10) : '';
+                          const vigenteMX = e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—';
+                          const subt = `${e.subtarea?.area?.nombre || ''} / ${e.subtarea?.nombre || ''}`.trim();
+                          const mod = e.modelo?.nombre || '—';
+                        %>
                         <tr>
                           <td>
-                            <span style="font-size:.78rem; color:var(--ink-dim)">
-                              <%= e.subtarea?.area?.nombre %> /
-                            </span>
+                            <span style="font-size:.78rem; color:var(--ink-dim)"><%= e.subtarea?.area?.nombre %> /</span>
                             <%= e.subtarea?.nombre %>
                           </td>
-
-                          <td><%= e.modelo?.nombre %></td>
-
+                          <td><%= mod %></td>
                           <td class="td-mono"><%= e.cantidadEstandar %></td>
+                          <td class="td-mono td-hide-mobile"><%= vigenteMX %></td>
 
-                          <td class="td-mono td-hide-mobile">
-                            <%= e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—' %>
+                          <td>
+                            <div class="row-actions">
+
+                               <button
+                                type="button"
+                                class="btn btn--edit btn--sm btn--icon"
+                                title="Editar"
+                                data-edit-kind="estandar"
+                                data-update-action="/admin/catalogos/estandares/<%= e.id %>/editar"
+                                data-id="<%= e.id %>"
+                                data-subtarea="<%= subt %>"
+                                data-modelo="<%= mod %>"
+                                data-cantidad="<%= e.cantidadEstandar %>"
+                                data-vigente="<%= vigenteISO %>"
+                                data-vigente-mx="<%= vigenteMX %>"
+                              >
+                                <svg class="icon"><use href="#icon-edit"/></svg>
+                              </button>
+
+                              <form
+                                method="POST"
+                                action="/admin/catalogos/estandares/<%= e.id %>/eliminar"
+                                data-confirm-delete
+                                data-kind="estandar"
+                                data-subtarea="<%= subt %>"
+                                data-modelo="<%= mod %>"
+                                data-cantidad="<%= e.cantidadEstandar %>"
+                                data-vigente="<%= vigenteMX %>"
+                              >
+                                <button type="submit" class="btn btn--danger btn--sm btn--icon" title="Eliminar">
+                                  <svg class="icon"><use href="#icon-trash"/></svg>
+                                </button>
+                              </form>
+                            </div>
                           </td>
                         </tr>
                       <% }) %>
@@ -143,17 +177,13 @@
                 </div>
               <% } %>
             </div>
-
           </div>
         </div>
       </main>
     </div>
   </div>
-
-  <!-- Overlay para mobile (si tu main.js lo usa) -->
   <div id="sidebarOverlay"></div>
-
-  <!-- JS del layout -->
   <script src="/js/main.js"></script>
+  <script src="/js/alerts.js" defer></script>
 </body>
 </html>

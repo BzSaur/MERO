@@ -218,3 +218,27 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
 });
+
+
+/* ============================================================*/
+(() => {
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+
+  const KEY = 'mero_theme';
+  const apply = (mode) => {
+    document.documentElement.dataset.theme = mode; // "dark" | "light"
+  };
+
+  const saved = localStorage.getItem(KEY);
+  if (saved) {
+    apply(saved);
+    toggle.checked = saved === 'dark';
+  }
+
+  toggle.addEventListener('change', () => {
+    const mode = toggle.checked ? 'dark' : 'light';
+    apply(mode);
+    localStorage.setItem(KEY, mode);
+  });
+})();

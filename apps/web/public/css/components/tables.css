@@ -1,45 +1,257 @@
-/* ── Table ── */
-.table-wrap {
+/* =========================================================
+   BASE TABLE WRAP
+   ========================================================= */
+.table-wrap{
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-table {
+/* =========================================================
+   TABLE THEME — Clean List (tipo “Lista de Empleados”)
+   (Se deja tal cual por si lo usas en otros lados)
+   ========================================================= */
+
+.table-wrap--clean{
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(15,23,42,.10);
+  background: #ffffff;
+}
+
+.table--clean{
   width: 100%;
-  border-collapse: collapse;
-  font-size: .9rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .92rem;
 }
 
-thead {
-  border-bottom: 2px solid var(--wire);
-}
-
-th {
-  text-align: left;
-  padding: .65rem .75rem;
-  font-size: .7rem;
-  font-weight: 700;
+/* Header claro */
+.table--clean thead th{
+  background: rgba(15,23,42,.03);
+  color: rgba(15,23,42,.75);
+  font-weight: 900;
+  font-size: .74rem;
+  letter-spacing: .08em;
   text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--ink-dim);
+
+  padding: .85rem .95rem;
+  border-bottom: 1px solid rgba(15,23,42,.10);
+  text-align: left;
   white-space: nowrap;
 }
 
-td {
-  padding: .65rem .75rem;
-  border-bottom: 1px solid var(--wire);
+/* Body */
+.table--clean tbody td{
+  padding: .85rem .95rem;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  color: rgba(15,23,42,.92);
+  background: #ffffff;
+  transition: background .12s ease;
+}
+
+/* zebra muuuuy ligera */
+.table--clean tbody tr:nth-child(even) td{
+  background: rgba(15,23,42,.015);
+}
+
+/* hover sutil */
+.table--clean tbody tr:hover td{
+  background: rgba(59,130,246,.06);
+}
+
+/* última fila sin borde */
+.table--clean tbody tr:last-child td{
+  border-bottom: 0;
+}
+
+/* primera col un poquito más fuerte */
+.table--clean tbody td:first-child{
+  font-weight: 800;
+}
+
+/* mono */
+.table--clean .td-mono{
+  color: rgba(15,23,42,.65);
+  font-family: var(--font-mono);
+  font-size: .88rem;
+}
+
+/* Acciones derecha */
+.table--clean td:last-child,
+.table--clean th:last-child{
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* iconos dentro de celdas */
+.table--clean td svg{
+  width: 18px;
+  height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+}
+
+/* =========================================================
+   Auditoría — Forzar look “Empleados” SIN tocar tu EJS
+   Tu tabla es: <table class="table table--blue table--auditoria">
+   y wrap: <div class="table-wrap table-wrap--asignar table-wrap--blue">
+   ========================================================= */
+
+/* El contenedor azul lo volvemos “clean” como Empleados */
+.page--auditoria .table-wrap--blue{
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(15,23,42,.10);
+  background: #ffffff;
+}
+
+/* Tabla auditoría */
+.page--auditoria .table--auditoria{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .92rem;
+}
+
+/* Header gris, bien “adentro” */
+.page--auditoria .table--auditoria thead th{
+  background: rgba(15,23,42,.03);
+  color: rgba(15,23,42,.72);
+  font-weight: 900;
+  font-size: .74rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+
+  padding: .85rem .95rem;
+  border-bottom: 1px solid rgba(15,23,42,.10);
+  text-align: left;
+  white-space: nowrap;
   vertical-align: middle;
 }
 
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(59, 130, 246, 0.04); }
-
-.td-mono {
-  font-family: var(--font-mono);
-  font-size: .85rem;
+/* Body spacing igual a empleados */
+.page--auditoria .table--auditoria tbody td{
+  padding: .85rem .95rem;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  color: rgba(15,23,42,.92);
+  background: #ffffff;
+  vertical-align: middle;
+  transition: background .12s ease;
 }
 
-@media (max-width: 640px) {
-  .td-hide-mobile { display: none; }
-  th.td-hide-mobile { display: none; }
+/* zebra ligera */
+.page--auditoria .table--auditoria tbody tr:nth-child(even) td{
+  background: rgba(15,23,42,.015);
+}
+
+/* hover */
+.page--auditoria .table--auditoria tbody tr:hover td{
+  background: rgba(59,130,246,.06);
+}
+
+/* última fila sin borde */
+.page--auditoria .table--auditoria tbody tr:last-child td{
+  border-bottom: 0;
+}
+
+/* mono mantiene tu look */
+.page--auditoria .table--auditoria .td-mono{
+  color: rgba(15,23,42,.65);
+  font-family: var(--font-mono);
+  font-size: .88rem;
+}
+
+/* Alinear último header/celda a la derecha (Detalle) */
+.page--auditoria .table--auditoria th:last-child,
+.page--auditoria .table--auditoria td:last-child{
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   Auditoría: JSON dentro de <details>
+   ========================================================= */
+.pre-json{
+  font-size: .75rem;
+  margin-top: .5rem;
+  overflow: auto;
+  max-width: 460px;
+  background: rgba(15,23,42,.92);
+  color: rgba(255,255,255,.95) !important;
+  padding: .65rem .75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  white-space: pre;
+}
+.pre-json *{ color: rgba(255,255,255,.95) !important; }
+
+/* =========================================================
+   RESPONSIVE: Tabla → Cards (si quieres usarlo)
+   Actívalo con class="table--stack"
+   (Tu auditoría NO lo está usando, así que no afecta)
+   ========================================================= */
+@media (max-width: 720px){
+  .table--stack thead{ display:none; }
+
+  .table--stack,
+  .table--stack tbody,
+  .table--stack tr,
+  .table--stack td{
+    display:block;
+    width:100%;
+  }
+
+  .table--stack tbody tr{
+    margin: 0 0 12px 0;
+    border: 1px solid rgba(15,23,42,.10);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .table--stack tbody td{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    padding: .72rem .92rem;
+    border-bottom: 1px solid rgba(15,23,42,.08);
+    background: #fff !important;
+  }
+
+  .table--stack tbody td:last-child{
+    border-bottom:0;
+    justify-content:flex-end;
+  }
+}
+
+/* =========================================================
+   ✅ Color de Post, delete, patch etc (NO TOCAR)
+   Se dejan igual para que NO se rompan tus badges
+   ========================================================= */
+
+.table--blue .badge--warn{
+  background: rgba(245,158,11,.18);
+  color: #92400e;
+  border-color: rgba(245,158,11,.32);
+}
+
+.table--blue .badge--ok{
+  background: rgba(30,58,138,.14);
+  color: #1e3a8a;
+  border-color: rgba(30,58,138,.26);
+}
+
+.table--blue .badge--none{
+  background: rgba(15,23,42,.08);
+  color: rgba(15,23,42,.88);
+  border-color: rgba(15,23,42,.14);
+}
+
+.table--blue .badge--fail{
+  background: rgba(220, 38, 38, .14);
+  color: #b91c1c;
+  border-color: rgba(220, 38, 38, .30);
 }

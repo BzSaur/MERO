@@ -10,10 +10,24 @@
 <!-- Sidebar Drawer -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <a href="/" class="sidebar-brand">
-      <img src="/img/logo_ram.png" alt="Logo" class="sidebar-brand-logo">
-      <span>MERO</span>
-    </a>
+
+    <!-- ✅ Brand + Toggle (a la izquierda) -->
+    <div class="sidebar-brand-wrap">
+      <a href="/" class="sidebar-brand">
+        <img src="/img/logo_ram.png" alt="Logo" class="sidebar-brand-logo">
+        <span>MERO</span>
+      </a>
+
+      <!-- ✅ Toggle theme (UI tipo sol/luna) -->
+      <label class="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
+        <input id="themeToggle" type="checkbox" class="theme-toggle__input">
+        <span class="theme-toggle__track" aria-hidden="true">
+          <span class="theme-toggle__thumb"></span>
+          <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">☀</span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">🌙</span>
+        </span>
+      </label>
+    </div>
 
     <button class="btn-icon text-white" id="sidebarClose" type="button" title="Cerrar menú" aria-label="Cerrar menú">
       <i class="bi bi-x-lg"></i>

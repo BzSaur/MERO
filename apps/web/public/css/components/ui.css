@@ -1,145 +1,388 @@
-/* ── Badge (soft background) ── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  padding: .2rem .6rem;
-  border-radius: var(--r-sm);
-  font-size: .75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
+/* =========================================================
+   BUTTON VARIANTS — Create / Edit (SIN gradiente)
+   ========================================================= */
 
-.badge--ok   { background: var(--signal-ok-bg);   color: #047857; }
-.badge--warn { background: var(--signal-warn-bg);  color: #c2410c; }
-.badge--fail { background: var(--signal-fail-bg);  color: #dc2626; }
-.badge--none { background: var(--panel);            color: var(--ink-dim); }
-
-
-/* ── Buttons ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .5rem 1rem;
-  border-radius: var(--r-sm);
-  font-size: .85rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all .15s ease;
-  text-decoration: none;
-  white-space: nowrap;
-  font-family: var(--font-ui);
-}
-.btn:hover { text-decoration: none; }
-
-.btn--primary {
-  background: var(--amber);
-  color: #ffffff;
-  border-color: var(--amber);
-  box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
-}
-.btn--primary:hover {
-  background: var(--amber-hi);
-  border-color: var(--amber-hi);
-  color: #ffffff;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
-}
-
-.btn--ghost {
-  background: var(--surface);
-  color: var(--ink-dim);
-  border-color: var(--wire);
-}
-.btn--ghost:hover {
-  background: var(--panel);
-  color: var(--ink);
-  border-color: var(--wire-hi);
-}
-
-.btn--danger {
-  background: rgba(239, 68, 68, 0.10);
-  border-color: rgba(239, 68, 68, 0.28);
-  color: rgba(239, 68, 68, 0.92);
-}
-
-.btn--danger:hover{
-  background: rgba(239, 68, 68, 0.16);
-  border-color: rgba(239, 68, 68, 0.40);
-  color: rgba(239, 68, 68, 0.98);
-}
-
-.btn--sm   { padding: .35rem .65rem; font-size: .8rem; }
-.btn--icon { padding: .4rem; }
-.btn--full { width: 100%; justify-content: center; }
-
-
-/* ── Flash messages ── */
-.flash-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-sm);
-  margin-bottom: var(--gap);
-}
-
-.flash {
-  padding: .75rem 1rem;
-  border-radius: var(--r-sm);
-  font-size: .9rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-}
-
-.flash--error   { background: var(--signal-fail-bg); color: #dc2626; }
-.flash--success { background: var(--signal-ok-bg);   color: #047857; }
-.flash--info    { background: var(--amber-lo);       color: var(--amber-hi); }
-
-
-/* ── Efficiency value ── */
-.eff-value {
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 600;
-}
-.eff-value--ok   { color: var(--signal-ok);   }
-.eff-value--warn { color: var(--signal-warn); }
-.eff-value--fail { color: var(--signal-fail); }
-.eff-value--none { color: var(--ink-muted);   }
-
-
-/* ── Icon (SVG sprite) ── */
-/* IMPORTANTE: sin esto tus <svg class="icon"> vuelven a su tamaño default (300x150) */
-.icon {
-  display: inline-block;
+.btn svg{
   width: 1em;
   height: 1em;
   flex-shrink: 0;
-  vertical-align: middle;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+}
+
+/* Nuevo / Crear */
+.btn--create{
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(29,78,216,.18);
+  font-weight: 700;
+}
+.btn--create:hover{
+  background: #1e40af;
+  border-color: #1e40af;
+  box-shadow: 0 14px 26px rgba(29,78,216,.22);
+}
+.btn--create:active{
+  box-shadow: 0 8px 18px rgba(29,78,216,.16);
+}
+
+/* Editar */
+.btn--edit{
+  background: rgba(29,78,216,.10);
+  border-color: rgba(29,78,216,.30);
+  color: #1e3a8a;
+  font-weight: 700;
+}
+.btn--edit:hover{
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+}
+
+/* Compacto para tablas */
+.btn--edit.btn--sm{
+  padding: .34rem .65rem;
+  font-size: .82rem;
+  border-radius: 10px;
+}
+
+/* =========================================================
+   USUARIOS — Header + Filtros (sin fondo blanco)
+   ========================================================= */
+
+/* Botón arriba a la derecha */
+.page-header--usuarios{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: var(--gap, 12px);
+  flex-wrap: wrap;
+}
+.page-header--usuarios .btn--create{
+  margin-left: auto;
+}
+
+/* Barra de filtros */
+.users-controls{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+
+  /* ✅ más separación entre controles */
+  gap: 18px;
+
+  /* ✅ más separación con la tabla */
+  margin: 14px 0 18px 0;
+
+  /* ✅ SIN fondo blanco */
+  background: transparent;
+
+  /* más aire */
+  padding: 6px 0;
+  border: 0;
+}
+
+.users-controls__left{
+  display:flex;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap: 18px; /* ✅ separa “Filtrar”, “Orden” y el botón */
+}
+
+.users-controls__field{ min-width: 240px; }
+.users-controls__field--wide{ min-width: 280px; }
+
+.users-controls .form-label{
+  margin-bottom:.35rem;
+}
+
+/* ✅ QUITA el blanco del select/input (transparente) */
+.users-controls .form-control{
+  background: transparent !important;
+  border: 1px solid rgba(30,58,138,.22);
+  border-radius: 14px;
+  height: 44px;
+}
+
+/* focus azul limpio */
+.users-controls .form-control:focus{
+  border-color: rgba(29,78,216,.55);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.12);
+}
+
+/* botón limpiar separado y con estilo */
+.users-controls__actions{
+  display:flex;
+  gap: 12px;
+}
+
+.users-controls .btn--ghost{
+  margin-left: 6px;
+  background: rgba(29,78,216,.06);
+  border-color: rgba(29,78,216,.18);
+  color: #1e3a8a;
+}
+.users-controls .btn--ghost:hover{
+  background: rgba(29,78,216,.12);
+  border-color: rgba(29,78,216,.28);
+}
+
+/* contador */
+.users-controls__count{
+  align-self:center;
+}
+
+/* Responsive */
+@media (max-width: 720px){
+  .page-header--usuarios .btn--create{ width: 100%; }
+  .users-controls__field,
+  .users-controls__field--wide{ min-width: 100%; }
+  .users-controls__count{ width: 100%; text-align:center; }
 }
 
 
-/* ── Divider ── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--wire);
-  margin: var(--gap) 0;
+
+
+
+
+/* Auditoría: header alineado (título izq, volver der) */
+.page-header--auditoria{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: var(--gap, 12px);
+  flex-wrap: wrap;
+}
+.page-header--auditoria .btn--back{ margin-left:auto; }
+
+/* Botón Volver (sin gradiente) */
+/* Auditoría: Volver arriba derecha (sin gradiente) */
+.page--auditoria .page-header{
+  position: relative;
+  padding-right: 180px; /* espacio para el botón */
+}
+
+.page--auditoria .btn--back{
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+
+  background: rgba(29,78,216,.08);
+  border: 1px solid rgba(29,78,216,.22);
+  color: #1e3a8a;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: .55rem 1.05rem;
+  box-shadow: 0 10px 20px rgba(15,23,42,.08);
+}
+
+.page--auditoria .btn--back:hover{
+  background: rgba(29,78,216,.14);
+  border-color: rgba(29,78,216,.30);
+  transform: translateY(-1px);
+}
+
+.page--auditoria .btn--back:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+
+@media (max-width:720px){
+  .page--auditoria .page-header{
+    padding-right: 0;
+    padding-top: 56px; /* para que no se encime con el título */
+  }
 }
 
 
-/* ── Empty state ── */
-.empty {
+
+
+/* Catalogos: tabs arriba (Subtareas / Modelos / Estándares) */
+.tabs-actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tabs-actions .btn--ghost{
+  background: rgba(29,78,216,.06);
+  border-color: rgba(29,78,216,.18);
+  color: #1e3a8a;
+  font-weight: 800;
+}
+.tabs-actions .btn--ghost:hover{
+  background: rgba(29,78,216,.12);
+  border-color: rgba(29,78,216,.28);
+}
+
+/* Áreas: header con acciones a la derecha */
+.page--areas .page-header{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: var(--gap, 12px);
+  flex-wrap: wrap;
+}
+
+.page--areas .tabs-actions{
+  margin-left: auto;        /* ✅ empuja a la derecha */
+  justify-content: flex-end;
+}
+
+/* =========================================================
+   Áreas: Form "Nueva área" como mini-tabla compacta
+   ========================================================= */
+/* =========================================================
+   ÁREAS: forzar 2 columnas en escritorio
+   (Nueva área izquierda / Registradas derecha)
+   ========================================================= */
+.page--areas .grid-2{
+  display: grid;
+  grid-template-columns: 460px 1fr; /* izquierda fija, derecha flexible */
+  gap: 18px;
+  align-items: start;
+}
+
+/* que no se estiren raro */
+.page--areas .grid-2 > .card{
+  min-width: 0;
+}
+
+/* responsive: 1 columna */
+@media (max-width: 980px){
+  .page--areas .grid-2{
+    grid-template-columns: 1fr;
+  }
+}
+.area-mini{
+  padding: var(--gap) var(--gap-lg);
+}
+
+.area-mini__grid{
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+/* label como columna izquierda */
+.area-mini__label{
+  font-size: .78rem;
+  font-weight: 900;
+  color: rgba(15,23,42,.70);
+  letter-spacing: .03em;
+}
+
+/* inputs compactos */
+.area-mini .form-control{
+  height: 42px;
+  border-radius: 12px;
+}
+
+/* fila de acciones */
+.area-mini__actions{
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* Nueva área: look tipo mini-tabla (sutil azul) */
+.page--areas .area-mini{
+  background: rgba(219,234,254,.35);      /* azul muy suave */
+  border-top: 1px solid rgba(30,58,138,.10);
+  border-bottom: 1px solid rgba(30,58,138,.10);
+  border-radius: 14px;
+}
+
+/* líneas entre filas (como tabla) */
+.page--areas .area-mini__grid > *{
+  padding: .55rem .25rem;
+}
+
+.page--areas .area-mini__grid > :nth-child(1),
+.page--areas .area-mini__grid > :nth-child(2){
+  border-bottom: 1px solid rgba(30,58,138,.10);
+}
+
+.page--areas .area-mini__label{
+  color: rgba(30,58,138,.85);
+}
+
+/* inputs un poco más “tabla” */
+.page--areas .area-mini .form-control{
+  background: rgba(255,255,255,.85);
+  border-color: rgba(30,58,138,.18);
+}
+.page--areas .area-mini .form-control:focus{
+  border-color: rgba(29,78,216,.55);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.10);
+}
+
+/* responsive: apila */
+@media (max-width: 720px){
+  .area-mini__grid{
+    grid-template-columns: 1fr;
+  }
+  .area-mini__actions{
+    justify-content: stretch;
+  }
+  .area-mini__actions .btn{
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   ÁREAS: el card de "Nueva área" no debe estirarse (quita el cuadrote)
+   ========================================================= */
+
+/* El grid no estira items verticalmente */
+.page--areas .grid-2{
+  align-items: start;
+}
+
+/* Solo el primer card (Nueva área): que mida lo que su contenido */
+.page--areas .grid-2 > .card:first-child{
+  align-self: start;
+  height: fit-content;
+  min-height: 0;
+}
+
+/* Si algún estilo viejo le metió min-height al card--asignar, lo anulamos aquí */
+.page--areas .grid-2 > .card:first-child.card--asignar{
+  min-height: unset;
+}
+
+/* (opcional) Si quieres que todo el card se vea con el tono azul suave y no quede blanco */
+.page--areas .grid-2 > .card:first-child{
+  background: rgba(219,234,254,.20);
+  border: 1px solid rgba(30,58,138,.10);
+}
+
+/* =========================================================
+   EMPTY STATE centrado y con panel suave (Estándares / catálogos)
+   ========================================================= */
+
+/* Cuando no hay registros, el card no debe verse “vacío blanco” */
+.page--areas .card--asignar-act .empty{
+  display: grid;
+  place-items: center;            /* centra X/Y */
   text-align: center;
-  padding: 3rem var(--gap);
-  color: var(--ink-dim);
+
+  min-height: 260px;              /* da presencia al panel */
+  padding: 24px;
+
+  background: rgba(219,234,254,.25);  /* azul muy suave */
+  border: 1px dashed rgba(30,58,138,.22);
+  border-radius: 14px;
+
+  margin: var(--gap, 12px) var(--gap-lg, 18px) var(--gap-lg, 18px);
 }
-.empty__text { font-size: .9rem; }
+
+/* Texto del empty más bonito */
+.page--areas .card--asignar-act .empty__text{
+  font-weight: 800;
+  color: rgba(30,58,138,.85);
+  margin: 0;
+}
