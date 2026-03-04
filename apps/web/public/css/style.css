@@ -399,35 +399,14 @@
       border-top: 1px solid #e2e8f0;
     }
 
-    /* Sidebar cerrado por defecto */
-/* ============================================================
-   Sidebar (FIX) - NO forzar abierto en desktop desde style.css
-   Motivo:
-   - style.css se carga después de sidebar.css y estaba anulando
-     el modo "drawer" (sidebar cerrado por defecto).
-   - Se elimina el sistema viejo ".sidebar-open" y se respeta:
-     body.sidebar-collapsed  +  .sidebar.show
-   ============================================================ */
-
-/* (Opcional) Mantén transición suave por si style.css estaba antes */
 .sidebar {
   transition: transform 0.3s ease;
 }
 
-/* El sistema viejo ya no se usa: evita que vuelva a abrirse */
 .sidebar-open .sidebar {
   transform: unset;
 }
 
-/* El overlay viejo (clase) ya no se usa como “display block”,
-   porque ahora el overlay se controla con .show y opacity en sidebar.css */
 .sidebar-open .sidebar-overlay {
   display: none;
 }
-
-/* IMPORTANTE:
-   Antes se forzaba que en desktop el sidebar SIEMPRE estuviera visible.
-   Ese era el bug: anulaba body.sidebar-collapsed.
-   Así que aquí NO se debe poner:
-   @media(...) { .sidebar { transform: translateX(0) } }
-*/
