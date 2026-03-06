@@ -705,3 +705,588 @@ html[data-theme="dark"] .area-item:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: var(--dm-primary) !important;
 }
+
+/* ============================================================
+   EMPLEADO DETALLE — Dark Mode real
+   PONER AL FINAL DE dark.css
+   ============================================================ */
+
+html[data-theme="dark"] .page--empleado-detalle{
+  color: var(--dm-ink);
+}
+
+/* Fondo general del contenido */
+html[data-theme="dark"] .page--empleado-detalle .container{
+  position: relative;
+}
+
+/* HERO */
+html[data-theme="dark"] .page--empleado-detalle .employee-hero{
+  background:
+    radial-gradient(circle at top right, rgba(59,130,246,.10), transparent 34%),
+    linear-gradient(180deg, rgba(15,23,42,.96), rgba(17,28,51,.96)) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.32) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-hero__title{
+  color: rgba(241,245,249,.98) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-hero__eyebrow{
+  background: rgba(59,130,246,.14) !important;
+  color: rgba(191,219,254,.96) !important;
+  border: 1px solid rgba(59,130,246,.16);
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-chip{
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  color: rgba(226,232,240,.82) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-chip strong{
+  color: rgba(248,250,252,.98) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-chip .icon{
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-hero__back{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  color: rgba(226,232,240,.82) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-hero__back:hover{
+  background: rgba(255,255,255,.06) !important;
+  border-color: var(--dm-border) !important;
+  color: rgba(248,250,252,.98) !important;
+}
+
+/* CARDS */
+html[data-theme="dark"] .page--empleado-detalle .employee-card,
+html[data-theme="dark"] .page--empleado-detalle .empleado-detail-history{
+  background: linear-gradient(180deg, rgba(15,23,42,.98), rgba(17,28,51,.98)) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.28) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-card__header,
+html[data-theme="dark"] .page--empleado-detalle .employee-card__header--history{
+  background: rgba(255,255,255,.03) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-card__header .card__title{
+  color: rgba(241,245,249,.94) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-card__header .card__title .icon{
+  color: #3b82f6 !important;
+}
+
+/* BLOQUES INTERNOS */
+html[data-theme="dark"] .page--empleado-detalle .employee-info-item,
+html[data-theme="dark"] .page--empleado-detalle .employee-status__block{
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-info-item__label,
+html[data-theme="dark"] .page--empleado-detalle .employee-status__label{
+  color: rgba(148,163,184,.92) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-info-item__value,
+html[data-theme="dark"] .page--empleado-detalle .employee-status__value{
+  color: rgba(241,245,249,.96) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-info-item__value.td-mono,
+html[data-theme="dark"] .page--empleado-detalle .employee-qr__code{
+  color: rgba(148,163,184,.9) !important;
+}
+
+/* QR */
+html[data-theme="dark"] .page--empleado-detalle .employee-qr__box{
+  background: #ffffff !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 10px 24px rgba(0,0,0,.18) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-qr__btn{
+  box-shadow: none !important;
+}
+
+/* TABLA HISTORIAL */
+html[data-theme="dark"] .page--empleado-detalle .table-wrap--clean{
+  background: transparent !important;
+  border: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .table--clean thead th{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .table--clean tbody td{
+  background: rgba(15,23,42,.98) !important;
+  color: var(--dm-ink) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .table--clean tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .table--clean tbody tr:hover td{
+  background: rgba(59,130,246,.10) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .table--clean .td-mono{
+  color: rgba(148,163,184,.92) !important;
+}
+
+/* EMPTY */
+html[data-theme="dark"] .page--empleado-detalle .empty--employee{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px dashed var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .empty--employee .empty__text{
+  color: rgba(226,232,240,.86) !important;
+}
+
+/* BADGES */
+html[data-theme="dark"] .page--empleado-detalle .badge--ok{
+  background: rgba(34,197,94,.14) !important;
+  color: #86efac !important;
+  border: 1px solid rgba(34,197,94,.24) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .badge--fail{
+  background: rgba(239,68,68,.14) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239,68,68,.24) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .badge--none{
+  background: rgba(148,163,184,.12) !important;
+  color: rgba(226,232,240,.86) !important;
+  border: 1px solid rgba(148,163,184,.18) !important;
+}
+
+/* ============================================================
+   FIX GENERAL — Tablas tipo asignar/blue en dark mode
+   PONER AL FINAL DE dark.css
+   ============================================================ */
+
+html[data-theme="dark"] .table-wrap--asignar,
+html[data-theme="dark"] .table-wrap--blue,
+html[data-theme="dark"] .table-wrap--asignar.table-wrap--blue{
+  background: var(--dm-surface) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.22) !important;
+}
+
+html[data-theme="dark"] .table--asignar,
+html[data-theme="dark"] .table--blue,
+html[data-theme="dark"] .table--asignar.table--blue{
+  background: transparent !important;
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .table--asignar thead th,
+html[data-theme="dark"] .table--blue thead th,
+html[data-theme="dark"] .table--asignar.table--blue thead th{
+  background: rgba(255,255,255,.03) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .table--asignar tbody td,
+html[data-theme="dark"] .table--blue tbody td,
+html[data-theme="dark"] .table--asignar.table--blue tbody td{
+  background: var(--dm-surface) !important;
+  color: var(--dm-ink) !important;
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .table--asignar tbody tr:nth-child(even) td,
+html[data-theme="dark"] .table--blue tbody tr:nth-child(even) td,
+html[data-theme="dark"] .table--asignar.table--blue tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+
+html[data-theme="dark"] .table--asignar tbody tr:hover td,
+html[data-theme="dark"] .table--blue tbody tr:hover td,
+html[data-theme="dark"] .table--asignar.table--blue tbody tr:hover td{
+  background: rgba(59,130,246,.10) !important;
+}
+
+html[data-theme="dark"] .table--asignar .td-mono,
+html[data-theme="dark"] .table--blue .td-mono,
+html[data-theme="dark"] .table--asignar.table--blue .td-mono{
+  color: rgba(148,163,184,.92) !important;
+}
+
+/* badges dentro de estas tablas */
+html[data-theme="dark"] .table--asignar .badge--none,
+html[data-theme="dark"] .table--blue .badge--none{
+  background: rgba(148,163,184,.12) !important;
+  color: rgba(226,232,240,.88) !important;
+  border: 1px solid rgba(148,163,184,.18) !important;
+}
+
+html[data-theme="dark"] .table--asignar .badge--ok,
+html[data-theme="dark"] .table--blue .badge--ok{
+  background: rgba(59,130,246,.16) !important;
+  color: rgba(219,234,254,.95) !important;
+  border: 1px solid rgba(59,130,246,.24) !important;
+}
+
+html[data-theme="dark"] .table--asignar .badge--warn,
+html[data-theme="dark"] .table--blue .badge--warn{
+  background: rgba(245,158,11,.16) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245,158,11,.24) !important;
+}
+
+html[data-theme="dark"] .table--asignar .badge--fail,
+html[data-theme="dark"] .table--blue .badge--fail{
+  background: rgba(239,68,68,.14) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239,68,68,.24) !important;
+}
+
+/* ============================================================
+   PANEL ENCARGADO — Eficiencia por slot en dark mode
+   PONER AL FINAL DE dark.css
+   ============================================================ */
+
+html[data-theme="dark"] .slot-area{
+  border-bottom: 1px solid var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .slot-area__name{
+  color: rgba(241,245,249,.94) !important;
+}
+
+html[data-theme="dark"] .slot-strip--lg .slot-strip__seg{
+  border-color: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .slot-strip__seg--none{
+  background: rgba(148,163,184,.18) !important;
+}
+
+/* =========================================================
+   PANEL ENCARGADO — Leyenda de eficiencia por slot (dark)
+   ========================================================= */
+
+html[data-theme="dark"] .slot-legend{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: rgba(226,232,240,.90) !important;
+}
+
+
+/* =========================================================
+   ASIGNACIONES — Botones ghost y volver como btn--edit en dark
+   PEGAR AL FINAL DE dark.css
+   ========================================================= */
+
+html[data-theme="dark"] .page--asignar .users-controls__actions .btn--ghost,
+html[data-theme="dark"] .page--auditoria.page--asignar .users-controls__actions .btn--ghost,
+html[data-theme="dark"] .page--areas.page--asignar .users-controls__actions .btn--ghost,
+html[data-theme="dark"] .page--auditoria.page--areas.page--asignar .users-controls__actions .btn--ghost{
+  background: rgba(59,130,246,.12) !important;
+  border: 1px solid rgba(59,130,246,.30) !important;
+  color: rgba(219,234,254,.95) !important;
+  box-shadow: none !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme="dark"] .page--asignar .users-controls__actions .btn--ghost:hover,
+html[data-theme="dark"] .page--auditoria.page--asignar .users-controls__actions .btn--ghost:hover,
+html[data-theme="dark"] .page--areas.page--asignar .users-controls__actions .btn--ghost:hover,
+html[data-theme="dark"] .page--auditoria.page--areas.page--asignar .users-controls__actions .btn--ghost:hover{
+  background: rgba(59,130,246,.32) !important;
+  border-color: rgba(59,130,246,.45) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+/* Botón volver */
+html[data-theme="dark"] .page--asignar .btn--back,
+html[data-theme="dark"] .page--auditoria.page--asignar .btn--back,
+html[data-theme="dark"] .page--areas.page--asignar .btn--back,
+html[data-theme="dark"] .page--auditoria.page--areas.page--asignar .btn--back{
+  background: rgba(59,130,246,.12) !important;
+  border: 1px solid rgba(59,130,246,.30) !important;
+  color: rgba(219,234,254,.95) !important;
+  box-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="dark"] .page--asignar .btn--back:hover,
+html[data-theme="dark"] .page--auditoria.page--asignar .btn--back:hover,
+html[data-theme="dark"] .page--areas.page--asignar .btn--back:hover,
+html[data-theme="dark"] .page--auditoria.page--areas.page--asignar .btn--back:hover{
+  background: rgba(59,130,246,.32) !important;
+  border-color: rgba(59,130,246,.45) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+/* Iconos dentro de esos botones */
+html[data-theme="dark"] .page--asignar .btn--back .icon,
+html[data-theme="dark"] .page--asignar .users-controls__actions .btn--ghost .icon,
+html[data-theme="dark"] .page--auditoria.page--asignar .btn--back .icon,
+html[data-theme="dark"] .page--auditoria.page--asignar .users-controls__actions .btn--ghost .icon,
+html[data-theme="dark"] .page--areas.page--asignar .btn--back .icon,
+html[data-theme="dark"] .page--areas.page--asignar .users-controls__actions .btn--ghost .icon{
+  color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* Por si el <small> del botón cámara hereda opacidad rara */
+html[data-theme="dark"] .page--asignar .users-controls__actions .btn--ghost small{
+  color: currentColor !important;
+  opacity: 1 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+}
+
+/* ============================================================
+   USUARIOS FORM — Dark mode
+   Editar / Nuevo usuario
+   Pegar al final de dark.css
+   ============================================================ */
+
+html[data-theme="dark"] .page--usuarios-form{
+  --uf-bg: #0b1220;
+  --uf-surface: #0f172a;
+  --uf-surface-2: #111c33;
+  --uf-surface-3: #18233d;
+  --uf-border: rgba(148,163,184,.18);
+  --uf-border-strong: rgba(148,163,184,.28);
+  --uf-ink: rgba(226,232,240,.95);
+  --uf-ink-soft: rgba(148,163,184,.82);
+  --uf-ink-dim: rgba(148,163,184,.68);
+  --uf-primary: #3b82f6;
+  --uf-primary-soft: rgba(59,130,246,.14);
+  --uf-danger: #ef4444;
+  --uf-danger-soft: rgba(239,68,68,.12);
+}
+
+/* Fondo general */
+html[data-theme="dark"] .page--usuarios-form,
+html[data-theme="dark"] .page--usuarios-form .container,
+html[data-theme="dark"] .page--usuarios-form .content{
+  background: transparent !important;
+  color: var(--uf-ink) !important;
+}
+
+/* Header superior */
+html[data-theme="dark"] .page--usuarios-form .page-header{
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .btn--back-users,
+html[data-theme="dark"] .page--usuarios-form .btn--back{
+  background: rgba(59,130,246,.10) !important;
+  border: 1px solid rgba(59,130,246,.28) !important;
+  color: rgba(219,234,254,.96) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .btn--back-users:hover,
+html[data-theme="dark"] .page--usuarios-form .btn--back:hover{
+  background: rgba(59,130,246,.18) !important;
+  border-color: rgba(59,130,246,.40) !important;
+  color: #fff !important;
+}
+
+/* Shell principal */
+html[data-theme="dark"] .page--usuarios-form .user-form-shell{
+  color: var(--uf-ink) !important;
+}
+
+/* Bloque logo/título */
+html[data-theme="dark"] .page--usuarios-form .user-form-brand{
+  color: var(--uf-ink) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .user-form-brand__logo{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid var(--uf-border) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.28) !important;
+  border-radius: 24px;
+}
+
+html[data-theme="dark"] .page--usuarios-form .user-form-brand__title{
+  color: var(--uf-ink) !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .user-form-brand__subtitle{
+  color: var(--uf-ink-soft) !important;
+}
+
+/* Tarjeta del formulario */
+html[data-theme="dark"] .page--usuarios-form .user-form-card,
+html[data-theme="dark"] .page--usuarios-form .card.card--asignar{
+  background: var(--uf-surface) !important;
+  border: 1px solid var(--uf-border) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,.34) !important;
+}
+
+/* Header blanco corregido */
+html[data-theme="dark"] .page--usuarios-form .card__header,
+html[data-theme="dark"] .page--usuarios-form .card__header--usuarios-form{
+  background: rgba(255,255,255,.03) !important;
+  border-bottom: 1px solid var(--uf-border) !important;
+  color: var(--uf-ink) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .card__header-left{
+  color: var(--uf-ink) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .card__title{
+  color: var(--uf-ink) !important;
+}
+
+/* Badge NUEVO / EDITAR */
+html[data-theme="dark"] .page--usuarios-form .badge--ok{
+  background: rgba(59,130,246,.14) !important;
+  color: #bfdbfe !important;
+  border: 1px solid rgba(59,130,246,.28) !important;
+}
+
+/* Formulario */
+html[data-theme="dark"] .page--usuarios-form .user-form{
+  color: var(--uf-ink) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .user-form__grid{
+  color: inherit !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .form-group{
+  color: inherit !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .form-label{
+  color: var(--uf-ink-soft) !important;
+  font-weight: 700;
+}
+
+/* Inputs / selects */
+html[data-theme="dark"] .page--usuarios-form .form-control,
+html[data-theme="dark"] .page--usuarios-form select.form-control{
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02)) !important;
+  border: 1px solid var(--uf-border-strong) !important;
+  color: var(--uf-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .form-control::placeholder{
+  color: var(--uf-ink-dim) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .form-control:hover,
+html[data-theme="dark"] .page--usuarios-form select.form-control:hover{
+  border-color: rgba(148,163,184,.38) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .form-control:focus,
+html[data-theme="dark"] .page--usuarios-form select.form-control:focus{
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(59,130,246,.52) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.16) !important;
+  color: var(--uf-ink) !important;
+  outline: none !important;
+}
+
+/* Options del select */
+html[data-theme="dark"] .page--usuarios-form select.form-control option{
+  background: #0f172a !important;
+  color: var(--uf-ink) !important;
+}
+
+/* Acciones inferiores */
+html[data-theme="dark"] .page--usuarios-form .user-form__actions{
+  border-top: 1px solid var(--uf-border) !important;
+  padding-top: 18px;
+}
+
+/* Botón principal */
+html[data-theme="dark"] .page--usuarios-form .btn--create{
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #fff !important;
+  box-shadow: 0 12px 24px rgba(29,78,216,.22) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .btn--create:hover{
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+/* Cancelar */
+html[data-theme="dark"] .page--usuarios-form .btn--ghost{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid var(--uf-border) !important;
+  color: var(--uf-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .btn--ghost:hover{
+  background: rgba(255,255,255,.06) !important;
+  border-color: var(--uf-border-strong) !important;
+  color: var(--uf-ink) !important;
+}
+
+/* Eliminar */
+html[data-theme="dark"] .page--usuarios-form .btn--danger{
+  background: var(--uf-danger-soft) !important;
+  border: 1px solid rgba(239,68,68,.30) !important;
+  color: #fecaca !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--usuarios-form .btn--danger:hover{
+  background: rgba(239,68,68,.18) !important;
+  border-color: rgba(239,68,68,.45) !important;
+  color: #fff !important;
+}
+
+/* Flash dentro de esta vista */
+html[data-theme="dark"] .page--usuarios-form .alert,
+html[data-theme="dark"] .page--usuarios-form .flash,
+html[data-theme="dark"] .page--usuarios-form .flash__item{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--uf-border) !important;
+  color: var(--uf-ink) !important;
+}
+
+/* Responsive suave */
+@media (max-width: 720px){
+  html[data-theme="dark"] .page--usuarios-form .user-form-brand__title{
+    line-height: 1.04;
+  }
+
+  html[data-theme="dark"] .page--usuarios-form .user-form__actions{
+    border-top: 0 !important;
+    padding-top: 12px;
+  }
+}

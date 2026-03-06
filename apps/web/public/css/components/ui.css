@@ -1163,3 +1163,145 @@ USUARIOS
     margin-bottom: 14px;
   }
 }
+
+
+/* =========================================================
+   PANEL ENCARGADO — Eficiencia por slot
+   PONER AL FINAL DE ui.css
+   ========================================================= */
+
+.slot-area{
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+}
+
+.slot-area:last-child{
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
+.slot-area__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.slot-area__name{
+  font-weight: 800;
+  color: rgba(15,23,42,.88);
+  line-height: 1.2;
+}
+
+.slot-strip{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.slot-strip--lg .slot-strip__seg{
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+.slot-strip__seg--ok{
+  background: linear-gradient(180deg, #22c55e, #15803d);
+}
+
+.slot-strip__seg--warn{
+  background: linear-gradient(180deg, #f59e0b, #b45309);
+}
+
+.slot-strip__seg--fail{
+  background: linear-gradient(180deg, #ef4444, #b91c1c);
+}
+
+.slot-strip__seg--none{
+  background: rgba(148,163,184,.18);
+}
+
+/* Valor eficiencia al lado derecho */
+.slot-area__header .eff-value{
+  white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 720px){
+  .slot-strip{
+    grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
+    gap: 6px;
+  }
+
+  .slot-strip--lg .slot-strip__seg{
+    height: 14px;
+  }
+}
+
+/* =========================================================
+   PANEL ENCARGADO — Leyenda de eficiencia por slot
+   ========================================================= */
+
+.slot-legend{
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .38rem .7rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #475569;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DASHBOARD ADMIN — Header responsive
+   Pegar al final de ui.css
+   ========================================================= */
+
+@media (max-width: 768px){
+  .welcome-header{
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 14px;
+  }
+
+  .welcome-header h2{
+    font-size: 2rem !important;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+
+  .welcome-header p{
+    margin: 0;
+    line-height: 1.45;
+  }
+
+  .date-badge{
+    align-self: flex-start;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 420px){
+  .welcome-header h2{
+    font-size: 1.8rem !important;
+  }
+
+  .date-badge{
+    font-size: .95rem;
+    line-height: 1.35;
+  }
+}
+
+
