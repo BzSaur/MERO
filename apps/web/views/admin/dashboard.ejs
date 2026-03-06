@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="/css/cards.css">
   <link rel="stylesheet" href="/css/ui.css">
   <link rel="stylesheet" href="/css/buttons.css">
-  <link rel="stylesheet" href="/css/dark.css"> </head>
+  <link rel="stylesheet" href="/css/dark.css">
+</head>
 
 <body>
   <div class="wrapper">
@@ -49,7 +50,6 @@
         <%- include('../partials/flash') %>
 
         <%
-          // Lógica de cálculo de variables
           const totalAsignados = (asignaciones || []).length;
           let sumEff = 0, countEff = 0;
           (metricas || []).forEach(m => {
@@ -111,7 +111,7 @@
                 <i class="bi bi-circle-fill text-warning" style="font-size: 0.6rem;"></i> Riesgo (70-89%): <%= warnCount %>
               </span>
               <span class="badge-summary">
-                <i class="bi bi-circle-fill text-danger" style="font-size: 0.6rem;"></i> Crítico (<70%): <%= failCount %>
+                <i class="bi bi-circle-fill text-danger" style="font-size: 0.6rem;"></i> Crítico (&lt;70%): <%= failCount %>
               </span>
             </div>
           </div>
@@ -133,7 +133,7 @@
             </div>
           </div>
 
-          <div class="col-12 col-lg-5">
+          <div class="col-12 col-lg-9">
             <div class="card h-100">
               <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom-0 pb-0">
                 <h5 class="card-title mb-0"><i class="bi bi-bar-chart-line me-2" style="color: #3b82f6;"></i> Eficiencia por área</h5>
@@ -146,23 +146,6 @@
                   <a href="/encargado/captura" class="btn--success-alt">
                     <i class="bi bi-plus-circle me-2"></i> Registrar captura
                   </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-4">
-            <div class="card h-100">
-              <div class="card-header bg-transparent border-bottom-0 pb-0">
-                <h5 class="card-title"><i class="bi bi-diagram-3 me-2" style="color: #10b981;"></i> Áreas Activas</h5>
-              </div>
-              <div class="card-body">
-                <div class="areas-grid">
-                  <% ['Administración', 'Sistemas', 'Laboratorio', 'Producción', 'Calidad', 'Mantenimiento', 'Almacén', 'Compras', 'Ventas', 'RH', 'Finanzas', 'Marketing', 'I+D', 'Logística', 'Servicio'].forEach(area => { %>
-                    <div class="area-item">
-                      <i class="bi bi-folder-fill me-1" style="font-size: 0.8rem; color: #3b82f6;"></i> <%= area %>
-                    </div>
-                  <% }) %>
                 </div>
               </div>
             </div>
@@ -182,7 +165,7 @@
     function toggleUserMenu() {
       document.getElementById('userMenu').classList.toggle('show');
     }
-    // Cerrar dropdown al hacer click fuera
+
     window.onclick = function(event) {
       if (!event.target.matches('.user-dropdown-toggle') && !event.target.closest('.user-dropdown-toggle')) {
         var dropdowns = document.getElementsByClassName("dropdown-menu");

@@ -416,3 +416,750 @@ html[data-theme="dark"] .btn--success-alt i {
     background: transparent !important;
     color: inherit;
 }
+
+
+/**************************************
+USUARIOS 
+***************************************/
+/* =========================================================
+   USUARIOS - FORMULARIO NUEVO / EDITAR
+   ========================================================= */
+
+.page--usuarios-form .container{
+  max-width: 1280px;
+}
+
+.page-header--usuarios-form{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.btn--back-users{
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.user-form-shell{
+  min-height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 0 40px;
+}
+
+.user-form-brand{
+  width: 100%;
+  max-width: 780px;
+  text-align: center;
+  margin: 8px auto 22px;
+}
+
+.user-form-brand__logo{
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 14px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 14px 30px rgba(15,23,42,.08);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.user-form-brand__logo img{
+  max-width: 78%;
+  max-height: 78%;
+  object-fit: contain;
+  display: block;
+}
+
+.user-form-brand__title{
+  margin: 0;
+  font-size: clamp(2.3rem, 5vw, 4.3rem);
+  line-height: 1;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.user-form-brand__subtitle{
+  margin: .75rem 0 0;
+  color: rgba(15,23,42,.62);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.user-form-card{
+  width: 100%;
+  max-width: 780px;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 18px 40px rgba(15,23,42,.08);
+}
+
+.card__header--usuarios-form{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 16px 18px !important;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  background: #fff;
+}
+
+.card__header--usuarios-form .card__header-left{
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.user-form{
+  padding: 20px 20px 8px;
+}
+
+.user-form__grid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.user-form .form-group{
+  margin: 0;
+}
+
+.user-form .form-label{
+  display: inline-block;
+  margin-bottom: .45rem;
+  font-weight: 800;
+  color: rgba(15,23,42,.85);
+}
+
+.user-form .form-control{
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.12);
+  background: #fff;
+  padding: .82rem .95rem;
+  color: #0f172a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+.user-form .form-control:focus{
+  outline: none;
+  border-color: rgba(29,78,216,.45);
+  box-shadow: 0 0 0 4px rgba(29,78,216,.10);
+}
+
+.user-form__actions{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 20px 20px;
+}
+
+.user-form__actions .btn{
+  min-height: 46px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.user-form__actions .btn--danger{
+  margin-left: auto;
+}
+
+@media (max-width: 720px){
+  .user-form-shell{
+    min-height: auto;
+    padding-bottom: 28px;
+  }
+
+  .user-form-brand__logo{
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+  }
+
+  .user-form-brand__subtitle{
+    font-size: .95rem;
+  }
+
+  .user-form{
+    padding: 16px 16px 6px;
+  }
+
+  .user-form__actions{
+    padding: 8px 16px 16px;
+  }
+
+  .user-form__actions .btn{
+    width: 100%;
+  }
+
+  .user-form__actions .btn--danger{
+    margin-left: 0;
+  }
+}
+
+
+/* =========================================================
+   EMPLEADO DETALLE — Layout general
+   PONER EN: ui.css
+   ========================================================= */
+/* =========================================================
+   EMPLEADO DETALLE — Vista bonita y ordenada
+   PONER AL FINAL DE ui.css
+   ========================================================= */
+
+.page--empleado-detalle .container{
+  max-width: 1320px;
+}
+
+/* -------------------------
+   HERO
+------------------------- */
+.page--empleado-detalle .employee-hero{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+
+  border-radius: 24px;
+  border: 1px solid rgba(15,23,42,.08);
+  background:
+    radial-gradient(circle at top right, rgba(29,78,216,.08), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.96));
+  box-shadow: 0 18px 38px rgba(15,23,42,.07);
+}
+
+.page--empleado-detalle .employee-hero__main{
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+}
+
+.page--empleado-detalle .employee-hero__avatar{
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  flex: 0 0 84px;
+
+  display: grid;
+  place-items: center;
+
+  background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+  color: #fff;
+  box-shadow: 0 16px 28px rgba(29,78,216,.22);
+}
+
+.page--empleado-detalle .employee-hero__avatar span{
+  font-size: 1.65rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.page--empleado-detalle .employee-hero__copy{
+  min-width: 0;
+  flex: 1;
+}
+
+.page--empleado-detalle .employee-hero__topline{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.page--empleado-detalle .employee-hero__eyebrow{
+  display: inline-flex;
+  align-items: center;
+  padding: .34rem .7rem;
+  border-radius: 999px;
+  background: rgba(29,78,216,.08);
+  color: #1e3a8a;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.page--empleado-detalle .employee-hero__title{
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: .98;
+  font-weight: 900;
+  color: #0f172a;
+  text-transform: lowercase;
+  word-break: break-word;
+}
+
+.page--empleado-detalle .employee-hero__meta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.page--empleado-detalle .employee-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .62rem .85rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(15,23,42,.08);
+  color: rgba(15,23,42,.82);
+  font-size: .9rem;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.page--empleado-detalle .employee-chip strong{
+  color: #0f172a;
+}
+
+.page--empleado-detalle .employee-chip .icon{
+  width: 16px;
+  height: 16px;
+  opacity: .85;
+}
+
+.page--empleado-detalle .employee-hero__actions{
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.page--empleado-detalle .employee-hero__back{
+  white-space: nowrap;
+}
+
+/* -------------------------
+   GRID PRINCIPAL
+------------------------- */
+.page--empleado-detalle .empleado-detail-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+/* -------------------------
+   CARD BASE
+------------------------- */
+.page--empleado-detalle .employee-card{
+  border-radius: 22px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.96));
+  box-shadow: 0 16px 32px rgba(15,23,42,.06);
+  overflow: hidden;
+}
+
+.page--empleado-detalle .employee-card__header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px !important;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.75);
+}
+
+.page--empleado-detalle .employee-card__header .card__title{
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  margin: 0;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.page--empleado-detalle .employee-card__header .card__title .icon{
+  width: 18px;
+  height: 18px;
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+
+.page--empleado-detalle .employee-card__body{
+  padding: 18px;
+}
+
+/* -------------------------
+   INFO LIST
+------------------------- */
+.page--empleado-detalle .employee-info-list{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.page--empleado-detalle .employee-info-item{
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.78);
+}
+
+.page--empleado-detalle .employee-info-item--full{
+  grid-column: 1 / -1;
+}
+
+.page--empleado-detalle .employee-info-item__label{
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(15,23,42,.58);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.page--empleado-detalle .employee-info-item__value{
+  display: block;
+  color: #0f172a;
+  font-size: 1rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+/* -------------------------
+   QR
+------------------------- */
+.page--empleado-detalle .employee-card__body--qr{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page--empleado-detalle .employee-qr{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.page--empleado-detalle .employee-qr__box{
+  width: min(100%, 260px);
+  aspect-ratio: 1 / 1;
+  padding: 14px;
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+  display: grid;
+  place-items: center;
+}
+
+.page--empleado-detalle .employee-qr__img{
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  display: block;
+}
+
+.page--empleado-detalle .employee-qr__code{
+  width: 100%;
+  text-align: center;
+  color: rgba(15,23,42,.62);
+  word-break: break-all;
+  line-height: 1.35;
+}
+
+.page--empleado-detalle .employee-qr__btn{
+  width: 100%;
+  max-width: 260px;
+  justify-content: center;
+}
+
+/* -------------------------
+   STATUS
+------------------------- */
+.page--empleado-detalle .employee-status{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.page--empleado-detalle .employee-status__block{
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.78);
+}
+
+.page--empleado-detalle .employee-status__label{
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(15,23,42,.58);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.page--empleado-detalle .employee-status__value{
+  color: #0f172a;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* -------------------------
+   HISTORIAL
+------------------------- */
+.page--empleado-detalle .empleado-detail-history{
+  margin-top: 2px;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 16px 32px rgba(15,23,42,.06);
+}
+
+.page--empleado-detalle .employee-card__header--history{
+  padding: 16px 18px !important;
+  background: rgba(255,255,255,.9);
+}
+
+.page--empleado-detalle .employee-table-wrap{
+  padding: 0 18px 18px;
+}
+
+.page--empleado-detalle .employee-table-wrap .table-wrap--clean{
+  border-radius: 18px;
+}
+
+.page--empleado-detalle .table--clean thead th{
+  background: rgba(15,23,42,.03);
+}
+
+.page--empleado-detalle .empty--employee{
+  margin: 18px;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 18px;
+  border: 1px dashed rgba(29,78,216,.22);
+  background: rgba(219,234,254,.18);
+}
+
+.page--empleado-detalle .empty--employee .empty__text{
+  margin: 0;
+  font-weight: 800;
+  color: rgba(30,58,138,.82);
+}
+
+/* -------------------------
+   BADGES
+------------------------- */
+.page--empleado-detalle .badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: .24rem .62rem;
+  font-size: .75rem;
+  font-weight: 900;
+}
+
+/* -------------------------
+   RESPONSIVE
+------------------------- */
+@media (max-width: 1200px){
+  .page--empleado-detalle .empleado-detail-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px){
+  .page--empleado-detalle .employee-hero{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page--empleado-detalle .employee-hero__actions{
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px){
+  .page--empleado-detalle .employee-hero{
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .page--empleado-detalle .employee-hero__main{
+    align-items: flex-start;
+  }
+
+  .page--empleado-detalle .employee-hero__avatar{
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
+    border-radius: 20px;
+  }
+
+  .page--empleado-detalle .employee-hero__avatar span{
+    font-size: 1.2rem;
+  }
+
+  .page--empleado-detalle .employee-hero__title{
+    font-size: 2rem;
+  }
+
+  .page--empleado-detalle .empleado-detail-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .page--empleado-detalle .employee-info-list{
+    grid-template-columns: 1fr;
+  }
+
+  .page--empleado-detalle .employee-card__body,
+  .page--empleado-detalle .employee-table-wrap{
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .page--empleado-detalle .employee-card__header{
+    padding: 14px 14px !important;
+  }
+
+  .page--empleado-detalle .employee-qr__btn{
+    max-width: 100%;
+  }
+}
+/* =========================================================
+   PATCH — EMPLEADO DETALLE
+   PONER DEBAJO DEL BLOQUE DE EMPLEADO DETALLE EN ui.css
+   ========================================================= */
+
+.page--empleado-detalle .empleado-detail-grid{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:18px !important;
+  align-items:start !important;
+}
+
+.page--empleado-detalle .employee-card{
+  display:flex !important;
+  flex-direction:column !important;
+  align-self:start !important;
+  min-height:unset !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+
+.page--empleado-detalle .employee-card .card__header,
+.page--empleado-detalle .employee-card__header{
+  position:relative !important;
+  inset:auto !important;
+  width:100% !important;
+  min-height:auto !important;
+  height:auto !important;
+  margin:0 !important;
+  flex:0 0 auto !important;
+}
+
+.page--empleado-detalle .employee-card .card__body,
+.page--empleado-detalle .employee-card__body{
+  display:block !important;
+  position:relative !important;
+  inset:auto !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:unset !important;
+  margin:0 !important;
+  padding:18px !important;
+  overflow:visible !important;
+  flex:1 1 auto !important;
+}
+
+.page--empleado-detalle .employee-card--qr .employee-card__body{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
+.page--empleado-detalle .employee-info-list{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:14px !important;
+}
+
+.page--empleado-detalle .employee-info-item{
+  display:block !important;
+}
+
+.page--empleado-detalle .employee-info-item__label,
+.page--empleado-detalle .employee-info-item__value,
+.page--empleado-detalle .employee-status__label,
+.page--empleado-detalle .employee-status__value,
+.page--empleado-detalle .employee-qr__code{
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.page--empleado-detalle .employee-qr,
+.page--empleado-detalle .employee-status{
+  display:flex !important;
+}
+
+.page--empleado-detalle .employee-qr__img{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.page--empleado-detalle .employee-detail-history{
+  clear:both;
+}
+
+@media (max-width:1200px){
+  .page--empleado-detalle .empleado-detail-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width:720px){
+  .page--empleado-detalle .empleado-detail-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  .page--empleado-detalle .employee-info-list{
+    grid-template-columns:1fr !important;
+  }
+}
+/* =========================================================
+   EMPLEADOS — espacio entre header y card listado
+   PONER EN: ui.css
+   ========================================================= */
+
+.page--usuarios .page-header--empleados-list{
+  margin-bottom: 18px;
+}
+
+@media (max-width: 720px){
+  .page--usuarios .page-header--empleados-list{
+    margin-bottom: 14px;
+  }
+}

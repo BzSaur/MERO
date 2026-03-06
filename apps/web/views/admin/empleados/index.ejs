@@ -14,19 +14,19 @@
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page">
+        <div class="page page--usuarios">
           <div class="container">
 
-            <div class="page-header">
+            <div class="page-header page-header--usuarios page-header--empleados-list">
               <div>
                 <h1>Empleados</h1>
-                <p class="page-header__sub">
+                <h2><p class="page-header__sub">
                   Lectura en tiempo real desde VITA (ERP) &mdash; <%= empleados.length %> activos
-                </p>
+                </p></h2>
               </div>
 
-              <form action="/admin/empleados/sync" method="POST" style="display:inline">
-                <button type="submit" class="btn btn--primary">
+              <form action="/admin/empleados/sync" method="POST">
+                <button type="submit" class="btn btn--create">
                   <svg class="icon"><use href="#icon-refresh"/></svg>
                   Sincronizar con VITA
                 </button>
@@ -36,6 +36,11 @@
             <%- include('../../partials/flash') %>
 
             <div class="card">
+              <div class="card__header card__header--usuarios">
+                <h3><span class="card__title">Listado de empleados</span></h3>
+                <span class="badge badge--ok"><%= empleados.length %></span>
+              </div>
+
               <% if (!empleados.length) { %>
                 <div class="empty">
                   <p class="empty__text">
@@ -43,8 +48,8 @@
                   </p>
                 </div>
               <% } else { %>
-                <div class="table-wrap">
-                  <table>
+                <div class="table-wrap table-wrap--clean">
+                  <table class="table table--clean">
                     <thead>
                       <tr>
                         <th>ID VITA</th>
@@ -53,7 +58,7 @@
                         <th class="td-hide-mobile">Área (VITA)</th>
                         <th class="td-hide-mobile">Fecha Ingreso</th>
                         <th>QR</th>
-                        <th></th>
+                        <th>Acciones</th>
                       </tr>
                     </thead>
 
@@ -78,19 +83,20 @@
                               href="/admin/empleados/<%= e.id %>/qr-download"
                               class="badge badge--ok"
                               title="<%= e.uuidQr %>"
-                              style="text-decoration:none; cursor:pointer"
                               download
                             >
-                              <svg class="icon" style="width:14px;height:14px"><use href="#icon-qr"/></svg>
+                              <svg class="icon"><use href="#icon-qr"/></svg>
                               QR
                             </a>
                           </td>
 
                           <td>
-                            <a href="/admin/empleados/<%= e.id %>" class="btn btn--ghost btn--sm">
-                              <svg class="icon"><use href="#icon-eye"/></svg>
-                              Ver
-                            </a>
+                            <div class="row-actions">
+                              <a href="/admin/empleados/<%= e.id %>" class="btn btn--ghost btn--sm">
+                                <svg class="icon"><use href="#icon-eye"/></svg>
+                                Ver
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       <% }) %>

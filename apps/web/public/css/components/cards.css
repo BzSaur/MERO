@@ -191,3 +191,71 @@ DASHBOARD
   gap: 0.35rem; /* Espacio más corto entre icono y texto */
   border-radius: 20px;
 }
+
+/* =========================================================
+   HISTÓRICO — tarjetas resumen en una sola fila
+   PONER AL FINAL DE ui.css
+   ========================================================= */
+
+.page--auditoria .historico-stats{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+  align-items: stretch;
+}
+
+.page--auditoria .historico-stats .stat-card{
+  min-width: 0;
+}
+
+.page--auditoria .historico-stats .stat-card--gradient{
+  min-height: 132px;
+  border-radius: 20px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 18px 30px rgba(15,23,42,.14);
+}
+
+.page--auditoria .historico-stats .stat-card__label{
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.page--auditoria .historico-stats .stat-card__value{
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+}
+
+.page--auditoria .historico-stats .stat-card__sub{
+  font-size: .92rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.82);
+}
+
+/* Evita que se vean como barras largas */
+.page--auditoria .historico-stats .stat-card--gradient::after{
+  content: "";
+  position: absolute;
+  inset: -60px -70px auto auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  filter: blur(1px);
+}
+
+/* Responsive */
+@media (max-width: 980px){
+  .page--auditoria .historico-stats{
+    grid-template-columns: 1fr;
+  }
+}

@@ -365,3 +365,96 @@
   font-size: 1.1rem;
   line-height: 0;
 }
+
+
+
+/***** =========================
+   Botón Volver formulario NUEVO EDITAR
+   ========================= */
+
+
+.page--usuarios-form .page-header{
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.page--usuarios-form .btn--back-users{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  background: rgba(29,78,216,.08);
+  border: 1px solid rgba(29,78,216,.22);
+  color: #1e3a8a;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: .55rem 1.05rem;
+  box-shadow: 0 10px 20px rgba(15,23,42,.08);
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.page--usuarios-form .btn--back-users:hover{
+  background: rgba(29,78,216,.14);
+  border-color: rgba(29,78,216,.30);
+  transform: translateY(-1px);
+}
+
+.page--usuarios-form .btn--back-users:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+
+.page--usuarios-form .btn--back-users .icon{
+  width: 16px;
+  height: 16px;
+}
+
+.page--usuarios-form .page-header--usuarios-form{
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.page--usuarios-form .btn--back-users{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+
+  background: rgba(29,78,216,.08);
+  border: 1px solid rgba(29,78,216,.22);
+  color: #1e3a8a;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: .55rem 1.05rem;
+  box-shadow: 0 10px 20px rgba(15,23,42,.08);
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.page--usuarios-form .btn--back-users:hover{
+  background: rgba(29,78,216,.14);
+  border-color: rgba(29,78,216,.30);
+  transform: translateY(-1px);
+}
+
+.page--usuarios-form .btn--back-users:active{
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+}
+
+.page--usuarios-form .btn--back-users .icon{
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 720px){
+  .page--usuarios-form .page-header--usuarios-form{
+    justify-content: flex-end;
+  }
+}
+

@@ -14,192 +14,270 @@
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page">
+        <div class="page page--usuarios page--empleado-detalle">
           <div class="container">
 
-            <div class="page-header">
-              <div>
-                <h1><%= empleado.nombre %> <%= empleado.apellidos || '' %></h1>
-                <p class="page-header__sub">
-                  ID VITA: <%= empleado.idVita %>
-                  <% if (empleado.activo) { %>
-                    &nbsp;<span class="badge badge--ok">Activo</span>
-                  <% } else { %>
-                    &nbsp;<span class="badge badge--fail">Inactivo</span>
-                  <% } %>
-                </p>
+            <%
+              const nombreCompleto = `${empleado.nombre || ''} ${empleado.apellidos || ''}`.trim();
+              const partesNombre = nombreCompleto.split(' ').filter(Boolean);
+              const iniciales = partesNombre.length >= 2
+                ? `${partesNombre[0][0] || ''}${partesNombre[1][0] || ''}`.toUpperCase()
+                : (nombreCompleto.slice(0, 2) || 'EM').toUpperCase();
+
+              let anos = 0;
+              let meses = 0;
+
+              if (empleado.vita?.fechaIngreso) {
+                const ingreso = new Date(empleado.vita.fechaIngreso);
+                const hoy = new Date();
+
+                anos = hoy.getFullYear() - ingreso.getFullYear();
+                meses = hoy.getMonth() - ingreso.getMonth();
+
+                if (meses < 0) {
+                  anos--;
+                  meses += 12;
+                }
+
+                if (hoy.getDate() < ingreso.getDate()) {
+                  meses--;
+                  if (meses < 0) {
+                    anos--;
+                    meses += 12;
+                  }
+                }
+              }
+            %>
+
+            <div class="employee-hero">
+              <div class="employee-hero__main">
+                <div class="employee-hero__avatar">
+                  <span><%= iniciales %></span>
+                </div>
+
+                <div class="employee-hero__copy">
+                  <div class="employee-hero__topline">
+                    <span class="employee-hero__eyebrow">Perfil de empleado</span>
+
+                    <% if (empleado.activo) { %>
+                      <span class="badge badge--ok">Activo</span>
+                    <% } else { %>
+                      <span class="badge badge--fail">Inactivo</span>
+                    <% } %>
+                  </div>
+
+                  <h1 class="employee-hero__title"><%= nombreCompleto %></h1>
+
+                  <div class="employee-hero__meta">
+                    <span class="employee-chip">
+                      <svg class="icon"><use href="#icon-person"/></svg>
+                      ID VITA: <strong><%= empleado.idVita %></strong>
+                    </span>
+
+                    <% if (empleado.vita?.area) { %>
+                      <span class="employee-chip">
+                        <svg class="icon"><use href="#icon-briefcase"/></svg>
+                        Área: <strong><%= empleado.vita.area %></strong>
+                      </span>
+                    <% } %>
+
+                    <% if (empleado.vita?.puesto) { %>
+                      <span class="employee-chip">
+                        <svg class="icon"><use href="#icon-logo"/></svg>
+                        Puesto: <strong><%= empleado.vita.puesto %></strong>
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
               </div>
 
-              <a href="/admin/empleados" class="btn btn--ghost">
-                <svg class="icon"><use href="#icon-back"/></svg>
-                Regresar
-              </a>
+              <div class="employee-hero__actions">
+                <a href="/admin/empleados" class="btn btn--ghost btn--back-users employee-hero__back">
+                  <svg class="icon"><use href="#icon-back"/></svg>
+                  Regresar
+                </a>
+              </div>
             </div>
 
             <%- include('../../partials/flash') %>
 
-            <!-- Cards -->
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:var(--gap);">
+            <div class="empleado-detail-grid">
 
-              <div class="card">
-                <div class="card__header">
+              <section class="card employee-card employee-card--info">
+                <div class="card__header employee-card__header">
                   <span class="card__title">
                     <svg class="icon"><use href="#icon-person"/></svg>
-                    Datos del Empleado
+                    Datos del empleado
                   </span>
                 </div>
-                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-                  <div>
-                    <small style="color:var(--ink-muted)">Nombre Completo</small>
-                    <div><strong><%= empleado.nombre %> <%= empleado.apellidos || '' %></strong></div>
-                  </div>
-                  <div>
-                    <small style="color:var(--ink-muted)">ID VITA</small>
-                    <div style="font-family:var(--font-mono)"><%= empleado.idVita %></div>
-                  </div>
 
-                  <% if (empleado.vita?.email) { %>
-                    <div>
-                      <small style="color:var(--ink-muted)">
-                        <svg class="icon" style="width:14px;height:14px"><use href="#icon-mail"/></svg>
-                        Email Corporativo
-                      </small>
-                      <div><%= empleado.vita.email %></div>
+                <div class="card__body employee-card__body">
+                  <div class="employee-info-list">
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">Nombre completo</span>
+                      <strong class="employee-info-item__value"><%= nombreCompleto %></strong>
                     </div>
-                  <% } %>
-                </div>
-              </div>
 
-              <div class="card">
-                <div class="card__header">
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">ID VITA</span>
+                      <span class="employee-info-item__value td-mono"><%= empleado.idVita %></span>
+                    </div>
+
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">UUID QR</span>
+                      <span class="employee-info-item__value td-mono"><%= empleado.uuidQr || '—' %></span>
+                    </div>
+
+                    <% if (empleado.vita?.email) { %>
+                      <div class="employee-info-item employee-info-item--full">
+                        <span class="employee-info-item__label">Email corporativo</span>
+                        <span class="employee-info-item__value"><%= empleado.vita.email %></span>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card employee-card employee-card--info">
+                <div class="card__header employee-card__header">
                   <span class="card__title">
                     <svg class="icon"><use href="#icon-briefcase"/></svg>
-                    Información Laboral (VITA)
+                    Información laboral
                   </span>
                 </div>
-                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-                  <div>
-                    <small style="color:var(--ink-muted)">Puesto</small>
-                    <div><strong><%= empleado.vita?.puesto || '—' %></strong></div>
-                  </div>
-                  <div>
-                    <small style="color:var(--ink-muted)">Área</small>
-                    <div><strong><%= empleado.vita?.area || '—' %></strong></div>
-                  </div>
-                  <div>
-                    <small style="color:var(--ink-muted)">
-                      <svg class="icon" style="width:14px;height:14px"><use href="#icon-calendar"/></svg>
-                      Fecha de Ingreso
-                    </small>
-                    <div>
-                      <strong>
+
+                <div class="card__body employee-card__body">
+                  <div class="employee-info-list">
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">Puesto</span>
+                      <strong class="employee-info-item__value"><%= empleado.vita?.puesto || '—' %></strong>
+                    </div>
+
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">Área</span>
+                      <strong class="employee-info-item__value"><%= empleado.vita?.area || '—' %></strong>
+                    </div>
+
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">Fecha de ingreso</span>
+                      <strong class="employee-info-item__value">
                         <%= empleado.vita?.fechaIngreso
                           ? new Date(empleado.vita.fechaIngreso).toLocaleDateString('es-MX')
                           : '—' %>
                       </strong>
                     </div>
-                  </div>
 
-                  <% if (empleado.vita?.fechaIngreso) { %>
-                    <div>
-                      <small style="color:var(--ink-muted)">Antigüedad</small>
-                      <div>
-                        <%
-                          const ingreso = new Date(empleado.vita.fechaIngreso);
-                          const hoy = new Date();
-                          let anos = hoy.getFullYear() - ingreso.getFullYear();
-                          let meses = hoy.getMonth() - ingreso.getMonth();
-                          if (meses < 0) { anos--; meses += 12; }
-                          if (hoy.getDate() < ingreso.getDate()) {
-                            meses--;
-                            if (meses < 0) { anos--; meses += 12; }
-                          }
-                        %>
-                        <strong><%= anos %> año<%= anos !== 1 ? 's' : '' %>, <%= meses %> mes<%= meses !== 1 ? 'es' : '' %></strong>
-                      </div>
+                    <div class="employee-info-item">
+                      <span class="employee-info-item__label">Antigüedad</span>
+                      <strong class="employee-info-item__value">
+                        <%= empleado.vita?.fechaIngreso
+                          ? `${anos} año${anos !== 1 ? 's' : ''}, ${meses} mes${meses !== 1 ? 'es' : ''}`
+                          : '—' %>
+                      </strong>
                     </div>
-                  <% } %>
+                  </div>
                 </div>
-              </div>
+              </section>
 
-              <div class="card">
-                <div class="card__header">
+              <section class="card employee-card employee-card--qr">
+                <div class="card__header employee-card__header">
                   <span class="card__title">
                     <svg class="icon"><use href="#icon-qr"/></svg>
                     Código QR
                   </span>
                 </div>
-                <div style="padding:var(--gap); display:flex; flex-direction:column; align-items:center; gap:var(--gap-sm);">
-                  <img
-                    src="/admin/empleados/<%= empleado.id %>/qr"
-                    alt="QR <%= empleado.nombre %>"
-                    style="width:200px; height:200px; border:1px solid var(--wire); border-radius:var(--r-sm); padding:8px; background:#fff;"
-                  >
-                  <small style="color:var(--ink-muted); font-family:var(--font-mono); font-size:0.75em; word-break:break-all; text-align:center">
-                    <%= empleado.uuidQr %>
-                  </small>
-                  <a href="/admin/empleados/<%= empleado.id %>/qr-download" class="btn btn--primary btn--sm" download>
-                    <svg class="icon"><use href="#icon-qr"/></svg>
-                    Descargar QR
-                  </a>
-                </div>
-              </div>
 
-              <div class="card">
-                <div class="card__header">
+                <div class="card__body employee-card__body employee-card__body--qr">
+                  <div class="employee-qr">
+                    <div class="employee-qr__box">
+                      <img
+                        src="/admin/empleados/<%= empleado.id %>/qr"
+                        alt="QR <%= empleado.nombre %>"
+                        class="employee-qr__img"
+                      >
+                    </div>
+
+                    <small class="employee-qr__code td-mono"><%= empleado.uuidQr %></small>
+
+                    <a
+                      href="/admin/empleados/<%= empleado.id %>/qr-download"
+                      class="btn btn--create btn--sm employee-qr__btn"
+                      download
+                    >
+                      <svg class="icon"><use href="#icon-qr"/></svg>
+                      Descargar QR
+                    </a>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card employee-card employee-card--status">
+                <div class="card__header employee-card__header">
                   <span class="card__title">
                     <svg class="icon"><use href="#icon-logo"/></svg>
                     Estado en MERO
                   </span>
                 </div>
-                <div style="padding:var(--gap); display:grid; gap:var(--gap-sm);">
-                  <div>
-                    <small style="color:var(--ink-muted)">Estado</small>
-                    <div>
-                      <% if (empleado.activo) { %>
-                        <span class="badge badge--ok">Activo</span>
-                      <% } else { %>
-                        <span class="badge badge--fail">Inactivo</span>
-                      <% } %>
+
+                <div class="card__body employee-card__body">
+                  <div class="employee-status">
+                    <div class="employee-status__block">
+                      <span class="employee-status__label">Estado</span>
+                      <div class="employee-status__value">
+                        <% if (empleado.activo) { %>
+                          <span class="badge badge--ok">Activo</span>
+                        <% } else { %>
+                          <span class="badge badge--fail">Inactivo</span>
+                        <% } %>
+                      </div>
+                    </div>
+
+                    <div class="employee-status__block">
+                      <span class="employee-status__label">Registrado en MERO</span>
+                      <div class="employee-status__value">
+                        <%= new Date(empleado.createdAt).toLocaleDateString('es-MX') %>
+                      </div>
+                    </div>
+
+                    <div class="employee-status__block">
+                      <span class="employee-status__label">Última actualización</span>
+                      <div class="employee-status__value">
+                        <%= new Date(empleado.updatedAt).toLocaleDateString('es-MX') %>
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <small style="color:var(--ink-muted)">Registrado en MERO</small>
-                    <div><%= new Date(empleado.createdAt).toLocaleDateString('es-MX') %></div>
-                  </div>
-                  <div>
-                    <small style="color:var(--ink-muted)">Última actualización</small>
-                    <div><%= new Date(empleado.updatedAt).toLocaleDateString('es-MX') %></div>
-                  </div>
                 </div>
-              </div>
+              </section>
 
             </div>
 
-            <!-- Asignaciones recientes -->
-            <div class="card" style="margin-top:var(--gap)">
-              <div class="card__header">
+            <section class="card card--asignar-act empleado-detail-history">
+              <div class="card__header employee-card__header employee-card__header--history">
                 <span class="card__title">
                   <svg class="icon"><use href="#icon-clock"/></svg>
-                  Asignaciones Recientes
+                  Asignaciones recientes
                 </span>
+
+                <% if (empleado.asignaciones?.length) { %>
+                  <span class="badge badge--none"><%= empleado.asignaciones.length %> registro<%= empleado.asignaciones.length !== 1 ? 's' : '' %></span>
+                <% } %>
               </div>
 
               <% if (!empleado.asignaciones || !empleado.asignaciones.length) { %>
-                <div class="empty">
+                <div class="empty empty--employee">
                   <p class="empty__text">Este empleado no tiene asignaciones registradas.</p>
                 </div>
               <% } else { %>
-                <div class="table-wrap">
-                  <table>
+                <div class="table-wrap table-wrap--clean employee-table-wrap">
+                  <table class="table table--clean">
                     <thead>
                       <tr>
                         <th>Fecha</th>
                         <th>Área</th>
                         <th class="td-hide-mobile">Subtarea</th>
                         <th class="td-hide-mobile">Modelo</th>
-                        <th class="td-hide-mobile">Hora Inicio</th>
-                        <th class="td-hide-mobile">Hora Fin</th>
+                        <th class="td-hide-mobile">Hora inicio</th>
+                        <th class="td-hide-mobile">Hora fin</th>
                         <th>Estado</th>
                       </tr>
                     </thead>
@@ -214,7 +292,6 @@
                           <td><%= a.areaId || '—' %></td>
                           <td class="td-hide-mobile"><%= a.subtareaId || '—' %></td>
                           <td class="td-hide-mobile"><%= a.modeloId || '—' %></td>
-
                           <td class="td-hide-mobile td-mono"><%= a.horaInicio || '—' %></td>
                           <td class="td-hide-mobile td-mono"><%= a.horaFin || '—' %></td>
 
@@ -231,7 +308,7 @@
                   </table>
                 </div>
               <% } %>
-            </div>
+            </section>
 
           </div>
         </div>

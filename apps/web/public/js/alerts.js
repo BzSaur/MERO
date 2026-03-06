@@ -379,4 +379,56 @@
     });
   });
 
+// ─────────────────────────────────────────────
+  // Confirmación de envío de formularios NUEVO USUARIO EDITAR 
+  // ─────────────────────────────────────────────
+
+  const submitForms = Array.from(document.querySelectorAll('form[data-confirm-submit]'));
+
+  submitForms.forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      if (form.dataset.confirmed === '1') return;
+
+      e.preventDefault();
+
+      const title = form.getAttribute('data-confirm-title') || '¿Confirmar acción?';
+      const text = form.getAttribute('data-confirm-text') || 'Se enviará la información capturada.';
+      const confirmText = form.getAttribute('data-confirm-button') || 'Sí, continuar';
+
+      if (!hasSwal) {
+        const ok = window.confirm(text);
+        if (ok) {
+          form.dataset.confirmed = '1';
+          form.submit();
+        }
+        return;
+      }
+
+      const r = await window.Swal.fire({
+        icon: 'question',
+        title,
+        text,
+        showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        focusCancel: true,
+        buttonsStyling: false,
+        customClass: {
+          confirmButton: 'btn btn--create',
+          cancelButton: 'btn btn--ghost'
+        }
+      });
+
+      if (!r.isConfirmed) return;
+
+      form.dataset.confirmed = '1';
+      form.submit();
+    });
+  });
+
 })();
+
+
+
+  

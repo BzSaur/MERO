@@ -14,115 +14,149 @@
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--asignar page--usuarios">
+        <div class="page page--asignar page--usuarios page--usuarios-form">
           <div class="container">
 
-            <div class="page-header">
-              <div>
-                <h1><%= usuario ? 'Editar usuario' : 'Nuevo usuario' %></h1>
-              </div>
-
-              <a href="/admin/usuarios" class="btn btn--ghost">
-                <svg class="icon"><use href="#icon-back"/></svg>
-                Volver
-              </a>
+            <div class="page-header page-header--usuarios-form">
+              <a href="/admin/usuarios" class="btn btn--back btn--back-users">
+              <svg class="icon"><use href="#icon-back"/></svg>
+              Volver
+            </a>
             </div>
 
             <%- include('../../partials/flash') %>
 
-            <div style="max-width: 720px">
-              <div class="card card--asignar">
-                <div class="card__header">
-                  <span class="card__title"><%= usuario ? 'Editar usuario' : 'Nuevo usuario' %></span>
-                  <span class="badge badge--ok"><%= usuario ? 'EDITAR' : 'NUEVO' %></span>
+            <section class="user-form-shell">
+              <div class="user-form-brand">
+                <div class="user-form-brand__logo">
+                  <!-- Reemplaza la ruta por la de tu logo -->
+                  <img src="/img/logo_ram.png" alt="Logo del sistema">
                 </div>
 
-                <!-- Form principal -->
+                <h1 class="user-form-brand__title">
+                  <%= usuario ? 'Editar usuario' : 'Nuevo usuario' %>
+                </h1>
+
+                <p class="user-form-brand__subtitle">
+                  <%= usuario ? 'Actualiza la información del usuario.' : 'Completa los datos para registrar un nuevo usuario.' %>
+                </p>
+              </div>
+
+              <div class="user-form-card card card--asignar">
+                <div class="card__header card__header--usuarios-form">
+                  <div class="card__header-left">
+                    <span class="card__title">
+                      <%= usuario ? 'Editar usuario' : 'Nuevo usuario' %>
+                    </span>
+                    <span class="badge badge--ok">
+                      <%= usuario ? 'EDITAR' : 'NUEVO' %>
+                    </span>
+                  </div>
+                </div>
+
                 <form
                   id="userForm"
+                  class="user-form"
                   method="POST"
                   action="<%= usuario ? `/admin/usuarios/${usuario.id}` : '/admin/usuarios' %>"
+                  data-confirm-submit="1"
+                  data-confirm-title="<%= usuario ? '¿Guardar cambios?' : '¿Crear usuario?' %>"
+                  data-confirm-text="<%= usuario ? 'Se actualizará la información del usuario.' : 'Se registrará el nuevo usuario en el sistema.' %>"
+                  data-confirm-button="<%= usuario ? 'Sí, guardar' : 'Sí, crear' %>"
                 >
-                  <div class="form-group">
-                    <label class="form-label" for="nombre">Nombre completo</label>
-                    <input
-                      class="form-control"
-                      type="text"
-                      id="nombre"
-                      name="nombre"
-                      value="<%= usuario?.nombre || '' %>"
-                      required
-                      placeholder="Juan García"
-                    >
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label" for="email">Correo</label>
-                    <input
-                      class="form-control"
-                      type="email"
-                      id="email"
-                      name="email"
-                      value="<%= usuario?.email || '' %>"
-                      required
-                      placeholder="usuario@empresa.com"
-                    >
-                  </div>
-
-                  <% if (!usuario) { %>
+                  <div class="user-form__grid">
                     <div class="form-group">
-                      <label class="form-label" for="password">Contraseña</label>
+                      <label class="form-label" for="nombre">Nombre completo</label>
                       <input
                         class="form-control"
-                        type="password"
-                        id="password"
-                        name="password"
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value="<%= usuario?.nombre || '' %>"
                         required
-                        placeholder="••••••••"
-                        minlength="8"
+                        placeholder="Juan García"
                       >
                     </div>
-                  <% } %>
 
-                  <div class="form-group">
-                    <label class="form-label" for="rol">Rol</label>
-                    <select class="form-control" id="rol" name="rol" required>
-                      <% ['ADMIN', 'ENCARGADO', 'CONSULTOR'].forEach(r => { %>
-                        <option value="<%= r %>" <%= usuario?.rol === r ? 'selected' : '' %>><%= r %></option>
-                      <% }) %>
-                    </select>
+                    <div class="form-group">
+                      <label class="form-label" for="email">Correo</label>
+                      <input
+                        class="form-control"
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="<%= usuario?.email || '' %>"
+                        required
+                        placeholder="usuario@empresa.com"
+                      >
+                    </div>
+
+                    <% if (!usuario) { %>
+                      <div class="form-group">
+                        <label class="form-label" for="password">Contraseña</label>
+                        <input
+                          class="form-control"
+                          type="password"
+                          id="password"
+                          name="password"
+                          required
+                          placeholder="••••••••"
+                          minlength="8"
+                        >
+                      </div>
+                    <% } %>
+
+                    <div class="form-group">
+                      <label class="form-label" for="rol">Rol</label>
+                      <select class="form-control" id="rol" name="rol" required>
+                        <% ['ADMIN', 'ENCARGADO', 'CONSULTOR'].forEach(r => { %>
+                          <option value="<%= r %>" <%= usuario?.rol === r ? 'selected' : '' %>>
+                            <%= r %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
                   </div>
                 </form>
 
-                <!-- Form eliminar (solo editar) -->
                 <% if (usuario) { %>
                   <form
                     id="deleteUserForm"
                     method="POST"
                     action="/admin/usuarios/<%= usuario.id %>/eliminar"
                     data-confirm-delete="1"
-                    data-user-name="<%= usuario?.nombre || 'este usuario' %>"
+                    data-kind="usuario"
+                    data-nombre="<%= usuario?.nombre || 'este usuario' %>"
+                    data-descripcion="<%= usuario?.email || 'sin correo' %>"
                   ></form>
                 <% } %>
 
-                <!-- Botonera -->
-                <div style="display:flex; gap:var(--gap-sm); align-items:center; flex-wrap:wrap">
-                  <button type="submit" class="btn btn--primary" form="userForm">
+                <div class="user-form__actions">
+                  <button
+                    type="submit"
+                    class="btn btn--create"
+                    form="userForm"
+                  >
                     <svg class="icon"><use href="#icon-check"/></svg>
                     <%= usuario ? 'Guardar cambios' : 'Crear usuario' %>
                   </button>
 
-                  <a href="/admin/usuarios" class="btn btn--ghost">Cancelar</a>
+                  <a href="/admin/usuarios" class="btn btn--ghost">
+                    Cancelar
+                  </a>
 
                   <% if (usuario) { %>
-                    <button type="submit" class="btn btn--danger" form="deleteUserForm" style="margin-left:auto">
+                    <button
+                      type="submit"
+                      class="btn btn--danger"
+                      form="deleteUserForm"
+                    >
                       Eliminar
                     </button>
                   <% } %>
                 </div>
-
               </div>
-            </div>
+            </section>
 
           </div>
         </div>
@@ -132,7 +166,6 @@
 
   <div id="sidebarOverlay"></div>
 
-  <!-- Modal + scripts (fuera del layout para que funcionen global) -->
   <%- include('../../partials/appModal') %>
 
   <script src="/js/main.js"></script>
