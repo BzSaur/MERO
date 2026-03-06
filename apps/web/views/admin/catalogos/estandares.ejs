@@ -32,7 +32,6 @@
 
             <%- include('../../partials/flash') %>
 
-            
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
                 <h3><span class="card__title">Nuevo estándar</span></h3>
@@ -46,7 +45,9 @@
                     <select class="form-control" id="subtareaId" name="subtareaId" required>
                       <option value="">— Seleccionar —</option>
                       <% subtareas.forEach(s => { %>
-                        <option value="<%= s.id %>"><%= s.area?.nombre %> / <%= s.nombre %></option>
+                        <option value="<%= s.id %>">
+                          <%= s.area?.nombre || 'Sin área' %> / <%= s.nombre %>
+                        </option>
                       <% }) %>
                     </select>
                   </div>
@@ -56,29 +57,37 @@
                     <select class="form-control" id="modeloId" name="modeloId" required>
                       <option value="">— Seleccionar —</option>
                       <% modelos.forEach(m => { %>
-                        <option value="<%= m.id %>"><%= m.nombre %></option>
+                        <option value="<%= m.id %>"><%= m.nombreSku %></option>
                       <% }) %>
                     </select>
                   </div>
 
                   <div class="form-group users-controls__field">
-                    <label class="form-label" for="cantidadEstandar">Unidades / hora</label>
-                    <input class="form-control" type="number" id="cantidadEstandar" name="cantidadEstandar" min="1" required placeholder="50">
+                    <label class="form-label" for="piezasPorHora">Unidades / hora</label>
+                    <input
+                      class="form-control"
+                      type="number"
+                      id="piezasPorHora"
+                      name="piezasPorHora"
+                      min="1"
+                      required
+                      placeholder="50"
+                    >
                   </div>
 
                   <div class="form-group users-controls__field">
-                    <label class="form-label" for="vigenteDesdeFecha">Vigente desde</label>
-                   <%
-                      const pad2 = (n) => String(n).padStart(2,'0');
+                    <label class="form-label" for="vigenteDesde">Vigente desde</label>
+                    <%
+                      const pad2 = (n) => String(n).padStart(2, '0');
                       const hoy = new Date();
-                      const hoyStr = `${hoy.getFullYear()}-${pad2(hoy.getMonth()+1)}-${pad2(hoy.getDate())}`;
+                      const hoyStr = `${hoy.getFullYear()}-${pad2(hoy.getMonth() + 1)}-${pad2(hoy.getDate())}`;
                     %>
 
                     <input
                       class="form-control"
                       type="date"
-                      id="vigenteDesdeFecha"
-                      name="vigenteDesdeFecha"
+                      id="vigenteDesde"
+                      name="vigenteDesde"
                       required
                       max="<%= hoyStr %>"
                     >
@@ -120,25 +129,26 @@
                     </thead>
 
                     <tbody>
-                      <% estandares.forEach(e => { 
-                          const vigenteISO = e.vigenteDesde ? new Date(e.vigenteDesde).toISOString().slice(0,10) : '';
+                      <% estandares.forEach(e => {
+                          const vigenteISO = e.vigenteDesde ? new Date(e.vigenteDesde).toISOString().slice(0, 10) : '';
                           const vigenteMX = e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—';
-                          const subt = `${e.subtarea?.area?.nombre || ''} / ${e.subtarea?.nombre || ''}`.trim();
-                          const mod = e.modelo?.nombre || '—';
+                          const subt = `${e.subtarea?.area?.nombre || 'Sin área'} / ${e.subtarea?.nombre || ''}`.trim();
+                          const mod = e.modelo?.nombreSku || '—';
                         %>
                         <tr>
                           <td>
-                            <span style="font-size:.78rem; color:var(--ink-dim)"><%= e.subtarea?.area?.nombre %> /</span>
-                            <%= e.subtarea?.nombre %>
+                            <span style="font-size:.78rem; color:var(--ink-dim)">
+                              <%= e.subtarea?.area?.nombre || 'Sin área' %> /
+                            </span>
+                            <%= e.subtarea?.nombre || '—' %>
                           </td>
                           <td><%= mod %></td>
-                          <td class="td-mono"><%= e.cantidadEstandar %></td>
+                          <td class="td-mono"><%= e.piezasPorHora %></td>
                           <td class="td-mono td-hide-mobile"><%= vigenteMX %></td>
 
                           <td>
                             <div class="row-actions">
-
-                               <button
+                              <button
                                 type="button"
                                 class="btn btn--edit btn--sm btn--icon"
                                 title="Editar"
@@ -147,7 +157,7 @@
                                 data-id="<%= e.id %>"
                                 data-subtarea="<%= subt %>"
                                 data-modelo="<%= mod %>"
-                                data-cantidad="<%= e.cantidadEstandar %>"
+                                data-cantidad="<%= e.piezasPorHora %>"
                                 data-vigente="<%= vigenteISO %>"
                                 data-vigente-mx="<%= vigenteMX %>"
                               >
@@ -161,7 +171,7 @@
                                 data-kind="estandar"
                                 data-subtarea="<%= subt %>"
                                 data-modelo="<%= mod %>"
-                                data-cantidad="<%= e.cantidadEstandar %>"
+                                data-cantidad="<%= e.piezasPorHora %>"
                                 data-vigente="<%= vigenteMX %>"
                               >
                                 <button type="submit" class="btn btn--danger btn--sm btn--icon" title="Eliminar">
@@ -182,6 +192,7 @@
       </main>
     </div>
   </div>
+
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
   <script src="/js/alerts.js" defer></script>

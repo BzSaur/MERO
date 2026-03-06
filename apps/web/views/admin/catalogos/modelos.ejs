@@ -40,14 +40,27 @@
               <form method="POST" action="/admin/catalogos/modelos">
                 <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
 
-                  <div class="form-group users-controls__field">
-                    <label class="form-label" for="nombre">Nombre / SKU</label>
-                    <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Fiberhome">
+                  <div class="form-group users-controls__field users-controls__field--wide">
+                    <label class="form-label" for="nombreSku">Nombre / SKU</label>
+                    <input
+                      class="form-control"
+                      type="text"
+                      id="nombreSku"
+                      name="nombreSku"
+                      required
+                      placeholder="Ej: Fiberhome"
+                    >
                   </div>
 
                   <div class="form-group users-controls__field users-controls__field--wide">
                     <label class="form-label" for="descripcion">Descripción</label>
-                    <input class="form-control" type="text" id="descripcion" name="descripcion" placeholder="Opcional">
+                    <input
+                      class="form-control"
+                      type="text"
+                      id="descripcion"
+                      name="descripcion"
+                      placeholder="Opcional"
+                    >
                   </div>
 
                   <div class="form-group users-controls__actions">
@@ -62,7 +75,7 @@
             </div>
 
             <div class="card card--asignar card--asignar-act">
-             <div class="card__header card__header--usuarios">
+              <div class="card__header card__header--usuarios">
                 <h3><span class="card__title">Modelos registrados</span></h3>
                 <span class="badge badge--ok"><%= modelos.length %></span>
               </div>
@@ -72,7 +85,6 @@
                   <p class="empty__text">Sin modelos registrados.</p>
                 </div>
               <% } else { %>
-
                 <div class="table-wrap table-wrap--asignar table-wrap--clean">
                   <table class="table table--asignar table--clean">
                     <thead>
@@ -85,14 +97,13 @@
                     </thead>
 
                     <tbody>
-                      <% modelos.forEach(m => { %>
+                      <% modelos.forEach((m, i) => { %>
                         <tr>
-                          <td class="td-mono"><%= m.id %></td>
-                          <td><%= m.nombre %></td>
+                          <td class="td-mono"><%= i + 1 %></td>
+                          <td><%= m.nombreSku || '—' %></td>
                           <td><%= m.descripcion || '—' %></td>
                           <td>
                             <div class="row-actions">
-
                               <button
                                 type="button"
                                 class="btn btn--edit btn--sm btn--icon"
@@ -100,7 +111,7 @@
                                 data-edit-kind="modelo"
                                 data-update-action="/admin/catalogos/modelos/<%= m.id %>/editar"
                                 data-id="<%= m.id %>"
-                                data-nombre="<%= m.nombre %>"
+                                data-nombre="<%= m.nombreSku || '' %>"
                                 data-descripcion="<%= m.descripcion || '' %>"
                               >
                                 <svg class="icon"><use href="#icon-edit"/></svg>
@@ -111,8 +122,8 @@
                                 action="/admin/catalogos/modelos/<%= m.id %>/eliminar"
                                 data-confirm-delete
                                 data-kind="modelo"
-                                data-nombre="<%= m.nombre %>"
-                                data-descripcion="<%= m.descripcion || '—' %>"
+                                data-nombre="<%= m.nombreSku || '' %>"
+                                data-descripcion="<%= m.descripcion || '' %>"
                               >
                                 <button type="submit" class="btn btn--danger btn--sm btn--icon" title="Eliminar">
                                   <svg class="icon"><use href="#icon-trash"/></svg>
@@ -127,11 +138,13 @@
                 </div>
               <% } %>
             </div>
+
           </div>
         </div>
       </main>
     </div>
   </div>
+
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
   <script src="/js/alerts.js" defer></script>

@@ -1,14 +1,14 @@
 const express = require('express');
-const axios   = require('axios');
+const axios = require('axios');
 const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
-const API    = process.env.API_URL || 'http://localhost:3000/api';
+const API = process.env.API_URL || 'http://localhost:3000/api';
 
 function api(token) {
   return axios.create({
     baseURL: API,
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
@@ -22,7 +22,7 @@ router.use(requireRole('ADMIN'));
 /* ── Dashboard ── */
 router.get('/', async (req, res, next) => {
   try {
-    const hoy    = new Date().toISOString().slice(0, 10);
+    const hoy = new Date().toISOString().slice(0, 10);
     const client = api(req.session.user.token);
 
     const [metRes, asnRes, areasRes] = await Promise.all([
@@ -121,7 +121,7 @@ router.get('/empleados/:id', async (req, res, next) => {
 router.get('/empleados/:id/qr', async (req, res, next) => {
   try {
     const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
     });
     res.set('Content-Type', 'image/png');
     res.set('Content-Disposition', `inline; filename="qr-empleado-${req.params.id}.png"`);
@@ -134,7 +134,7 @@ router.get('/empleados/:id/qr', async (req, res, next) => {
 router.get('/empleados/:id/qr-download', async (req, res, next) => {
   try {
     const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
     });
     res.set('Content-Type', 'image/png');
     res.set('Content-Disposition', `attachment; filename="qr-empleado-${req.params.id}.png"`);
@@ -147,7 +147,10 @@ router.get('/empleados/:id/qr-download', async (req, res, next) => {
 router.post('/empleados/sync', async (req, res) => {
   try {
     const { data } = await api(req.session.user.token).post('/empleados/sync');
-    req.flash('success', `Sync completado: ${data.sincronizados} sincronizados, ${data.desactivados} desactivados`);
+    req.flash(
+      'success',
+      `Sync completado: ${data.sincronizados} sincronizados, ${data.desactivados} desactivados`
+    );
     res.redirect('/admin/empleados');
   } catch (err) {
     req.flash('error', getErrorMessage(err, 'Error al sincronizar'));
@@ -167,7 +170,10 @@ router.get('/catalogos/areas', async (req, res, next) => {
 
 router.post('/catalogos/areas', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/catalogos/areas', req.body);
+    await api(req.session.user.token).post('/catalogos/areas', {
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+    });
     req.flash('success', 'Área creada');
     res.redirect('/admin/catalogos/areas');
   } catch (err) {
@@ -223,7 +229,11 @@ router.get('/catalogos/subtareas', async (req, res, next) => {
 
 router.post('/catalogos/subtareas', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/catalogos/subtareas', req.body);
+    await api(req.session.user.token).post('/catalogos/subtareas', {
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+      areaId: req.body.areaId ? Number(req.body.areaId) : undefined,
+    });
     req.flash('success', 'Subtarea creada');
     res.redirect('/admin/catalogos/subtareas');
   } catch (err) {
@@ -271,7 +281,10 @@ router.get('/catalogos/modelos', async (req, res, next) => {
 
 router.post('/catalogos/modelos', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/catalogos/modelos', req.body);
+    await api(req.session.user.token).post('/catalogos/modelos', {
+      nombreSku: req.body.nombreSku,
+      descripcion: req.body.descripcion,
+    });
     req.flash('success', 'Modelo creado');
     res.redirect('/admin/catalogos/modelos');
   } catch (err) {
@@ -329,7 +342,12 @@ router.get('/catalogos/estandares', async (req, res, next) => {
 
 router.post('/catalogos/estandares', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/catalogos/estandares', req.body);
+    await api(req.session.user.token).post('/catalogos/estandares', {
+      subtareaId: req.body.subtareaId ? Number(req.body.subtareaId) : undefined,
+      modeloId: req.body.modeloId ? Number(req.body.modeloId) : undefined,
+      piezasPorHora: req.body.piezasPorHora ? Number(req.body.piezasPorHora) : undefined,
+      vigenteDesde: req.body.vigenteDesde,
+    });
     req.flash('success', 'Estándar creado');
     res.redirect('/admin/catalogos/estandares');
   } catch (err) {
