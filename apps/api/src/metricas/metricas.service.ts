@@ -1,13 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EstandaresService } from '../catalogos/estandares.service';
+import { VitaSyncService } from '../empleados/vita-sync.service';
 
 @Injectable()
 export class MetricasService {
+  // Reglas fijas (simples)
+  private static readonly TENURE_DAYS = 30;
+  private static readonly NEWBIE_FACTOR = 0.6;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly estandares: EstandaresService,
+    private readonly vitaSync: VitaSyncService,
   ) {}
+
+  private startOfDay(d: Date) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  private diffDays(a: Date, b: Date) {
+    const A = this.startOfDay(a).getTime();
+    const B = this.startOfDay(b).getTime();
+    return Math.floor((A - B) / (1000 * 60 * 60 * 24));
+  }
 
   async getMetricasHora(fecha: string, areaId?: number) {
     const asignaciones = await this.prisma.meroAsignacion.findMany({
@@ -27,21 +43,50 @@ export class MetricasService {
     const metricas = [];
 
     for (const asignacion of asignaciones) {
-      let estandarPiezas = 0;
+      // 1) estándar base (ya existe)
+      let estandarBase = 0;
       try {
         const estandar = await this.estandares.findVigente(
           asignacion.subtareaId,
           asignacion.modeloId,
         );
-        estandarPiezas = estandar.piezasPorHora;
+        estandarBase = estandar.piezasPorHora;
       } catch {
-        // Sin estándar vigente, eficiencia queda en 0
+        // sin estándar vigente
       }
 
+      // 2) antigüedad desde VITA (sin caché, como pediste)
+      let diasAntiguedad: number | null = null;
+      let tipoEstandar: 'NUEVO' | 'NORMAL' | 'DESCONOCIDO' = 'DESCONOCIDO';
+
+      try {
+        const vita = await this.vitaSync.getVitaEmpleadoDetalle(
+          asignacion.empleado.idVita,
+        );
+
+        if (vita?.Fecha_Ingreso) {
+          diasAntiguedad = this.diffDays(asignacion.fecha, new Date(vita.Fecha_Ingreso));
+          if (diasAntiguedad < 0) diasAntiguedad = 0;
+
+          tipoEstandar =
+            diasAntiguedad < MetricasService.TENURE_DAYS ? 'NUEVO' : 'NORMAL';
+        }
+      } catch {
+        // si VITA falla, dejamos DESCONOCIDO y aplicamos estándar base sin factor
+      }
+
+      // 3) estándar aplicado = base * factor (solo si es NUEVO)
+      const factorAplicado =
+        tipoEstandar === 'NUEVO' ? MetricasService.NEWBIE_FACTOR : 1;
+
+      const estandarAplicado =
+        estandarBase > 0 ? Math.max(1, Math.round(estandarBase * factorAplicado)) : 0;
+
+      // 4) por hora (capturas)
       for (const captura of asignacion.capturas) {
         const eficiencia =
-          estandarPiezas > 0
-            ? Math.round((captura.cantidad / estandarPiezas) * 100 * 100) / 100
+          estandarAplicado > 0
+            ? Math.round((captura.cantidad / estandarAplicado) * 100 * 100) / 100
             : 0;
 
         metricas.push({
@@ -52,8 +97,16 @@ export class MetricasService {
           modelo: asignacion.modelo.nombreSku,
           slotHora: captura.slotHora,
           cantidad: captura.cantidad,
-          estandar: estandarPiezas,
+
+          // 👇 antes era el base; ahora es el aplicado (con 0.60 si NUEVO)
+          estandar: estandarAplicado,
           eficienciaPct: eficiencia,
+
+          // 👇 extras (no rompen front si no los usa)
+          estandarBase,
+          factorAplicado,
+          diasAntiguedad,
+          tipoEstandar,
         });
       }
     }

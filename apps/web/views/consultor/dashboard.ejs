@@ -15,7 +15,6 @@
       <%- include('../partials/navbar') %>
 
       <main class="content">
-        <!-- ✅ Hereda look de Histórico (cards/table/header) -->
         <div class="page page--encargado page--metrics page--asignar page--areas">
           <div class="container">
 
@@ -38,14 +37,88 @@
             <%- include('../partials/flash') %>
 
             <%
+              // =========================
+              // Normalizadores (API vs UI)
+              // =========================
+
+              function getAreaName(m) {
+                return (
+                  m?.areaNombre ||
+                  m?.area?.nombre ||
+                  m?.area_name ||
+                  m?.areaName ||
+                  (typeof m?.area === 'string' ? m.area : null) ||
+                  (m?.areaId != null ? `Área #${m.areaId}` : 'Área')
+                );
+              }
+
+              function getSlotHora(m) {
+                return (
+                  m?.slotHora ??
+                  m?.slot ??
+                  m?.hora ??
+                  null
+                );
+              }
+
+              // REAL: tu API manda `cantidad`
+              function getReal(m) {
+                const v =
+                  m?.cantidadReal ??
+                  m?.real ??
+                  m?.cantidad ??
+                  m?.producido ??
+                  null;
+                return (v == null ? null : Number(v));
+              }
+
+              // STD: tu API manda `estandar`
+              // OJO: si viene 0 casi seguro es "no hay estándar en BD" (findVigente falló)
+              function getStd(m) {
+                const v =
+                  m?.cantidadEstandar ??
+                  m?.estandar ??
+                  m?.standard ??
+                  m?.meta ??
+                  null;
+
+                if (v == null) return null;
+
+                const n = Number(v);
+
+                // Si el backend te manda 0 por falta de estándar, no lo muestres como 0 (engaña)
+                if (!Number.isFinite(n) || n <= 0) return null;
+
+                return n;
+              }
+
+              // Eficiencia: tu API manda `eficienciaPct`
+              function getEff(m) {
+                const v =
+                  m?.eficiencia ??
+                  m?.eficienciaPct ??
+                  m?.efficiencia ??
+                  m?.eff ??
+                  null;
+
+                if (v == null) return null;
+
+                const n = Number(v);
+                if (!Number.isFinite(n)) return null;
+
+                return n; // ya viene como porcentaje (0-100)
+              }
+
+              // Promedio global
               let sumEff = 0, countEff = 0;
               metricas.forEach(m => {
-                if (m.eficiencia != null) { sumEff += Number(m.eficiencia); countEff++; }
+                const e = getEff(m);
+                if (e != null) { sumEff += e; countEff++; }
               });
               const avgEff = countEff ? (sumEff / countEff) : null;
             %>
 
-            <!-- ✅ Cards -->
+            <!-- Cards -->
             <div class="grid-stats grid-stats--metrics" style="margin-bottom:var(--gap-lg)">
               <div class="stat-card stat-card--gradient stat-card--green">
                 <div class="stat-card__label">Eficiencia global</div>
@@ -68,14 +141,21 @@
 
             <% if (metricas.length > 0) { %>
               <%
+                // Agrupar por área
                 const byArea = {};
                 metricas.forEach(m => {
-                  if (!byArea[m.areaNombre]) byArea[m.areaNombre] = [];
-                  byArea[m.areaNombre].push(m);
+                  const key = getAreaName(m);
+                  if (!byArea[key]) byArea[key] = [];
+                  byArea[key].push(m);
+                });
+
+                // Orden por slotHora asc
+                Object.values(byArea).forEach(arr => {
+                  arr.sort((a,b) => Number(getSlotHora(a)) - Number(getSlotHora(b)));
                 });
               %>
 
-              <!-- ✅ Panel -->
+              <!-- Panel strip por área -->
               <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
                 <div class="card__header">
                   <h3><span class="card__title">Slot strip por área</span></h3>
@@ -85,7 +165,10 @@
                 <div style="padding: var(--gap) var(--gap-lg);">
                   <% Object.entries(byArea).forEach(([area, slots]) => {
                        let areaSum = 0, areaCount = 0;
-                       slots.forEach(s => { if (s.eficiencia != null) { areaSum += Number(s.eficiencia); areaCount++; } });
+                       slots.forEach(s => {
+                         const e = getEff(s);
+                         if (e != null) { areaSum += e; areaCount++; }
+                       });
                        const areaAvg = areaCount ? (areaSum / areaCount) : null;
                   %>
                     <div class="slot-area">
@@ -95,17 +178,22 @@
                       </div>
 
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.forEach(s => { %>
+                        <% slots.forEach(s => { 
+                             const sh = getSlotHora(s);
+                             const r  = getReal(s);
+                             const st = getStd(s);
+                             const e  = getEff(s);
+                        %>
                           <div
-                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s.eficiencia) %>"
-                            title="<%= s.slotHora %>h -- real: <%= s.cantidadReal %> / est: <%= s.cantidadEstandar %> -- <%= fmtEff(s.eficiencia) %>"
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(e) %>"
+                            title="<%= sh %>h — real: <%= (r == null ? '—' : r) %> / est: <%= (st == null ? '—' : st) %> — <%= fmtEff(e) %>"
                           ></div>
                         <% }) %>
                       </div>
 
                       <div class="slot-area__hours">
                         <% slots.forEach(s => { %>
-                          <span class="slot-area__hour"><%= s.slotHora %>h</span>
+                          <span class="slot-area__hour"><%= getSlotHora(s) %>h</span>
                         <% }) %>
                       </div>
                     </div>
@@ -113,9 +201,8 @@
                 </div>
               </div>
 
-              <!-- ✅ RESULTADOS -->
+              <!-- Tabla resultados -->
               <div class="card card--asignar card--asignar-act">
-                <!-- ✅ MISMA CLASE QUE USUARIOS -->
                 <div class="card__header card__header--usuarios">
                   <h3><span class="card__title">Resultados</span></h3>
                   <span class="badge badge--ok"><%= metricas.length %></span>
@@ -134,15 +221,20 @@
                     </thead>
 
                     <tbody>
-                      <% metricas.forEach(m => { %>
+                      <% metricas.forEach(m => {
+                           const sh = getSlotHora(m);
+                           const r  = getReal(m);
+                           const st = getStd(m);
+                           const e  = getEff(m);
+                      %>
                         <tr>
-                          <td><%= m.areaNombre %></td>
-                          <td class="td-mono"><%= m.slotHora %>:00</td>
-                          <td class="td-mono td-hide-mobile"><%= m.cantidadReal %></td>
-                          <td class="td-mono td-hide-mobile"><%= m.cantidadEstandar %></td>
+                          <td><%= getAreaName(m) %></td>
+                          <td class="td-mono"><%= sh %>:00</td>
+                          <td class="td-mono td-hide-mobile"><%= (r == null ? '—' : r) %></td>
+                          <td class="td-mono td-hide-mobile"><%= (st == null ? '—' : st) %></td>
                           <td>
-                            <span class="eff-value <%= effClass(m.eficiencia) %>">
-                              <%= fmtEff(m.eficiencia) %>
+                            <span class="eff-value <%= effClass(e) %>">
+                              <%= fmtEff(e) %>
                             </span>
                           </td>
                         </tr>
@@ -154,9 +246,7 @@
 
             <% } else { %>
 
-              <!-- ✅ Empty -->
               <div class="card card--asignar card--asignar-act">
-                <!-- ✅ MISMA CLASE QUE USUARIOS -->
                 <div class="card__header card__header--usuarios">
                   <h3><span class="card__title">Resultados</span></h3>
                   <span class="badge badge--ok">0</span>
@@ -177,7 +267,6 @@
   </div>
 
   <div id="sidebarOverlay"></div>
-  <link rel="stylesheet" href="/css/style.css">
   <script src="/js/main.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ import { VitaSyncService } from './vita-sync.service';
 @Module({
   controllers: [EmpleadosController],
   providers: [EmpleadosService, VitaSyncService],
-  exports: [EmpleadosService],
+  // 👇 exporta VitaSyncService para que MetricasModule lo pueda usar
+  exports: [EmpleadosService, VitaSyncService],
 })
 export class EmpleadosModule {}
