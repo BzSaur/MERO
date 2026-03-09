@@ -1,10 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEstandarDto } from './dto/create-estandar.dto';
+import { UpdateEstandarDto } from './dto/update-estandar.dto';
 
 @Injectable()
 export class EstandaresService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private toDateOnly(value: string | Date) {
+    if (value instanceof Date) return value;
+    return new Date(value.includes('T') ? value : `${value}T00:00:00.000Z`);
+  }
 
   create(dto: CreateEstandarDto) {
     return this.prisma.meroEstandar.create({
@@ -12,7 +18,7 @@ export class EstandaresService {
         subtareaId: Number(dto.subtareaId),
         modeloId: Number(dto.modeloId),
         piezasPorHora: Number(dto.piezasPorHora),
-        vigenteDesde: dto.vigenteDesde,
+        vigenteDesde: this.toDateOnly(dto.vigenteDesde),
       },
     });
   }
@@ -27,7 +33,7 @@ export class EstandaresService {
         },
         modelo: true,
       },
-      orderBy: { vigenteDesde: 'desc' },
+      orderBy: [{ vigenteDesde: 'desc' }, { id: 'desc' }],
     });
   }
 
@@ -44,11 +50,31 @@ export class EstandaresService {
       },
     });
 
-    if (!estandar) {
-      throw new NotFoundException('Estándar no encontrado');
-    }
-
+    if (!estandar) throw new NotFoundException('Estándar no encontrado');
     return estandar;
+  }
+
+  async update(id: number, dto: UpdateEstandarDto) {
+    await this.findOne(id);
+
+    return this.prisma.meroEstandar.update({
+      where: { id },
+      data: {
+        ...(dto.piezasPorHora !== undefined
+          ? { piezasPorHora: Number(dto.piezasPorHora) }
+          : {}),
+        ...(dto.vigenteDesde !== undefined
+          ? { vigenteDesde: this.toDateOnly(dto.vigenteDesde) }
+          : {}),
+      },
+    });
+  }
+
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.meroEstandar.delete({
+      where: { id },
+    });
   }
 
   async findVigente(subtareaId: number, modeloId: number) {

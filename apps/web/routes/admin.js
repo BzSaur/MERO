@@ -17,6 +17,10 @@ function getErrorMessage(err, fallback = 'Error') {
   return Array.isArray(raw) ? raw.join(', ') : raw;
 }
 
+function toIsoDateStart(value) {
+  return value ? `${value}T00:00:00.000Z` : undefined;
+}
+
 router.use(requireRole('ADMIN'));
 
 /* ── Dashboard ── */
@@ -177,7 +181,7 @@ router.post('/catalogos/areas', async (req, res) => {
     req.flash('success', 'Área creada');
     res.redirect('/admin/catalogos/areas');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error'));
+    req.flash('error', getErrorMessage(err, 'Error al crear área'));
     res.redirect('/admin/catalogos/areas');
   }
 });
@@ -203,7 +207,7 @@ router.post('/catalogos/areas/:id/eliminar', async (req, res) => {
     req.flash('success', 'Área eliminada');
     res.redirect('/admin/catalogos/areas');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error al eliminar'));
+    req.flash('error', getErrorMessage(err, 'Error al eliminar área'));
     res.redirect('/admin/catalogos/areas');
   }
 });
@@ -237,7 +241,7 @@ router.post('/catalogos/subtareas', async (req, res) => {
     req.flash('success', 'Subtarea creada');
     res.redirect('/admin/catalogos/subtareas');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error'));
+    req.flash('error', getErrorMessage(err, 'Error al crear subtarea'));
     res.redirect('/admin/catalogos/subtareas');
   }
 });
@@ -288,7 +292,7 @@ router.post('/catalogos/modelos', async (req, res) => {
     req.flash('success', 'Modelo creado');
     res.redirect('/admin/catalogos/modelos');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error'));
+    req.flash('error', getErrorMessage(err, 'Error al crear modelo'));
     res.redirect('/admin/catalogos/modelos');
   }
 });
@@ -346,12 +350,13 @@ router.post('/catalogos/estandares', async (req, res) => {
       subtareaId: req.body.subtareaId ? Number(req.body.subtareaId) : undefined,
       modeloId: req.body.modeloId ? Number(req.body.modeloId) : undefined,
       piezasPorHora: req.body.piezasPorHora ? Number(req.body.piezasPorHora) : undefined,
-      vigenteDesde: req.body.vigenteDesde,
+      vigenteDesde: toIsoDateStart(req.body.vigenteDesde),
     });
+
     req.flash('success', 'Estándar creado');
     res.redirect('/admin/catalogos/estandares');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error'));
+    req.flash('error', getErrorMessage(err, 'Error al crear estándar'));
     res.redirect('/admin/catalogos/estandares');
   }
 });
@@ -359,8 +364,8 @@ router.post('/catalogos/estandares', async (req, res) => {
 router.post('/catalogos/estandares/:id/editar', async (req, res) => {
   try {
     await api(req.session.user.token).patch(`/catalogos/estandares/${req.params.id}`, {
-      piezasPorHora: Number(req.body.cantidad),
-      vigenteDesde: req.body.vigente,
+      piezasPorHora: req.body.cantidad ? Number(req.body.cantidad) : undefined,
+      vigenteDesde: toIsoDateStart(req.body.vigente),
     });
 
     req.flash('success', 'Estándar actualizado');

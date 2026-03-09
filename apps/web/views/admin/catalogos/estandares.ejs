@@ -115,7 +115,6 @@
                   <p class="empty__text">Sin estándares registrados.</p>
                 </div>
               <% } else { %>
-
                 <div class="table-wrap table-wrap--asignar table-wrap--clean">
                   <table class="table table--asignar table--clean">
                     <thead>
@@ -130,11 +129,11 @@
 
                     <tbody>
                       <% estandares.forEach(e => {
-                          const vigenteISO = e.vigenteDesde ? new Date(e.vigenteDesde).toISOString().slice(0, 10) : '';
-                          const vigenteMX = e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—';
-                          const subt = `${e.subtarea?.area?.nombre || 'Sin área'} / ${e.subtarea?.nombre || ''}`.trim();
-                          const mod = e.modelo?.nombreSku || '—';
-                        %>
+                        const vigenteISO = e.vigenteDesde ? new Date(e.vigenteDesde).toISOString().slice(0, 10) : '';
+                        const vigenteMX = e.vigenteDesde ? new Date(e.vigenteDesde).toLocaleDateString('es-MX') : '—';
+                        const subt = `${e.subtarea?.area?.nombre || 'Sin área'} / ${e.subtarea?.nombre || ''}`.trim();
+                        const mod = e.modelo?.nombreSku || '—';
+                      %>
                         <tr>
                           <td>
                             <span style="font-size:.78rem; color:var(--ink-dim)">
@@ -145,7 +144,6 @@
                           <td><%= mod %></td>
                           <td class="td-mono"><%= e.piezasPorHora %></td>
                           <td class="td-mono td-hide-mobile"><%= vigenteMX %></td>
-
                           <td>
                             <div class="row-actions">
                               <button
@@ -187,6 +185,7 @@
                 </div>
               <% } %>
             </div>
+
           </div>
         </div>
       </main>
