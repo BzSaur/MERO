@@ -38,9 +38,14 @@
             <%
               const totalAsignados = asignaciones.length;
               let sumEff = 0, countEff = 0;
-              metricas.forEach(m => {
-                if (m.eficiencia != null) { sumEff += Number(m.eficiencia); countEff++; }
+
+              metricas.forEach(function(m) {
+                if (m.eficiencia != null) {
+                  sumEff += Number(m.eficiencia);
+                  countEff++;
+                }
               });
+
               const avgEff = countEff ? (sumEff / countEff) : null;
             %>
 
@@ -67,28 +72,50 @@
             <% if (metricas.length > 0) { %>
               <%
                 const byArea = {};
-                metricas.forEach(m => {
-                  if (!byArea[m.areaNombre]) byArea[m.areaNombre] = [];
-                  byArea[m.areaNombre].push(m);
+
+                metricas.forEach(function(m) {
+                  let areaKey = 'Sin área';
+
+                  if (m && m.areaNombre) {
+                    areaKey = String(m.areaNombre);
+                  } else if (m && m.area && m.area.nombre) {
+                    areaKey = String(m.area.nombre);
+                  }
+
+                  if (!byArea[areaKey]) {
+                    byArea[areaKey] = [];
+                  }
+
+                  byArea[areaKey].push(m);
                 });
               %>
+
               <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
                 <div class="card__header">
                   <h3><span class="card__title">Eficiencia por slot — hoy</span></h3>
-                  <span class="badge badge--none">Verde &gt;=90% / Ámbar 70-89% / Rojo &lt;70%</span>
+                  <span class="slot-legend">Verde &gt;=90% / Ámbar 70-89% / Rojo &lt;70%</span>
                 </div>
+
                 <div style="padding: var(--gap) var(--gap-lg);">
-                  <% Object.entries(byArea).forEach(([area, slots]) => { 
-                       const last = slots[slots.length - 1];
+                  <% Object.entries(byArea).forEach(function(entry) { 
+                    const area = entry[0];
+                    const slots = entry[1];
+                    const last = slots && slots.length ? slots[slots.length - 1] : null;
                   %>
                     <div class="slot-area">
                       <div class="slot-area__header">
                         <span class="slot-area__name"><%= area %></span>
-                        <span class="eff-value <%= effClass(last?.eficiencia) %>"><%= fmtEff(last?.eficiencia) %></span>
+                        <span class="eff-value <%= effClass(last ? last.eficiencia : null) %>">
+                          <%= fmtEff(last ? last.eficiencia : null) %>
+                        </span>
                       </div>
+
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.forEach(s => { %>
-                          <div class="slot-strip__seg slot-strip__seg--<%= slotClass(s.eficiencia) %>" title="<%= s.slotHora %>h — <%= fmtEff(s.eficiencia) %>"></div>
+                        <% slots.forEach(function(s) { %>
+                          <div
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s ? s.eficiencia : null) %>"
+                            title="<%= (s && s.slotHora != null ? s.slotHora + ':00' : 'Sin hora') %> — <%= fmtEff(s ? s.eficiencia : null) %>">
+                          </div>
                         <% }) %>
                       </div>
                     </div>
@@ -99,7 +126,6 @@
 
             <div class="card card--asignar card--asignar-act">
               <div class="card__header card__header--usuarios card__header--split">
-
                 <div class="card__header-left">
                   <h3><span class="card__title">Asignaciones activas</span></h3>
                   <span class="badge badge--ok"><%= asignaciones.length %></span>
@@ -129,7 +155,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <% asignaciones.forEach(a => { %>
+                      <% asignaciones.forEach(function(a) { %>
                         <tr>
                           <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
                           <td><span class="badge badge--none"><%= a.area?.nombre %></span></td>

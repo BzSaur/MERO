@@ -458,3 +458,169 @@
   }
 }
 
+/* =========================================================
+   ASIGNACIONES — Responsive real para escaneo UUID
+   Pegar al final de filtro.css
+   ========================================================= */
+
+/* Desktop / base */
+.page--asignar .card--asignar > form{
+  width: 100%;
+}
+
+.page--asignar .users-controls,
+.page--asignar .users-controls--light{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.page--asignar .users-controls__left{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+/* Campos */
+.page--asignar .users-controls__field{
+  flex: 1 1 260px;
+  min-width: 260px;
+}
+
+.page--asignar .users-controls__field--wide{
+  flex: 1 1 320px;
+  min-width: 320px;
+}
+
+/* El modelo puede romper bonito en otra fila */
+.page--asignar .users-controls__field:last-of-type{
+  flex: 1 1 320px;
+}
+
+/* Inputs/selects no se salen */
+.page--asignar .users-controls .form-control{
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Botonera */
+.page--asignar .users-controls__actions{
+  margin-left: auto;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.page--asignar .users-controls__actions .btn{
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.page--asignar .users-controls__actions .btn small{
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+/* El botón de cámara que no quede más chaparro o raro */
+.page--asignar #btnScanCam{
+  min-width: 210px;
+}
+
+/* =========================================================
+   Tablet
+   ========================================================= */
+@media (max-width: 980px){
+  .page--asignar .users-controls__field,
+  .page--asignar .users-controls__field--wide{
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .page--asignar .users-controls__actions{
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .page--asignar .users-controls__actions .btn{
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+
+  .page--asignar #btnScanCam{
+    min-width: 0;
+  }
+}
+
+/* =========================================================
+   Móvil
+   ========================================================= */
+@media (max-width: 640px){
+  .page--asignar .card--asignar .card__header{
+    padding: 14px 14px !important;
+  }
+
+  .page--asignar .card--asignar > form{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .page--asignar .users-controls,
+  .page--asignar .users-controls--light{
+    padding: 14px !important;
+    gap: 14px !important;
+    border-radius: 14px;
+  }
+
+  .page--asignar .users-controls__left{
+    gap: 14px;
+  }
+
+  .page--asignar .users-controls__field,
+  .page--asignar .users-controls__field--wide{
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .page--asignar .users-controls__actions{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .page--asignar .users-controls__actions .btn{
+    width: 100%;
+    min-width: 0;
+    padding: .7rem .8rem;
+    font-size: .96rem;
+  }
+}
+
+/* =========================================================
+   Móvil angosto
+   ========================================================= */
+@media (max-width: 420px){
+  .page--asignar .users-controls__actions{
+    grid-template-columns: 1fr;
+  }
+
+  .page--asignar .users-controls__actions .btn{
+    width: 100%;
+  }
+
+  .page--asignar .users-controls .form-control{
+    font-size: 16px; /* evita zoom raro en móviles */
+  }
+}
