@@ -17,23 +17,24 @@
   const homeHref = (isSuperAdmin || isAdmin)
     ? '/admin'
     : isEncargado
-      ? '/encargado'
+      ? '/encargado'   // ENCARGADO → Panel Encargado
       : isConsultor
         ? '/consultor'
         : '/';
 
   // Activo SOLO en la ruta raíz de cada rol
   const homeActive = (
-    _currentPath === '/'          ||
-    _currentPath === '/admin'     ||
+    (_currentPath === '/admin'     && (isSuperAdmin || isAdmin)) ||
     (_currentPath === '/encargado' && isEncargado) ||
-    (_currentPath === '/consultor' && isConsultor)
+    (_currentPath === '/consultor' && isConsultor) ||
+    (_currentPath === '/' && !isSuperAdmin && !isAdmin && !isEncargado && !isConsultor)
   ) ? 'active' : '';
 
-  // Métricas activo: en /consultor solo si NO es CONSULTOR (para él es su Inicio)
+  // Métricas activo: solo para roles que sí ven métricas (no ENCARGADO)
   const metricasActive = (
-    (_currentPath === '/consultor' && !isConsultor) ||
-    (_currentPath === '/consultor' && (isSuperAdmin || isAdmin || isEncargado))
+    _currentPath === '/consultor' &&
+    !isEncargado &&
+    (isSuperAdmin || isAdmin || isConsultor)
   ) ? 'active' : '';
 %>
 
@@ -63,7 +64,7 @@
   <div class="sidebar-body">
     <ul class="sidebar-nav">
 
-      <%/* ── Inicio: todos los roles ── */%>
+      <%/* ── Inicio: todos los roles (ruta depende de rol) ── */%>
       <li class="nav-item">
         <a href="<%= homeHref %>" class="nav-link <%= homeActive %>">
           <i class="bi bi-house"></i>
@@ -71,16 +72,8 @@
         </a>
       </li>
 
-      <%/* ── Panel Encargado, Asignaciones, Captura: SUPERADMIN y ADMIN ── */%>
-      <% if (canSeeEncargado) { %>
-        <li class="nav-item">
-          <a href="/encargado"
-             class="nav-link <%= (_currentPath === '/encargado' && !isEncargado) ? 'active' : '' %>">
-            <i class="bi bi-speedometer2"></i>
-            <span>Panel Encargado</span>
-          </a>
-        </li>
-
+      <%/* ── Asignaciones y Captura: ENCARGADO + (opcional) SUPERADMIN/ADMIN ── */%>
+      <% if (isEncargado || canSeeEncargado) { %>
         <li class="nav-item">
           <a href="/encargado/asignar"
              class="nav-link <%= _currentPath.startsWith('/encargado/asignar') ? 'active' : '' %>">
@@ -98,22 +91,24 @@
         </li>
       <% } %>
 
-      <%/* ── Métricas e Histórico: todos los roles ── */%>
-      <li class="nav-item">
-        <a href="/consultor"
-           class="nav-link <%= metricasActive %>">
-          <i class="bi bi-graph-up"></i>
-          <span>Métricas (Hoy)</span>
-        </a>
-      </li>
+      <%/* ── Métricas e Histórico: todos menos ENCARGADO ── */%>
+      <% if (!isEncargado) { %>
+        <li class="nav-item">
+          <a href="/consultor"
+             class="nav-link <%= metricasActive %>">
+            <i class="bi bi-graph-up"></i>
+            <span>Métricas (Hoy)</span>
+          </a>
+        </li>
 
-      <li class="nav-item">
-        <a href="/consultor/historico"
-           class="nav-link <%= _currentPath.startsWith('/consultor/historico') ? 'active' : '' %>">
-          <i class="bi bi-clock-history"></i>
-          <span>Histórico</span>
-        </a>
-      </li>
+        <li class="nav-item">
+          <a href="/consultor/historico"
+             class="nav-link <%= _currentPath.startsWith('/consultor/historico') ? 'active' : '' %>">
+            <i class="bi bi-clock-history"></i>
+            <span>Histórico</span>
+          </a>
+        </li>
+      <% } %>
 
       <%/* ── Administración: SUPERADMIN y ADMIN ── */%>
       <% if (canSeeAdminPanel) { %>

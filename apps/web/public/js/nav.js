@@ -39,8 +39,8 @@
       buttonsStyling: false,
       customClass: {
         popup: 'mero-swal mero-swal--light',
-        confirmButton: 'mero-swal-confirm',
-        cancelButton: 'mero-swal-cancel',
+        confirmButton: 'btn btn--success',
+        cancelButton: 'btn btn--danger',
       },
     }).then((result) => {
       if (!result.isConfirmed) return;
