@@ -1,15 +1,44 @@
 <%
-  // Evita crash si no mandan currentPath
   const _currentPath =
     (typeof currentPath !== 'undefined' && currentPath) ||
-    (typeof locals !== 'undefined' && locals.currentPath) ||
-    (typeof req !== 'undefined' && req.path) ||
+    (typeof locals  !== 'undefined' && locals.currentPath) ||
+    (typeof req     !== 'undefined' && req.path) ||
     '';
+
+  const isSuperAdmin = typeof hasRole === 'function' && hasRole('SUPERADMIN');
+  const isAdmin      = typeof hasRole === 'function' && hasRole('ADMIN');
+  const isEncargado  = typeof hasRole === 'function' && hasRole('ENCARGADO');
+  const isConsultor  = typeof hasRole === 'function' && hasRole('CONSULTOR');
+
+  const canSeeEncargado  = isSuperAdmin || isAdmin;
+  const canSeeAdminPanel = isSuperAdmin || isAdmin;
+
+  // Ruta de inicio según rol
+  const homeHref = (isSuperAdmin || isAdmin)
+    ? '/admin'
+    : isEncargado
+      ? '/encargado'
+      : isConsultor
+        ? '/consultor'
+        : '/';
+
+  // Activo SOLO en la ruta raíz de cada rol
+  const homeActive = (
+    _currentPath === '/'          ||
+    _currentPath === '/admin'     ||
+    (_currentPath === '/encargado' && isEncargado) ||
+    (_currentPath === '/consultor' && isConsultor)
+  ) ? 'active' : '';
+
+  // Métricas activo: en /consultor solo si NO es CONSULTOR (para él es su Inicio)
+  const metricasActive = (
+    (_currentPath === '/consultor' && !isConsultor) ||
+    (_currentPath === '/consultor' && (isSuperAdmin || isAdmin || isEncargado))
+  ) ? 'active' : '';
 %>
 
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
-
     <div class="sidebar-brand-wrap">
       <a href="/" class="sidebar-brand">
         <img src="/img/logo_ram.png" alt="Logo" class="sidebar-brand-logo">
@@ -34,49 +63,60 @@
   <div class="sidebar-body">
     <ul class="sidebar-nav">
 
+      <%/* ── Inicio: todos los roles ── */%>
       <li class="nav-item">
-        <a href="/" class="nav-link <%= (_currentPath === '/' || _currentPath === '/admin') ? 'active' : '' %>">
+        <a href="<%= homeHref %>" class="nav-link <%= homeActive %>">
           <i class="bi bi-house"></i>
           <span>Inicio</span>
         </a>
-      </li> 
-
-      <li class="nav-item">
-        <a href="/encargado" class="nav-link <%= _currentPath === '/encargado' ? 'active' : '' %>">
-          <i class="bi bi-speedometer2"></i>
-          <span>Panel Encargado</span>
-        </a>
       </li>
 
-      <li class="nav-item">
-        <a href="/encargado/asignar" class="nav-link <%= _currentPath.startsWith('/encargado/asignar') ? 'active' : '' %>">
-          <i class="bi bi-qr-code-scan"></i>
-          <span>Asignaciones</span>
-        </a>
-      </li>
+      <%/* ── Panel Encargado, Asignaciones, Captura: SUPERADMIN y ADMIN ── */%>
+      <% if (canSeeEncargado) { %>
+        <li class="nav-item">
+          <a href="/encargado"
+             class="nav-link <%= (_currentPath === '/encargado' && !isEncargado) ? 'active' : '' %>">
+            <i class="bi bi-speedometer2"></i>
+            <span>Panel Encargado</span>
+          </a>
+        </li>
 
-      <li class="nav-item">
-        <a href="/encargado/captura" class="nav-link <%= _currentPath.startsWith('/encargado/captura') ? 'active' : '' %>">
-          <i class="bi bi-clipboard-check"></i>
-          <span>Captura</span>
-        </a>
-      </li>
+        <li class="nav-item">
+          <a href="/encargado/asignar"
+             class="nav-link <%= _currentPath.startsWith('/encargado/asignar') ? 'active' : '' %>">
+            <i class="bi bi-qr-code-scan"></i>
+            <span>Asignaciones</span>
+          </a>
+        </li>
 
+        <li class="nav-item">
+          <a href="/encargado/captura"
+             class="nav-link <%= _currentPath.startsWith('/encargado/captura') ? 'active' : '' %>">
+            <i class="bi bi-clipboard-check"></i>
+            <span>Captura</span>
+          </a>
+        </li>
+      <% } %>
+
+      <%/* ── Métricas e Histórico: todos los roles ── */%>
       <li class="nav-item">
-        <a href="/consultor" class="nav-link <%= _currentPath === '/consultor' ? 'active' : '' %>">
+        <a href="/consultor"
+           class="nav-link <%= metricasActive %>">
           <i class="bi bi-graph-up"></i>
           <span>Métricas (Hoy)</span>
         </a>
       </li>
 
       <li class="nav-item">
-        <a href="/consultor/historico" class="nav-link <%= _currentPath.startsWith('/consultor/historico') ? 'active' : '' %>">
+        <a href="/consultor/historico"
+           class="nav-link <%= _currentPath.startsWith('/consultor/historico') ? 'active' : '' %>">
           <i class="bi bi-clock-history"></i>
           <span>Histórico</span>
         </a>
       </li>
 
-      <% if (typeof hasRole === 'function' && hasRole('ADMIN', 'SuperAdministrador', 'SUPER_ADMIN')) { %>
+      <%/* ── Administración: SUPERADMIN y ADMIN ── */%>
+      <% if (canSeeAdminPanel) { %>
         <li class="nav-item has-submenu">
           <a href="javascript:void(0)"
              class="nav-link submenu-toggle <%= (_currentPath.startsWith('/admin') && _currentPath !== '/admin') ? 'active' : '' %>">
@@ -87,25 +127,26 @@
 
           <ul class="sidebar-submenu <%= _currentPath.startsWith('/admin') ? 'show' : '' %>">
             <li>
-              <a href="/admin/usuarios" class="<%= _currentPath === '/admin/usuarios' ? 'active' : '' %>">
+              <a href="/admin/usuarios"
+                 class="<%= _currentPath === '/admin/usuarios' ? 'active' : '' %>">
                 <i class="bi bi-person-gear"></i> Usuarios
               </a>
             </li>
-
             <li>
-              <a href="/admin/empleados" class="<%= _currentPath === '/admin/empleados' ? 'active' : '' %>">
+              <a href="/admin/empleados"
+                 class="<%= _currentPath === '/admin/empleados' ? 'active' : '' %>">
                 <i class="bi bi-people"></i> Empleados
               </a>
             </li>
-
             <li>
-              <a href="/admin/catalogos/areas" class="<%= _currentPath.startsWith('/admin/catalogos') ? 'active' : '' %>">
+              <a href="/admin/catalogos/areas"
+                 class="<%= _currentPath.startsWith('/admin/catalogos') ? 'active' : '' %>">
                 <i class="bi bi-folder"></i> Catálogos
               </a>
             </li>
-
             <li>
-              <a href="/admin/auditoria" class="<%= _currentPath === '/admin/auditoria' ? 'active' : '' %>">
+              <a href="/admin/auditoria"
+                 class="<%= _currentPath === '/admin/auditoria' ? 'active' : '' %>">
                 <i class="bi bi-shield-check"></i> Auditoría
               </a>
             </li>

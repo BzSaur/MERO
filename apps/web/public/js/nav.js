@@ -1,5 +1,7 @@
 (function () {
-  // Toggle menú de usuario
+  // ============================================================
+  // USER MENU
+  // ============================================================
   function toggleUserMenu() {
     const menu = document.getElementById('userMenu');
     if (menu) {
@@ -7,17 +9,61 @@
     }
   }
 
-  // Logout directo, sin alerta ni confirmación
+  // ============================================================
+  // LOGOUT CON SWEETALERT
+  // ============================================================
   function handleLogout(event) {
     event.preventDefault();
 
     const logoutBtn = event.currentTarget;
-    const href = logoutBtn.getAttribute('href') || '/logout';
+    const href = logoutBtn.getAttribute('href') || '/auth/logout';
 
-    window.location.href = href;
+    // Fallback si SweetAlert2 no cargó
+    if (typeof Swal === 'undefined') {
+      const ok = confirm('¿Está seguro de cerrar sesión?');
+      if (ok) {
+        alert('Sesión cerrada');
+        window.location.href = href;
+      }
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Cerrar sesión?',
+      text: '¿Está seguro de cerrar sesión?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      buttonsStyling: false,
+      customClass: {
+        popup: 'mero-swal mero-swal--light',
+        confirmButton: 'mero-swal-confirm',
+        cancelButton: 'mero-swal-cancel',
+      },
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      Swal.fire({
+        title: 'Sesión cerrada',
+        text: 'Has cerrado sesión correctamente.',
+        icon: 'success',
+        timer: 1200,
+        showConfirmButton: false,
+        buttonsStyling: false,
+        customClass: {
+          popup: 'mero-swal mero-swal--light',
+        },
+      }).then(() => {
+        window.location.href = href;
+      });
+    });
   }
 
-  // Toggle del sidebar
+  // ============================================================
+  // SIDEBAR
+  // ============================================================
   function toggleSidebar() {
     document.body.classList.toggle('sidebar-collapsed');
 
@@ -74,7 +120,8 @@
     // Botón del menú de usuario
     const userDropdownToggle =
       document.getElementById('userDropdownToggle') ||
-      document.querySelector('.user-dropdown-toggle');
+      document.querySelector('.user-dropdown-toggle') ||
+      document.getElementById('userDropdown');
 
     if (userDropdownToggle) {
       userDropdownToggle.addEventListener('click', function (e) {
