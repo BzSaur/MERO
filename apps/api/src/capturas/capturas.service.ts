@@ -11,8 +11,37 @@ import { HORARIOS } from '@mero/shared';
 export class CapturasService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private getMexicoNowParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Mexico_City',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      weekday: 'short',
+    }).formatToParts(date);
+
+    const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? -1);
+    const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? -1);
+    const weekday = parts.find((p) => p.type === 'weekday')?.value ?? '';
+
+    const isoMap: Record<string, number> = {
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+      Sun: 7,
+    };
+
+    return {
+      hour,
+      minute,
+      isoDay: isoMap[weekday] ?? 0,
+    };
+  }
+
   async create(dto: CreateCapturaDto, capturadoPor: number) {
-    // Verificar que la asignación existe y está activa
     const asignacion = await this.prisma.meroAsignacion.findUnique({
       where: { id: dto.asignacionId },
     });
@@ -21,12 +50,10 @@ export class CapturasService {
       throw new NotFoundException('Asignación no encontrada');
     }
 
-    // Validar que el slot horario es válido para el día
     const diaSemana = asignacion.fecha.getDay();
-    // Convertir de JS (0=domingo) a ISO (7=domingo)
     const diaIso = diaSemana === 0 ? 7 : diaSemana;
     const slotsValidos = HORARIOS.getSlotsParaDia(diaIso);
-    const slotValido = slotsValidos.some((s) => s.hora === dto.slotHora);
+    const slotValido = slotsValidos.some((s: { hora: number }) => s.hora === dto.slotHora);
 
     if (!slotValido) {
       throw new BadRequestException(
@@ -34,7 +61,34 @@ export class CapturasService {
       );
     }
 
-    // Verificar si ya existe una captura para este slot
+    const { hour: horaActualMexico } = this.getMexicoNowParts();
+
+    const horasPermitidas: number[] = [];
+
+    // El slot anterior sigue disponible durante toda la hora siguiente
+    if (slotsValidos.some((s: { hora: number }) => s.hora === (horaActualMexico - 1))) {
+      horasPermitidas.push(horaActualMexico - 1);
+    }
+
+    // El slot actual también se puede capturar si es válido
+    if (slotsValidos.some((s: { hora: number }) => s.hora === horaActualMexico)) {
+      horasPermitidas.push(horaActualMexico);
+    }
+
+    if (!horasPermitidas.includes(dto.slotHora)) {
+      if (!horasPermitidas.length) {
+        throw new BadRequestException(
+          'En este momento no hay ningún slot disponible para captura',
+        );
+      }
+
+      throw new BadRequestException(
+        `Solo puedes capturar estos slots actualmente: ${horasPermitidas
+          .map((h) => `${h}:00 - ${h + 1}:00`)
+          .join(', ')}`,
+      );
+    }
+
     const existente = await this.prisma.meroCaptura.findFirst({
       where: {
         asignacionId: dto.asignacionId,
@@ -43,7 +97,6 @@ export class CapturasService {
     });
 
     if (existente) {
-      // Actualizar captura existente
       return this.prisma.meroCaptura.update({
         where: { id: existente.id },
         data: { cantidad: dto.cantidad, capturadoPor },

@@ -14,19 +14,12 @@
       <%- include('../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--captura page--auditoria page--asignar page--areas">
+        <div class="page page--captura">
           <div class="container">
-
-            <div class="page-header page-header--auditoria">
+            <div class="page-header">
               <div>
-                <h1>Registrar Captura</h1>
-                <h2><p class="page-header__sub">Ingresa la producción por slot horario</p></h2>
+                <h1>Ingresa la producción por slot horario</h1>
               </div>
-
-              <a href="/encargado" class="btn btn--back">
-                <svg class="icon"><use href="#icon-back"/></svg>
-                Volver
-              </a>
             </div>
 
             <%
@@ -34,101 +27,75 @@
               const _slots = [8,9,10,11,12,13,15,16,17,18];
             %>
 
-            <div class="card card--asignar card--asignar-act card--usuarios">
-              <div class="card__header card__header--usuarios">
+            <div class="card card--captura" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
                 <h3><span class="card__title">Nueva captura</span></h3>
                 <span class="badge badge--ok"><%= _asignaciones.length %></span>
               </div>
 
-              <% if (!_asignaciones.length) { %>
-                <div class="empty empty--asignar">
-                  <p class="empty__text">Sin asignaciones activas.</p>
-                  <p class="empty__sub">Primero asigna un usuario a un área para registrar su captura.</p>
+              <form method="POST" action="/encargado/captura" class="form-grid" style="padding: var(--gap) var(--gap-lg);">
+                <div class="form-group">
+                  <label class="form-label" for="asignacionId">Asignación activa</label>
+                  <select class="form-control" id="asignacionId" name="asignacionId" required>
+                    <option value="">— Seleccionar —</option>
+                    <% (asignaciones || []).forEach(a => { %>
+                      <option value="<%= a.id %>">
+                        <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %> —
+                        <%= a.area?.nombre || 'Sin área' %>
+                      </option>
+                    <% }) %>
+                  </select>
                 </div>
-              <% } else { %>
-                <div class="table-wrap table-wrap--asignar table-wrap--clean">
-                  <table class="table table--asignar table--clean">
-                    <thead>
-                      <tr>
-                        <th>Usuario</th>
-                        <th>Área</th>
-                        <th>Horario</th>
-                        <th>Cantidad</th>
-                        <th>Capturar</th>
-                      </tr>
-                    </thead>
 
-                    <tbody>
-                      <% _asignaciones.forEach((a, idx) => { 
-                           const formId = `capturaForm_${a.id}_${idx}`;
-                      %>
-                        <tr>
-                          <td>
-                            <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
-                          </td>
-
-                          <td>
-                            <%= a.area?.nombre || '—' %>
-                          </td>
-
-                          <td>
-                            <select class="form-control" name="slotHora" form="<%= formId %>" required>
-                              <option value="">— Seleccionar —</option>
-                              <% _slots.forEach(h => { %>
-                                <option value="<%= h %>"><%= h %>:00 – <%= h + 1 %>:00</option>
-                              <% }) %>
-                            </select>
-                          </td>
-
-                          <td>
-                            <input
-                              class="form-control"
-                              type="number"
-                              name="cantidad"
-                              form="<%= formId %>"
-                              min="0"
-                              required
-                              placeholder="0"
-                            >
-                          </td>
-
-                          <td>
-                            <button type="submit" form="<%= formId %>" class="btn btn--edit btn--sm">
-                              <svg class="icon"><use href="#icon-check"/></svg>
-                              Capturar
-                            </button>
-
-                            <form
-                              id="<%= formId %>"
-                              method="POST"
-                              action="/encargado/captura"
-                              class="js-form-captura"
-                              style="display:none;"
-                            >
-                              <input type="hidden" name="asignacionId" value="<%= a.id %>">
-                            </form>
-                          </td>
-                        </tr>
+                <div class="form-group">
+                  <label class="form-label" for="slotHora">Slot horario</label>
+                  <select
+                    class="form-control"
+                    id="slotHora"
+                    name="slotHora"
+                    required
+                    <%= !slotsDisponibles || !slotsDisponibles.length ? 'disabled' : '' %>
+                  >
+                    <% if (slotsDisponibles && slotsDisponibles.length) { %>
+                      <% slotsDisponibles.forEach(s => { %>
+                        <option value="<%= s.hora %>" selected><%= s.label %></option>
                       <% }) %>
-                    </tbody>
-                  </table>
+                    <% } else { %>
+                      <option value="">No hay slot activo disponible en este momento</option>
+                    <% } %>
+                  </select>
+
+                  <% if (!slotsDisponibles || !slotsDisponibles.length) { %>
+                    <small style="display:block; margin-top:8px; color:#b45309;">
+                      Solo se puede capturar en el slot horario que está transcurriendo actualmente.
+                    </small>
+                  <% } %>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cantidad">Cantidad producida</label>
+                  <input class="form-control" type="number" id="cantidad" name="cantidad" min="0" required>
+                </div>
+
+                <div class="form-group" style="align-self:end;">
+                  <button
+                    type="submit"
+                    class="btn btn--success"
+                    <%= !slotsDisponibles || !slotsDisponibles.length ? 'disabled' : '' %>
+                  >
+                    Registrar
+                  </button>
                 </div>
               <% } %>
             </div>
 
-            <div class="card card--asignar card--asignar-act card--usuarios">
-              <div class="card__header card__header--split">
-                <div class="card__header-left">
-                  <h3><span class="card__title">Asignaciones activas</span></h3>
-                  <span class="badge badge--ok"><%= _asignaciones.length %></span>
-                </div>
-
-                <a href="/encargado/asignar" class="btn btn--success btn--sm">
-                  Gestionar asignaciones
-                </a>
+            <div class="card card--captura">
+              <div class="card__header card__header--usuarios">
+                <h3><span class="card__title">Asignaciones activas</span></h3>
+                <span class="badge badge--ok"><%= (asignaciones || []).length %></span>
               </div>
 
-              <% if (!_asignaciones.length) { %>
+              <% if (!asignaciones || !asignaciones.length) { %>
                 <div class="empty empty--asignar">
                   <p class="empty__text">Sin asignaciones activas.</p>
                 </div>
@@ -139,16 +106,16 @@
                       <tr>
                         <th>Usuario</th>
                         <th>Área</th>
-                        <th class="td-hide-mobile">Subtarea</th>
+                        <th>Subtarea</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      <% _asignaciones.forEach(a => { %>
+                      <% (asignaciones || []).forEach(a => { %>
                         <tr>
                           <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
                           <td><%= a.area?.nombre || '—' %></td>
-                          <td class="td-hide-mobile"><%= a.subtarea?.nombre || '—' %></td>
+                          <td><%= a.subtarea?.nombre || '—' %></td>
                         </tr>
                       <% }) %>
                     </tbody>
@@ -156,7 +123,6 @@
                 </div>
               <% } %>
             </div>
-
           </div>
         </div>
       </main>
@@ -164,58 +130,6 @@
   </div>
 
   <div id="sidebarOverlay"></div>
-
   <script src="/js/main.js"></script>
-  <script src="/js/alerts.js" defer></script>
-
-  <script>
-    (() => {
-      const SwalRef = window.Swal;
-      const KEY_CAPTURA_OK = 'mero_captura_ok';
-
-      function showPendingAlerts() {
-        if (!SwalRef) return;
-
-        const capturaOk = sessionStorage.getItem(KEY_CAPTURA_OK);
-
-        if (capturaOk === '1') {
-          sessionStorage.removeItem(KEY_CAPTURA_OK);
-
-          SwalRef.fire({
-            icon: 'success',
-            title: 'Captura realizada exitosamente',
-            confirmButtonText: 'Aceptar'
-          });
-        }
-      }
-
-      document.addEventListener('DOMContentLoaded', showPendingAlerts);
-
-      document.querySelectorAll('.js-form-captura').forEach((form) => {
-        form.addEventListener('submit', (e) => {
-          const formId = form.id;
-          const slot = document.querySelector(`[name="slotHora"][form="${formId}"]`);
-          const cantidad = document.querySelector(`[name="cantidad"][form="${formId}"]`);
-
-          if (!slot?.value || !cantidad?.value) {
-            e.preventDefault();
-
-            if (SwalRef) {
-              SwalRef.fire({
-                icon: 'warning',
-                title: 'Faltan datos',
-                text: 'Selecciona un horario y captura la cantidad antes de guardar.',
-                confirmButtonText: 'Aceptar'
-              });
-            }
-
-            return;
-          }
-
-          sessionStorage.setItem(KEY_CAPTURA_OK, '1');
-        });
-      });
-    })();
-  </script>
 </body>
 </html>

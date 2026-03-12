@@ -41,6 +41,69 @@ function getUserAreaScope(req) {
   };
 }
 
+function getMexicoNowParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Mexico_City',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    weekday: 'short',
+  }).formatToParts(date);
+
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? -1);
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? -1);
+  const weekday = parts.find((p) => p.type === 'weekday')?.value ?? '';
+
+  const isoMap = {
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+    Sun: 7,
+  };
+
+  return {
+    hour,
+    minute,
+    isoDay: isoMap[weekday] ?? 0,
+  };
+}
+
+function getSlotsDelDia(isoDay) {
+  if (isoDay === 7) return [];
+  if (isoDay === 6) return [8, 9, 10, 11, 12, 13];
+  return [8, 9, 10, 11, 12, 13, 15, 16, 17, 18];
+}
+
+function getSlotsDisponiblesParaCaptura() {
+  const { hour, isoDay } = getMexicoNowParts();
+  const slotsDelDia = getSlotsDelDia(isoDay);
+
+  if (!slotsDelDia.length) return [];
+
+  const disponibles = [];
+
+  // Slot anterior: sigue disponible durante toda la hora siguiente
+  if (slotsDelDia.includes(hour - 1)) {
+    disponibles.push({
+      hora: hour - 1,
+      label: `${hour - 1}:00 – ${hour}:00`,
+    });
+  }
+
+  // Slot actual: si la hora actual es un slot válido, también se puede capturar
+  if (slotsDelDia.includes(hour)) {
+    disponibles.push({
+      hora: hour,
+      label: `${hour}:00 – ${hour + 1}:00`,
+    });
+  }
+
+  return disponibles;
+}
+
 /* ───────────────────────────────────────────────
  * Dashboard
  * ─────────────────────────────────────────────── */
@@ -102,6 +165,8 @@ router.get('/captura', async (req, res, next) => {
       ? areas.find((a) => Number(a.id) === Number(scope.areaId)) || null
       : null;
 
+    const slotsDisponibles = getSlotsDisponiblesParaCaptura();
+
     res.render('encargado/captura', {
       title: 'Registrar Captura',
       areas: scope.isScoped ? (areaFija ? [areaFija] : []) : areas,
@@ -109,6 +174,7 @@ router.get('/captura', async (req, res, next) => {
       asignaciones,
       areaFija,
       lockArea: scope.isScoped,
+      slotsDisponibles,
     });
   } catch (err) {
     next(err);
