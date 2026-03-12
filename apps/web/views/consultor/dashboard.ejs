@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <%- include('../partials/head') %>
-
 </head>
 
 <body class="sidebar-collapsed">
@@ -61,7 +60,6 @@
                 );
               }
 
-              // REAL: tu API manda `cantidad`
               function getReal(m) {
                 const v =
                   m?.cantidadReal ??
@@ -69,11 +67,10 @@
                   m?.cantidad ??
                   m?.producido ??
                   null;
+
                 return (v == null ? null : Number(v));
               }
 
-              // STD: tu API manda `estandar`
-              // OJO: si viene 0 casi seguro es "no hay estándar en BD" (findVigente falló)
               function getStd(m) {
                 const v =
                   m?.cantidadEstandar ??
@@ -86,13 +83,11 @@
 
                 const n = Number(v);
 
-                // Si el backend te manda 0 por falta de estándar, no lo muestres como 0 (engaña)
                 if (!Number.isFinite(n) || n <= 0) return null;
 
                 return n;
               }
 
-              // Eficiencia: tu API manda `eficienciaPct`
               function getEff(m) {
                 const v =
                   m?.eficiencia ??
@@ -106,16 +101,49 @@
                 const n = Number(v);
                 if (!Number.isFinite(n)) return null;
 
-                return n; // ya viene como porcentaje (0-100)
+                return n;
               }
 
-              // Promedio global
+              function slotClass(val) {
+                if (val == null || !Number.isFinite(Number(val))) return 'none';
+                if (Number(val) >= 90) return 'ok';
+                if (Number(val) >= 70) return 'warn';
+                return 'fail';
+              }
+
+              function effClass(val) {
+                return slotClass(val);
+              }
+
+              function fmtEff(val) {
+                if (val == null || !Number.isFinite(Number(val))) return '—';
+                return Number(val).toFixed(1) + '%';
+              }
+
               let sumEff = 0, countEff = 0;
               metricas.forEach(m => {
                 const e = getEff(m);
-                if (e != null) { sumEff += e; countEff++; }
+                if (e != null) {
+                  sumEff += e;
+                  countEff++;
+                }
               });
               const avgEff = countEff ? (sumEff / countEff) : null;
+
+              const okCount = metricas.filter(m => {
+                const e = getEff(m);
+                return e != null && e >= 90;
+              }).length;
+
+              const warnCount = metricas.filter(m => {
+                const e = getEff(m);
+                return e != null && e >= 70 && e < 90;
+              }).length;
+
+              const failCount = metricas.filter(m => {
+                const e = getEff(m);
+                return e != null && e < 70;
+              }).length;
             %>
 
             <!-- Cards -->
@@ -138,37 +166,57 @@
                 <div class="stat-card__sub">asignados ahora</div>
               </div>
             </div>
-
+            
             <% if (metricas.length > 0) { %>
               <%
-                // Agrupar por área
                 const byArea = {};
+
                 metricas.forEach(m => {
                   const key = getAreaName(m);
                   if (!byArea[key]) byArea[key] = [];
                   byArea[key].push(m);
                 });
 
-                // Orden por slotHora asc
                 Object.values(byArea).forEach(arr => {
-                  arr.sort((a,b) => Number(getSlotHora(a)) - Number(getSlotHora(b)));
+                  arr.sort((a, b) => Number(getSlotHora(a) ?? 0) - Number(getSlotHora(b) ?? 0));
                 });
               %>
 
               <!-- Panel strip por área -->
               <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
-                <div class="card__header">
-                  <h3><span class="card__title">Slot strip por área</span></h3>
-                  <span class="badge badge--none">Verde &gt;=90% / Ámbar 70-89% / Rojo &lt;70%</span>
+                <div class="card__header card__header--metrics-strip">
+                  <div>
+                    <h3><span class="card__title">Slot strip por área</span></h3>
+                  </div>
+
+                  <div class="metrics-legend">
+                    <span class="badge-summary">
+                      <i class="bi bi-circle-fill text-success" style="font-size: 0.6rem;"></i>
+                      Verde (≥90%)
+                    </span>
+                    <span class="badge-summary">
+                      <i class="bi bi-circle-fill text-warning" style="font-size: 0.6rem;"></i>
+                      Riesgo (70-89%)
+                    </span>
+                    <span class="badge-summary">
+                      <i class="bi bi-circle-fill text-danger" style="font-size: 0.6rem;"></i>
+                      Crítico (&lt;70%)
+                    </span>
+                  </div>
                 </div>
 
-                <div style="padding: var(--gap) var(--gap-lg);">
+                <div class="metrics-strip-body">
                   <% Object.entries(byArea).forEach(([area, slots]) => {
                        let areaSum = 0, areaCount = 0;
+
                        slots.forEach(s => {
                          const e = getEff(s);
-                         if (e != null) { areaSum += e; areaCount++; }
+                         if (e != null) {
+                           areaSum += e;
+                           areaCount++;
+                         }
                        });
+
                        const areaAvg = areaCount ? (areaSum / areaCount) : null;
                   %>
                     <div class="slot-area">
@@ -178,7 +226,7 @@
                       </div>
 
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.forEach(s => { 
+                        <% slots.forEach(s => {
                              const sh = getSlotHora(s);
                              const r  = getReal(s);
                              const st = getStd(s);
@@ -186,8 +234,7 @@
                         %>
                           <div
                             class="slot-strip__seg slot-strip__seg--<%= slotClass(e) %>"
-                            title="<%= sh %>h — real: <%= (r == null ? '—' : r) %> / est: <%= (st == null ? '—' : st) %> — <%= fmtEff(e) %>"
-                          ></div>
+                            title="<%= sh %>h — real: <%= (r == null ? '—' : r) %> / est: <%= (st == null ? '—' : st) %> — <%= fmtEff(e) %>"></div>
                         <% }) %>
                       </div>
 

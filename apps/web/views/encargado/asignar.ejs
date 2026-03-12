@@ -28,15 +28,12 @@
                 Volver
               </a>
             </div>
-
-            <%- include('../partials/flash') %>
-
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
                 <h3><span class="card__title">Escanear QR</span></h3>
               </div>
 
-              <form method="POST" action="/encargado/asignar/scan">
+              <form method="POST" action="/encargado/asignar/scan" id="formAsignar">
                 <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
                   <div class="users-controls__left">
 
@@ -171,8 +168,16 @@
                             <%= desde %>
                           </td>
                           <td class="td-actions">
-                            <form method="POST" action="/encargado/asignar/<%= a.id %>/finalizar" style="display:inline">
-                              <button type="submit" class="btn btn--ghost btn--sm">Finalizar</button>
+                            <form
+                              method="POST"
+                              action="/encargado/asignar/<%= a.id %>/finalizar"
+                              style="display:inline"
+                              class="js-form-finalizar"
+                              data-empleado="<%= `${a.empleado?.nombre || ''} ${a.empleado?.apellidos || ''}`.trim() || 'empleado' %>"
+                            >
+                              <button type="submit" class="btn btn--danger btn--sm">
+                                Finalizar
+                              </button>
                             </form>
                           </td>
                         </tr>
@@ -264,6 +269,83 @@
     btn?.addEventListener('click', startScan);
     closeBtn?.addEventListener('click', stopScan);
     modal?.addEventListener('click', (e) => { if (e.target === modal) stopScan(); });
+  </script>
+
+  <script>
+    (() => {
+      const SwalRef = window.Swal;
+      const formAsignar = document.getElementById('formAsignar');
+
+      const KEY_ASSIGN_OK = 'mero_asignacion_ok';
+      const KEY_FINISH_OK = 'mero_asignacion_finish_name';
+
+      function cleanText(value) {
+        return String(value ?? '').trim();
+      }
+
+      function showPendingAlerts() {
+        if (!SwalRef) return;
+
+        const assignOk = sessionStorage.getItem(KEY_ASSIGN_OK);
+        const finishName = sessionStorage.getItem(KEY_FINISH_OK);
+
+        if (assignOk === '1') {
+          sessionStorage.removeItem(KEY_ASSIGN_OK);
+
+          SwalRef.fire({
+            icon: 'success',
+            title: 'Asignado correctamente',
+            confirmButtonText: 'Aceptar'
+          });
+
+          return;
+        }
+
+        if (finishName) {
+          sessionStorage.removeItem(KEY_FINISH_OK);
+
+          SwalRef.fire({
+            icon: 'success',
+            title: `Asignación de: ${finishName} eliminada`,
+            confirmButtonText: 'Aceptar'
+          });
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', showPendingAlerts);
+
+      if (formAsignar) {
+        formAsignar.addEventListener('submit', () => {
+          if (!formAsignar.checkValidity()) return;
+          sessionStorage.setItem(KEY_ASSIGN_OK, '1');
+        });
+      }
+
+      document.querySelectorAll('.js-form-finalizar').forEach((form) => {
+        form.addEventListener('submit', async (e) => {
+          if (!SwalRef) return;
+
+          e.preventDefault();
+
+          const empleado = cleanText(form.dataset.empleado) || 'empleado';
+
+          const result = await SwalRef.fire({
+            icon: 'warning',
+            title: '¿Desea finalizar la asignación?',
+            text: `Se eliminará la asignación de: ${empleado}`,
+            showCancelButton: true,
+            confirmButtonText: 'Sí, finalizar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+          });
+
+          if (!result.isConfirmed) return;
+
+          sessionStorage.setItem(KEY_FINISH_OK, empleado);
+          form.submit();
+        });
+      });
+    })();
   </script>
 </body>
 </html>
