@@ -31,7 +31,6 @@
 
             <%- include('../partials/flash') %>
 
-            <%# ── Formulario scan QR (Estilizado como Filtros) ── %>
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
                 <h3><span class="card__title">Escanear QR</span></h3>
@@ -56,12 +55,23 @@
 
                     <div class="form-group users-controls__field users-controls__field--wide">
                       <label class="form-label" for="areaId">Área destino</label>
-                      <select class="form-control" id="areaId" name="areaId" required>
-                        <option value="">— Seleccionar área —</option>
-                        <% (areas || []).forEach(a => { %>
-                          <option value="<%= a.id %>"><%= a.nombre %></option>
-                        <% }) %>
-                      </select>
+
+                      <% if (lockArea && areaFija) { %>
+                        <input
+                          class="form-control"
+                          type="text"
+                          value="<%= areaFija.nombre %>"
+                          readonly
+                        >
+                        <input type="hidden" id="areaId" name="areaId" value="<%= areaFija.id %>">
+                      <% } else { %>
+                        <select class="form-control" id="areaId" name="areaId" required>
+                          <option value="">— Seleccionar área —</option>
+                          <% (areas || []).forEach(a => { %>
+                            <option value="<%= a.id %>"><%= a.nombre %></option>
+                          <% }) %>
+                        </select>
+                      <% } %>
                     </div>
 
                     <div class="form-group users-controls__field users-controls__field--wide">
@@ -110,7 +120,6 @@
               </div>
             </div>
 
-            <%# ── Asignaciones activas ── %>
             <div class="card card--asignar card--asignar-act">
               <div class="card__header card__header--usuarios">
                 <h3><span class="card__title">Activas ahora</span></h3>
@@ -184,24 +193,29 @@
   <script src="/js/main.js"></script>
 
   <script>
-    // Tu lógica de filtrado de subtareas
     const areaSel = document.getElementById('areaId');
     const subSel  = document.getElementById('subtareaId');
+
     function filterSubtareas() {
+      if (!areaSel || !subSel) return;
+
       const area = areaSel.value;
       subSel.value = '';
+
       [...subSel.options].forEach((opt, i) => {
         if (i === 0) return;
-        opt.hidden = (opt.dataset.area !== area);
+        opt.hidden = !!area && opt.dataset.area !== area;
       });
     }
-    areaSel.addEventListener('change', filterSubtareas);
-    filterSubtareas();
+
+    if (areaSel && subSel) {
+      areaSel.addEventListener('change', filterSubtareas);
+      filterSubtareas();
+    }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script>
-    // Tu lógica de la cámara (sin cambios)
     const btn = document.getElementById('btnScanCam');
     const modal = document.getElementById('qrModal');
     const closeBtn = document.getElementById('btnCloseQr');
@@ -217,27 +231,39 @@
         await video.play();
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
         async function tick() {
           if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(img.data, img.width, img.height);
-            if (code) { uuidInput.value = code.data; stopScan(); return; }
+            const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(image.data, image.width, image.height);
+            if (code && code.data) {
+              uuidInput.value = code.data.trim();
+              stopScan();
+              return;
+            }
           }
           rafId = requestAnimationFrame(tick);
         }
         tick();
-      } catch (e) { modal.style.display = 'none'; alert('Error cámara'); }
+      } catch (e) {
+        alert('No se pudo acceder a la cámara');
+        stopScan();
+      }
     }
 
     function stopScan() {
-      modal.style.display = 'none';
       if (rafId) cancelAnimationFrame(rafId);
       if (stream) stream.getTracks().forEach(t => t.stop());
+      video.srcObject = null;
+      modal.style.display = 'none';
     }
-    btn.addEventListener('click', startScan);
-    closeBtn.addEventListener('click', stopScan);
+
+    btn?.addEventListener('click', startScan);
+    closeBtn?.addEventListener('click', stopScan);
+    modal?.addEventListener('click', (e) => { if (e.target === modal) stopScan(); });
   </script>
 </body>
 </html>

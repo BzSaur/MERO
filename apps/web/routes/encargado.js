@@ -30,6 +30,17 @@ function toInt(v) {
   return Number.isInteger(n) ? n : undefined;
 }
 
+function getUserAreaScope(req) {
+  const user = req.session.user || {};
+  const isEncargado = user.rol === 'ENCARGADO';
+  const areaId = toInt(user.areaId);
+  return {
+    isEncargado,
+    areaId,
+    isScoped: isEncargado && Number.isInteger(areaId),
+  };
+}
+
 /* ───────────────────────────────────────────────
  * Dashboard
  * ─────────────────────────────────────────────── */
@@ -37,10 +48,19 @@ router.get('/', async (req, res, next) => {
   try {
     const hoy = new Date().toISOString().slice(0, 10);
     const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    const metricasUrl = scope.isScoped
+      ? `/metricas/hora?fecha=${hoy}&areaId=${scope.areaId}`
+      : `/metricas/hora?fecha=${hoy}`;
+
+    const asignacionesUrl = scope.isScoped
+      ? `/asignaciones/activas?areaId=${scope.areaId}`
+      : '/asignaciones/activas';
 
     const [metRes, asnRes] = await Promise.all([
-      client.get(`/metricas/hora?fecha=${hoy}`),
-      client.get('/asignaciones/activas'),
+      client.get(metricasUrl),
+      client.get(asignacionesUrl),
     ]);
 
     res.render('encargado/dashboard', {
@@ -60,18 +80,35 @@ router.get('/', async (req, res, next) => {
 router.get('/captura', async (req, res, next) => {
   try {
     const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    const areasPromise = client.get('/catalogos/areas');
+    const modelosPromise = client.get('/catalogos/modelos');
+    const asignacionesPromise = scope.isScoped
+      ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
+      : client.get('/asignaciones/activas');
 
     const [areasRes, modRes, asnRes] = await Promise.all([
-      client.get('/catalogos/areas'),
-      client.get('/catalogos/modelos'),
-      client.get('/asignaciones/activas'),
+      areasPromise,
+      modelosPromise,
+      asignacionesPromise,
     ]);
+
+    const areas = Array.isArray(areasRes.data) ? areasRes.data : [];
+    const modelos = Array.isArray(modRes.data) ? modRes.data : [];
+    const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+
+    const areaFija = scope.isScoped
+      ? areas.find((a) => Number(a.id) === Number(scope.areaId)) || null
+      : null;
 
     res.render('encargado/captura', {
       title: 'Registrar Captura',
-      areas: areasRes.data,
-      modelos: modRes.data,
-      asignaciones: asnRes.data,
+      areas: scope.isScoped ? (areaFija ? [areaFija] : []) : areas,
+      modelos,
+      asignaciones,
+      areaFija,
+      lockArea: scope.isScoped,
     });
   } catch (err) {
     next(err);
@@ -96,20 +133,44 @@ router.post('/captura', async (req, res) => {
 router.get('/asignar', async (req, res, next) => {
   try {
     const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    const asignacionesPromise = scope.isScoped
+      ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
+      : client.get('/asignaciones/activas');
 
     const [asnRes, areasRes, subRes, modRes] = await Promise.all([
-      client.get('/asignaciones/activas'),
+      asignacionesPromise,
       client.get('/catalogos/areas'),
       client.get('/catalogos/subtareas'),
       client.get('/catalogos/modelos'),
     ]);
 
+    const areas = Array.isArray(areasRes.data) ? areasRes.data : [];
+    const subtareas = Array.isArray(subRes.data) ? subRes.data : [];
+    const modelos = Array.isArray(modRes.data) ? modRes.data : [];
+    const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+
+    let areaFija = null;
+    let areasFiltradas = areas;
+    let subtareasFiltradas = subtareas;
+
+    if (scope.isScoped) {
+      areaFija = areas.find((a) => Number(a.id) === Number(scope.areaId)) || null;
+      areasFiltradas = areaFija ? [areaFija] : [];
+      subtareasFiltradas = subtareas.filter(
+        (s) => Number(s.areaId) === Number(scope.areaId)
+      );
+    }
+
     res.render('encargado/asignar', {
       title: 'Asignaciones',
-      asignaciones: asnRes.data,
-      areas: areasRes.data,
-      subtareas: subRes.data,
-      modelos: modRes.data,
+      asignaciones,
+      areas: areasFiltradas,
+      subtareas: subtareasFiltradas,
+      modelos,
+      areaFija,
+      lockArea: scope.isScoped,
     });
   } catch (err) {
     next(err);
@@ -118,14 +179,44 @@ router.get('/asignar', async (req, res, next) => {
 
 router.post('/asignar/scan', async (req, res) => {
   try {
+    const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    let areaId = toInt(req.body.areaId);
+    const subtareaId = toInt(req.body.subtareaId);
+    const modeloId = toInt(req.body.modeloId);
+    const uuidQr = (req.body.uuidQr || '').trim();
+
+    if (scope.isScoped) {
+      areaId = scope.areaId;
+    }
+
+    if (!uuidQr || !areaId || !subtareaId || !modeloId) {
+      req.flash('error', 'Completa todos los campos requeridos');
+      return res.redirect('/encargado/asignar');
+    }
+
+    const { data: subtareas } = await client.get('/catalogos/subtareas');
+    const subtarea = (subtareas || []).find((s) => Number(s.id) === Number(subtareaId));
+
+    if (!subtarea) {
+      req.flash('error', 'La subtarea seleccionada no existe');
+      return res.redirect('/encargado/asignar');
+    }
+
+    if (Number(subtarea.areaId) !== Number(areaId)) {
+      req.flash('error', 'La subtarea no pertenece al área seleccionada');
+      return res.redirect('/encargado/asignar');
+    }
+
     const payload = {
-      uuidQr: (req.body.uuidQr || '').trim(),
-      areaId: toInt(req.body.areaId),
-      subtareaId: toInt(req.body.subtareaId),
-      modeloId: toInt(req.body.modeloId),
+      uuidQr,
+      areaId,
+      subtareaId,
+      modeloId,
     };
 
-    await apiClient(req.session.user.token).post('/asignaciones/scan', payload);
+    await client.post('/asignaciones/scan', payload);
     req.flash('success', 'Asignación registrada');
     res.redirect('/encargado/asignar');
   } catch (err) {
@@ -141,7 +232,18 @@ router.post('/asignar/scan', async (req, res) => {
  */
 router.post('/asignar/:id/finalizar', async (req, res) => {
   try {
-    await apiClient(req.session.user.token).patch(`/asignaciones/${req.params.id}/finalizar`);
+    const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    if (scope.isScoped) {
+      const { data: asignacion } = await client.get(`/asignaciones/${req.params.id}`);
+      if (!asignacion || Number(asignacion.areaId) !== Number(scope.areaId)) {
+        req.flash('error', 'No puedes finalizar asignaciones de otra área');
+        return res.redirect('/encargado/asignar');
+      }
+    }
+
+    await client.patch(`/asignaciones/${req.params.id}/finalizar`);
     req.flash('success', 'Asignación finalizada');
   } catch (err) {
     const raw = err.response?.data?.message || 'Error al finalizar';

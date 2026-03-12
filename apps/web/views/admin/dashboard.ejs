@@ -145,31 +145,97 @@
           <div class="col-12 col-lg-9">
             <div class="card h-100">
               <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-bottom-0 pb-0">
-                <h5 class="card-title mb-0"><i class="bi bi-bar-chart-line me-2" style="color: #3b82f6;"></i> Eficiencia por área</h5>
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-bar-chart-line me-2" style="color: #3b82f6;"></i>
+                  Eficiencia por área
+                </h5>
                 <a href="/consultor" class="btn--manage" style="font-size: 0.75rem;">Ver métricas →</a>
               </div>
 
               <% if ((metricas || []).length > 0) { %>
+                <%
+                  function getAreaName(m) {
+                    return (
+                      m?.areaNombre ||
+                      m?.area?.nombre ||
+                      (typeof m?.area === 'string' ? m.area : null) ||
+                      'Área'
+                    );
+                  }
+
+                  function getEff(m) {
+                    const v = m?.eficienciaPct ?? m?.eficiencia ?? null;
+                    if (v == null) return null;
+
+                    const n = Number(v);
+                    if (!Number.isFinite(n)) return null;
+
+                    return n;
+                  }
+
+                  function getSlotHora(m) {
+                    return m?.slotHora ?? m?.slot ?? m?.hora ?? null;
+                  }
+
+                  function slotClass(val) {
+                    if (val == null) return 'none';
+                    if (val >= 90) return 'ok';
+                    if (val >= 70) return 'warn';
+                    return 'fail';
+                  }
+
+                  function fmtEff(val) {
+                    if (val == null || !Number.isFinite(Number(val))) return '—';
+                    return Number(val).toFixed(1) + '%';
+                  }
+
+                  const byArea = {};
+
+                  (metricas || []).forEach(m => {
+                    const key = getAreaName(m);
+                    if (!byArea[key]) byArea[key] = [];
+                    byArea[key].push(m);
+                  });
+
+                  Object.values(byArea).forEach(arr => {
+                    arr.sort((a, b) => Number(getSlotHora(a) ?? 0) - Number(getSlotHora(b) ?? 0));
+                  });
+                %>
+
                 <div class="card-body">
-                  <div class="d-grid gap-3">
-                    <% (metricas || []).forEach(m => { 
-                      const eficiencia = Number(m.eficienciaPct || 0);
-                      const anchoBarra = Math.max(0, Math.min(eficiencia, 100));
-                      const colorBarra = eficiencia >= 90 ? '#22c55e' : eficiencia >= 70 ? '#f59e0b' : '#ef4444';
+                  <div style="padding: 0;">
+                    <% Object.entries(byArea).forEach(([area, slots]) => {
+                        let areaSum = 0, areaCount = 0;
+
+                        slots.forEach(s => {
+                          const e = getEff(s);
+                          if (e != null) {
+                            areaSum += e;
+                            areaCount++;
+                          }
+                        });
+
+                        const areaAvg = areaCount ? (areaSum / areaCount) : null;
                     %>
-                      <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 14px; background: #fff;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                          <strong>
-                            <%= m.areaNombre || m.area?.nombre || (typeof m.area === 'string' ? m.area : 'Área') %>
-                          </strong>
-                          <span style="font-weight: 700;">
-                            <%= eficiencia.toFixed(1) %>%
-                          </span>
+                      <div class="slot-area">
+                        <div class="slot-area__header">
+                          <span class="slot-area__name"><%= area %></span>
+                          <span class="eff-value <%= slotClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
                         </div>
 
-                        <div style="width: 100%; height: 10px; background: #e5e7eb; border-radius: 999px; overflow: hidden;">
-                          <% const barraHtml = `<div style="width: ${anchoBarra}%; height: 100%; background: ${colorBarra}; border-radius: 999px;"></div>`; %>
-                          <%- barraHtml %>
+                        <div class="slot-strip slot-strip--lg">
+                          <% slots.forEach(s => { %>
+                            <div
+                              class="slot-strip__seg slot-strip__seg--<%= slotClass(getEff(s)) %>"
+                              title="<%= (getSlotHora(s) != null ? getSlotHora(s) + ':00' : 'Sin hora') %> — <%= fmtEff(getEff(s)) %>">
+                            </div>
+                          <% }) %>
+                        </div>
+
+                        <div class="slot-area__hours">
+                          <% slots.forEach(s => { %>
+                            <span class="slot-area__hour"><%= getSlotHora(s) %>h</span>
+                          <% }) %>
                         </div>
                       </div>
                     <% }) %>
@@ -188,7 +254,6 @@
               <% } %>
             </div>
           </div>
-        </div>
 
         <footer class="footer d-flex justify-content-between mt-5 pt-3">
           <span>© 2026 MERO. Todos los derechos reservados.</span>
