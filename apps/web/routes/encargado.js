@@ -104,10 +104,7 @@ function getSlotsDisponiblesParaCaptura() {
   return disponibles;
 }
 
-/* ───────────────────────────────────────────────
- * Dashboard
- * ─────────────────────────────────────────────── */
-router.get('/', async (req, res, next) => {
+async function renderDashboard(req, res, next) {
   try {
     const hoy = new Date().toISOString().slice(0, 10);
     const client = apiClient(req.session.user.token);
@@ -135,7 +132,13 @@ router.get('/', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+}
+
+/* ───────────────────────────────────────────────
+ * Dashboard
+ * ─────────────────────────────────────────────── */
+router.get('/', renderDashboard);
+router.get('/dashboard', renderDashboard);
 
 /* ───────────────────────────────────────────────
  * Captura
