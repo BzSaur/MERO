@@ -8,6 +8,19 @@ const path    = require('path');
 
 const app = express();
 
+const defaultSessionMaxAgeMinutes = 10;
+const sessionMaxAgeMinutes = Number(process.env.WEB_SESSION_MAX_AGE_MINUTES);
+const hasCustomSessionAge = Number.isFinite(sessionMaxAgeMinutes) && sessionMaxAgeMinutes > 0;
+const resolvedSessionMaxAgeMinutes = hasCustomSessionAge
+  ? sessionMaxAgeMinutes
+  : defaultSessionMaxAgeMinutes;
+const sessionCookie = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: resolvedSessionMaxAgeMinutes * 60 * 1000,
+};
+
 // ─── View engine ───
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -23,8 +36,10 @@ app.use(express.json());
 app.use(session({
   secret: process.env.JWT_SECRET || 'mero-web-secret',
   resave: false,
+  rolling: true,
   saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 h
+  unset: 'destroy',
+  cookie: sessionCookie,
 }));
 
 // ─── Flash ───

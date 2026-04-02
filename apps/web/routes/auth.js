@@ -10,10 +10,39 @@ const ROLE_HOME = {
   CONSULTOR: '/consultor',
 };
 
+function regenerateSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      return resolve();
+    });
+  });
+}
+
+function saveSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.save((err) => {
+      if (err) return reject(err);
+      return resolve();
+    });
+  });
+}
+
 function destroySession(req, res) {
-  req.session.destroy(() => {
-    res.clearCookie('connect.sid');
-    res.redirect('/login');
+  const cookieName = 'connect.sid';
+  const cookieOptions = { path: '/' };
+
+  if (!req.session) {
+    res.clearCookie(cookieName, cookieOptions);
+    return res.redirect('/login');
+  }
+
+  return req.session.destroy((err) => {
+    res.clearCookie(cookieName, cookieOptions);
+    if (err) {
+      req.flash('error', 'No se pudo cerrar la sesión. Intenta de nuevo.');
+    }
+    return res.redirect('/login');
   });
 }
 
@@ -30,7 +59,17 @@ router.post('/login', async (req, res) => {
 
   try {
     const { data } = await axios.post(`${API}/auth/login`, { email, password });
-    req.session.user = { ...data.usuario, token: data.accessToken };
+
+    try {
+      await regenerateSession(req);
+      req.session.user = { ...data.usuario, token: data.accessToken };
+      await saveSession(req);
+    } catch (sessionErr) {
+      console.error('Error al crear sesión web:', sessionErr);
+      req.flash('error', 'No se pudo iniciar sesión. Intenta de nuevo.');
+      return res.redirect('/login');
+    }
+
     return res.redirect(ROLE_HOME[data.usuario.rol] || '/');
   } catch (err) {
     const raw = err.response?.data?.message || 'Credenciales incorrectas';
