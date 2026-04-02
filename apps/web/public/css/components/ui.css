@@ -1442,3 +1442,22 @@ USUARIOS
   }
 }
 
+/* =========================================================
+   EMPLEADOS — empty state
+   ========================================================= */
+
+.page--usuarios .empty{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  min-height: 140px;
+  padding: 22px 28px;
+}
+
+.page--usuarios .empty .empty__text{
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  line-height: 1.6;
+}

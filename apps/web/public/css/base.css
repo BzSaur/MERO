@@ -13,6 +13,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 a { color: var(--amber); text-decoration: none; }
@@ -42,7 +44,14 @@ code, .mono { font-family: var(--font-mono); }
 
 ::selection { background: var(--amber-lo); color: var(--ink); }
 
+html, body {
+  min-height: 100%;
+  overflow-x: hidden;
+}
 
+body {
+  overscroll-behavior-y: none;
+}
 
 
 

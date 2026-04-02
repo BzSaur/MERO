@@ -33,10 +33,156 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.style.overflow = '';
   }
 
+  // ============================================================
+  // MOBILE SWIPE FOR SIDEBAR
+  // ============================================================
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let startScrollY = 0;
+  let isTrackingSwipe = false;
+  let isVerticalScroll = false;
+
+  const MIN_SWIPE = 90;
+  const VERTICAL_TOLERANCE = 28;
+  const HORIZONTAL_RATIO = 1.8;
+  const TOP_REFRESH_SAFE_ZONE = 140; // deja libre la parte superior para pull-to-refresh
+
+  function isInteractiveElement(target) {
+    return !!target.closest(
+      'input, textarea, select, button, a, [contenteditable="true"], .modal, .dropdown-menu'
+    );
+  }
+
+  document.addEventListener('touchstart', function (e) {
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    if (window.innerWidth >= 992) return;
+
+    const target = e.target;
+    if (isInteractiveElement(target)) {
+      isTrackingSwipe = false;
+      return;
+    }
+
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+    startScrollY = window.scrollY;
+    isVerticalScroll = false;
+
+    // deja libre la zona superior para refrescar la página
+    if (touchStartY <= TOP_REFRESH_SAFE_ZONE) {
+      isTrackingSwipe = false;
+      return;
+    }
+
+    isTrackingSwipe = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!isTrackingSwipe || !e.changedTouches || !e.changedTouches.length) return;
+
+    const currentX = e.changedTouches[0].clientX;
+    const currentY = e.changedTouches[0].clientY;
+
+    const diffX = Math.abs(currentX - touchStartX);
+    const diffY = Math.abs(currentY - touchStartY);
+
+    // si el gesto ya es vertical, lo dejamos al navegador
+    if (diffY > 10 && diffY > diffX) {
+      isVerticalScroll = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function (e) {
+    if (!isTrackingSwipe || !e.changedTouches || !e.changedTouches.length) return;
+    if (window.innerWidth >= 992) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    const diffX = touchEndX - touchStartX;
+    const absX = Math.abs(diffX);
+    const absY = Math.abs(touchEndY - touchStartY);
+    const scrollMoved = Math.abs(window.scrollY - startScrollY);
+    const isOpen = sidebar && sidebar.classList.contains('show');
+
+    isTrackingSwipe = false;
+
+    // si el usuario estaba haciendo scroll/refresh, no abrir sidebar
+    if (isVerticalScroll) return;
+    if (scrollMoved > 6) return;
+    if (absY > VERTICAL_TOLERANCE) return;
+    if (absX < MIN_SWIPE) return;
+    if (absX <= absY * HORIZONTAL_RATIO) return;
+
+    // Abrir
+    if (!isOpen && diffX > 0) {
+      openSidebar();
+      return;
+    }
+
+    // Cerrar
+    if (isOpen && diffX < 0) {
+      closeSidebar();
+    }
+  }, { passive: true });
+
+
+    // ============================================================
+  // CUSTOM PULL TO REFRESH
+  // ============================================================
+  let refreshStartY = 0;
+  let refreshCurrentY = 0;
+  let isPullingToRefresh = false;
+  let refreshTriggered = false;
+
+  const REFRESH_DISTANCE = 95;
+
+  document.addEventListener('touchstart', function (e) {
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    if (window.innerWidth >= 992) return;
+
+    // solo permitir si estás hasta arriba
+    if (window.scrollY > 0) {
+      isPullingToRefresh = false;
+      return;
+    }
+
+    const target = e.target;
+    if (
+      target.closest('input, textarea, select, button, a, [contenteditable="true"], .modal, .dropdown-menu')
+    ) {
+      isPullingToRefresh = false;
+      return;
+    }
+
+    refreshStartY = e.changedTouches[0].clientY;
+    refreshCurrentY = refreshStartY;
+    refreshTriggered = false;
+    isPullingToRefresh = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!isPullingToRefresh || !e.changedTouches || !e.changedTouches.length) return;
+
+    refreshCurrentY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function () {
+    if (!isPullingToRefresh) return;
+
+    const diffY = refreshCurrentY - refreshStartY;
+    isPullingToRefresh = false;
+
+    // solo si jaló hacia abajo suficiente y sigue arriba
+    if (window.scrollY === 0 && diffY >= REFRESH_DISTANCE && !refreshTriggered) {
+      refreshTriggered = true;
+      window.location.reload();
+    }
+  }, { passive: true });
+  
   // Toggle button
   if (navbarToggle) {
     navbarToggle.addEventListener('click', function () {
-      // si está abierto, cierra; si está cerrado, abre
       const isOpen = sidebar && sidebar.classList.contains('show');
       if (isOpen) closeSidebar();
       else openSidebar();
@@ -60,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Cierra al pasar a desktop (normalmente ya no ocupas overlay)
+  // Cierra al pasar a desktop
   window.addEventListener('resize', function () {
     if (window.innerWidth >= 992) {
       closeSidebar();
@@ -103,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Close drawer when clicking a nav link (not submenu toggle)
   document.querySelectorAll('.sidebar-nav a:not(.submenu-toggle)').forEach(function (link) {
     link.addEventListener('click', function () {
-      // Solo cerrar en mobile (en desktop no estorba)
       if (window.innerWidth < 992) closeSidebar();
     });
   });
@@ -182,7 +327,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!form) return;
 
     form.addEventListener('submit', function () {
-      // evita doble-loading si el form no es válido
       if (form.matches('[data-validate]') && !form.checkValidity()) return;
 
       button.disabled = true;
@@ -227,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const KEY = 'mero_theme';
   const apply = (mode) => {
-    document.documentElement.dataset.theme = mode; // "dark" | "light"
+    document.documentElement.dataset.theme = mode;
   };
 
   const saved = localStorage.getItem(KEY);
@@ -242,4 +386,3 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem(KEY, mode);
   });
 })();
-

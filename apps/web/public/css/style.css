@@ -165,7 +165,7 @@
     .content-wrapper {
       padding: 1.5rem 2rem;
       flex: 1;
-      overflow-y: auto;
+      overflow-y: visible;
     }
     
     /* Welcome header */
@@ -243,7 +243,7 @@
       border: none;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-      height: 10%;
+      height: auto;
     }
     
     .card-header {

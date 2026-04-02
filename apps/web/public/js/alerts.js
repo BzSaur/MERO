@@ -2,6 +2,22 @@
   const SwalRef = window.Swal;
   if (!SwalRef) return;
 
+  const SWAL_BASE = {
+    buttonsStyling: false,
+    reverseButtons: true,
+    customClass: {
+      confirmButton: 'btn btn--success',
+      cancelButton: 'btn btn--danger',
+    },
+  };
+
+  function fire(options = {}) {
+    return SwalRef.fire({
+      ...SWAL_BASE,
+      ...options,
+    });
+  }
+
   function esc(value) {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
@@ -9,6 +25,12 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  function normalizeText(value) {
+    return String(value ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   function titleForEdit(kind) {
@@ -24,6 +46,7 @@
     if (kind === 'subtarea') return 'Eliminar subtarea';
     if (kind === 'modelo') return 'Eliminar modelo';
     if (kind === 'estandar') return 'Eliminar estándar';
+    if (kind === 'usuario') return 'Eliminar usuario';
     return 'Eliminar';
   }
 
@@ -86,7 +109,162 @@
       `;
     }
 
+    if (kind === 'usuario') {
+      return `
+        <div style="text-align:left">
+          <b>Nombre:</b> ${esc(form.dataset.nombre || '—')}<br>
+          <b>Correo:</b> ${esc(form.dataset.descripcion || '—')}
+        </div>
+      `;
+    }
+
     return '¿Deseas continuar?';
+  }
+
+  function getMessagesFromContainer(container) {
+    const liMessages = [...container.querySelectorAll('li')]
+      .map((li) => normalizeText(li.textContent))
+      .filter(Boolean);
+
+    if (liMessages.length) return liMessages;
+
+    const text = normalizeText(container.textContent);
+    return text ? [text] : [];
+  }
+
+  function inferFlashType(container, text) {
+    const classText = [
+      container.className || '',
+      ...[...container.querySelectorAll('[class]')].map((el) => el.className || ''),
+    ].join(' ').toLowerCase();
+
+    const allText = `${classText} ${String(text || '').toLowerCase()}`;
+
+    if (
+      allText.includes('success') ||
+      allText.includes('exito') ||
+      allText.includes('éxito') ||
+      allText.includes('creado') ||
+      allText.includes('actualizado') ||
+      allText.includes('guardado') ||
+      allText.includes('eliminado')
+    ) {
+      return 'success';
+    }
+
+    if (
+      allText.includes('warning') ||
+      allText.includes('warn') ||
+      allText.includes('aviso') ||
+      allText.includes('atencion') ||
+      allText.includes('atención')
+    ) {
+      return 'warning';
+    }
+
+    if (
+      allText.includes('question') ||
+      allText.includes('info') ||
+      allText.includes('email must be an email') ||
+      (allText.includes('correo') && allText.includes('válido'))
+    ) {
+      return 'question';
+    }
+
+    return 'error';
+  }
+
+  function inferFlashTitle(type, text) {
+    const t = String(text || '').toLowerCase();
+
+    if (type === 'success') {
+      if (t.includes('usuario') && t.includes('cread')) return 'Usuario creado';
+      if (t.includes('elimin')) return 'Usuario eliminado';
+      if (t.includes('actualiz') || t.includes('guardad')) return 'Cambios guardados';
+      return 'Operación exitosa';
+    }
+
+    if (type === 'warning') {
+      return 'Atención';
+    }
+
+    if (type === 'question') {
+      if (t.includes('email must be an email') || (t.includes('correo') && (t.includes('válido') || t.includes('valido')))) {
+        return 'Correo inválido';
+      }
+      return 'Revisa la información';
+    }
+
+    if (t.includes('email must be an email') || (t.includes('correo') && (t.includes('válido') || t.includes('valido')))) {
+      return 'Correo inválido';
+    }
+
+    return 'No se pudo continuar';
+  }
+
+  function inferFlashText(type, text) {
+    const t = String(text || '').toLowerCase();
+
+    if (t.includes('email must be an email')) {
+      return 'El correo debe ser un email válido.';
+    }
+
+    if (type === 'success') {
+      if (t.includes('usuario') && t.includes('cread')) {
+        return 'El usuario fue creado exitosamente.';
+      }
+      if (t.includes('elimin')) {
+        return 'El usuario fue eliminado correctamente.';
+      }
+      if (t.includes('actualiz') || t.includes('guardad')) {
+        return 'Los cambios se guardaron correctamente.';
+      }
+    }
+
+    return text;
+  }
+
+  async function showFlashMessages() {
+    const containers = [
+      ...document.querySelectorAll('.js-flash-swal-source, .flash, .alert'),
+    ];
+
+    if (!containers.length) return;
+
+    const queue = [];
+    const seen = new Set();
+
+    containers.forEach((container) => {
+      const messages = getMessagesFromContainer(container);
+      const type = inferFlashType(container, messages.join(' '));
+
+      messages.forEach((message) => {
+        const clean = normalizeText(message);
+        if (!clean) return;
+
+        const key = `${type}|${clean}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        queue.push({
+          type,
+          text: clean,
+        });
+      });
+
+      container.hidden = true;
+      container.style.display = 'none';
+    });
+
+    for (const item of queue) {
+      await fire({
+        icon: item.type,
+        title: inferFlashTitle(item.type, item.text),
+        text: inferFlashText(item.type, item.text),
+        confirmButtonText: 'Entendido',
+        showCancelButton: false,
+      });
+    }
   }
 
   document.querySelectorAll('[data-edit-kind]').forEach((button) => {
@@ -94,7 +272,7 @@
       const kind = button.dataset.editKind;
       const action = button.dataset.updateAction;
 
-      const result = await SwalRef.fire({
+      const result = await fire({
         title: titleForEdit(kind),
         html: buildEditHtml(button),
         showCancelButton: true,
@@ -165,7 +343,7 @@
 
       const kind = form.dataset.kind || 'registro';
 
-      const r = await SwalRef.fire({
+      const r = await fire({
         icon: 'warning',
         title: titleForDelete(kind),
         html: buildDeleteHtml(form),
@@ -179,4 +357,6 @@
       form.submit();
     });
   });
+
+  showFlashMessages();
 })();

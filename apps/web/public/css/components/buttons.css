@@ -155,12 +155,6 @@
 
 
 
-
-/*=========================
-   Auditoría, filtro, btn limpiar
-   =========================
-*/
-
 /* =========================================================
    Auditoría — Botón "Limpiar" junto a "Filtrar"
    ========================================================= */
@@ -223,7 +217,23 @@
      HISTORICP
 ********************************/
 
+/* ---------- PANEL ENCARGADO ---------- */
+.page--encargado .page-header{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
 
+.page--encargado .page-header > div:first-child{
+  min-width: 0;
+}
+
+.page--encargado .btn--history{
+  margin-left: auto;
+  align-self: center;
+}
 .page--metrics .btn--history{
   background: #2e9b5f;
   border: 1.5px solid #2e9b5f;
@@ -252,87 +262,68 @@
    ========================= */
 
 /* Contenedor principal del encabezado */
-.card__header--split {
-  display: flex !important;
-  justify-content: space-between; /* Empuja los grupos a los extremos */
+.card__header--split{
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
-  gap: var(--gap);
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
 }
 
-/* Lado izquierdo: Título + Badge */
-.card__header-left {
+.card__header-left{
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex: 1; /* Ocupa el espacio disponible para empujar al botón */
+  min-width: 0;
+  flex: 1;
 }
 
 /* Diseño del botón Gestionar */
-.btn--manage {
+.btn--manage{
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: rgba(29, 78, 216, 0.08); /* Azul muy suave */
+  background: rgba(29, 78, 216, 0.08);
   border: 1.2px solid rgba(29, 78, 216, 0.2);
-  color: #1e40af; /* Azul corporativo */
+  color: #1e40af;
   padding: 0.5rem 1rem;
   border-radius: 10px;
   font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.2s ease;
-  white-space: nowrap; /* Evita que el texto se rompa en dos líneas */
-  margin-left: auto; /* Refuerzo para asegurar posición a la derecha */
+  white-space: nowrap;
+  margin-left: auto;
 }
 
-.btn--manage:hover {
+.btn--manage:hover{
   background: #1e40af;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
   transform: translateY(-1px);
 }
 
-.btn--manage .icon, 
-.btn--manage svg {
+.btn--manage .icon,
+.btn--manage svg{
   width: 16px;
   height: 16px;
   fill: currentColor;
 }
-/* =========================
-   RESPONSIVIDAD 
-   ========================= */
 
-.card__header--split {
-  display: flex !important;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: var(--gap-sm); /* Espacio mínimo entre elementos */
-  flex-wrap: wrap;    /* Permite que los elementos bajen si no caben */
-}
-
-.card__header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  min-width: 0; /* Evita que el texto desborde el contenedor */
-}
-
-/* Ajuste específico para celulares */
-@media (max-width: 580px) {
-  .card__header--split {
-    flex-direction: column; /* Cambia a vertical */
-    align-items: flex-start; /* Alinea todo a la izquierda */
+@media (max-width: 580px){
+  .card__header--split{
+    flex-direction: column;
+    align-items: flex-start;
     gap: var(--gap);
     padding-bottom: var(--gap);
   }
 
-  .btn--manage {
-    width: 100%;           /* El botón ocupa todo el ancho en móviles */
+  .btn--manage{
+    width: 100%;
     justify-content: center;
-    margin-left: 0 !important; /* Quita el empuje automático */
+    margin-left: 0;
   }
 }
 
@@ -369,46 +360,12 @@
 
 
 /***** =========================
-   Botón Volver formulario NUEVO EDITAR
+   Botones Volver
    ========================= */
-
 
 .page--usuarios-form .page-header{
   position: relative;
   margin-bottom: 10px;
-}
-
-.page--usuarios-form .btn--back-users{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-
-  background: rgba(29,78,216,.08);
-  border: 1px solid rgba(29,78,216,.22);
-  color: #1e3a8a;
-  font-weight: 800;
-  border-radius: 12px;
-  padding: .55rem 1.05rem;
-  box-shadow: 0 10px 20px rgba(15,23,42,.08);
-  text-decoration: none;
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-}
-
-.page--usuarios-form .btn--back-users:hover{
-  background: rgba(29,78,216,.14);
-  border-color: rgba(29,78,216,.30);
-  transform: translateY(-1px);
-}
-
-.page--usuarios-form .btn--back-users:active{
-  transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(15,23,42,.06);
-}
-
-.page--usuarios-form .btn--back-users .icon{
-  width: 16px;
-  height: 16px;
 }
 
 .page--usuarios-form .page-header--usuarios-form{
@@ -419,12 +376,14 @@
   margin-bottom: 12px;
 }
 
-.page--usuarios-form .btn--back-users{
+.page--usuarios-form .btn--back-users,
+.page--asignar .btn--back,
+.page--encargado .btn--back,
+.page--captura .btn--back{
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: .5rem;
-
   background: rgba(29,78,216,.08);
   border: 1px solid rgba(29,78,216,.22);
   color: #1e3a8a;
@@ -436,18 +395,27 @@
   transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
 }
 
-.page--usuarios-form .btn--back-users:hover{
+.page--usuarios-form .btn--back-users:hover,
+.page--asignar .btn--back:hover,
+.page--encargado .btn--back:hover,
+.page--captura .btn--back:hover{
   background: rgba(29,78,216,.14);
   border-color: rgba(29,78,216,.30);
   transform: translateY(-1px);
 }
 
-.page--usuarios-form .btn--back-users:active{
+.page--usuarios-form .btn--back-users:active,
+.page--asignar .btn--back:active,
+.page--encargado .btn--back:active,
+.page--captura .btn--back:active{
   transform: translateY(0);
   box-shadow: 0 8px 18px rgba(15,23,42,.06);
 }
 
-.page--usuarios-form .btn--back-users .icon{
+.page--usuarios-form .btn--back-users .icon,
+.page--asignar .btn--back .icon,
+.page--encargado .btn--back .icon,
+.page--captura .btn--back .icon{
   width: 16px;
   height: 16px;
 }
@@ -457,8 +425,14 @@
     justify-content: flex-end;
   }
 }
+@media (max-width: 720px){
+  .page--encargado .btn--history{
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}
 
-/* =========================================================
+/* ========================================================
    ASIGNACIONES — Responsive real para escaneo UUID
    Pegar al final de filtro.css
    ========================================================= */
@@ -622,5 +596,123 @@
 
   .page--asignar .users-controls .form-control{
     font-size: 16px; /* evita zoom raro en móviles */
+  }
+}
+
+
+/* =========================================================
+   ASIGNACIONES — Fix mobile header + botones
+   Pegar AL FINAL de buttons.css
+   ========================================================= */
+
+/* Desktop/base */
+.page--asignar .page-header{
+  position: relative;
+  padding-right: 180px;
+  margin-bottom: 18px;
+}
+
+.page--asignar .page-header h1{
+  margin: 0;
+  font-size: clamp(2.4rem, 4.2vw, 4rem);
+  line-height: 0.98;
+  word-break: break-word;
+}
+
+.page--asignar .page-header__sub{
+  margin-top: .75rem;
+  max-width: 720px;
+  line-height: 1.45;
+}
+
+/* Botón volver: separado y bien colocado */
+.page--asignar .btn--back{
+  position: absolute;
+  top: 8px;
+  right: 0;
+  z-index: 5;
+}
+
+/* Botonera del formulario */
+.page--asignar .users-controls__actions{
+  width: 100%;
+}
+
+.page--asignar .users-controls__actions .btn,
+.page--asignar .users-controls__actions #btnScanCam{
+  min-height: 48px;
+  height: 48px;
+  padding: .75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  border-radius: 12px;
+}
+
+/* Quita rarezas del small dentro del botón cámara */
+.page--asignar .users-controls__actions #btnScanCam small{
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+@media (max-width: 720px){
+  .page--asignar .page-header{
+    padding-right: 0;
+    padding-top: 68px; /* baja el botón */
+  }
+
+  .page--asignar .btn--back{
+    top: 14px;
+    right: 0;
+  }
+
+  .page--asignar .page-header h1{
+    font-size: clamp(2.2rem, 11vw, 3.4rem) !important;
+    line-height: 0.98;
+    max-width: 100%;
+  }
+
+  .page--asignar .page-header__sub{
+    max-width: 100%;
+    font-size: 1rem;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* =========================================================
+   Mobile angosto
+   ========================================================= */
+@media (max-width: 420px){
+  .page--asignar .page-header{
+    padding-top: 78px; /* lo baja un poco más */
+  }
+
+  .page--asignar .page-header h1{
+    font-size: 3.4rem !important;
+  }
+
+  .page--asignar .page-header__sub{
+    font-size: .98rem;
+  }
+
+  .page--asignar .users-controls__actions{
+    grid-template-columns: 1fr !important;
+  }
+
+  .page--asignar .users-controls__actions .btn,
+  .page--asignar .users-controls__actions #btnScanCam{
+    width: 100%;
+    min-width: 100%;
+    height: 48px;
+    min-height: 48px;
   }
 }
