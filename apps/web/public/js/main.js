@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let isTrackingSwipe = false;
   let isVerticalScroll = false;
 
-  const MIN_SWIPE = 110;
+  const MIN_SWIPE = 90;
   const VERTICAL_TOLERANCE = 28;
   const HORIZONTAL_RATIO = 1.8;
   const TOP_REFRESH_SAFE_ZONE = 140; // deja libre la parte superior para pull-to-refresh
@@ -126,6 +126,98 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }, { passive: true });
 
+
+  // ============================================================
+  // PULL-TO-REFRESH INDICATOR
+  // ============================================================
+  (function () {
+    const THRESHOLD   = 72;   // px que hay que jalar para activar la recarga
+    const MAX_PULL    = 100;  // límite visual de arrastre
+    const NAVBAR_H    = 64;   // altura del navbar (--navbar-height)
+
+    // Crear el elemento indicador
+    const ptr = document.createElement('div');
+    ptr.id = 'ptr-indicator';
+    ptr.innerHTML = `
+      <div class="ptr-inner">
+        <svg class="ptr-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="ptr-text">Jala para recargar</span>
+      </div>`;
+    document.body.prepend(ptr);
+
+    let ptrStartY    = 0;
+    let ptrPulling   = false;
+    let ptrTriggered = false;
+    let ptrActive    = false;
+
+    function setPull(dist) {
+      const clamped = Math.min(dist, MAX_PULL);
+      const ratio   = Math.min(clamped / THRESHOLD, 1);
+      const ready   = clamped >= THRESHOLD;
+
+      ptr.style.transform = `translateY(${clamped}px)`;
+      ptr.style.opacity   = Math.min(ratio * 1.4, 1);
+      ptr.querySelector('.ptr-icon').style.transform = `rotate(${ratio * 220}deg)`;
+      ptr.querySelector('.ptr-text').textContent = ready ? '¡Suelta para recargar!' : 'Jala para recargar';
+      ptr.classList.toggle('ptr-ready', ready);
+    }
+
+    function resetPull(reload) {
+      ptrPulling   = false;
+      ptrTriggered = false;
+      ptrActive    = false;
+
+      if (reload) {
+        ptr.classList.add('ptr-loading');
+        ptr.style.transform  = `translateY(${THRESHOLD}px)`;
+        ptr.style.opacity    = '1';
+        ptr.querySelector('.ptr-text').textContent = 'Recargando…';
+        ptr.querySelector('.ptr-icon').style.animation = 'ptr-spin 0.7s linear infinite';
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        ptr.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        ptr.style.transform  = 'translateY(0)';
+        ptr.style.opacity    = '0';
+        setTimeout(() => { ptr.style.transition = ''; }, 320);
+      }
+    }
+
+    document.addEventListener('touchstart', function (e) {
+      if (window.innerWidth >= 992) return;
+      if (!e.changedTouches.length) return;
+      // Solo activar si estamos en la parte superior de la página
+      if (window.scrollY > 4) return;
+      ptrStartY    = e.changedTouches[0].clientY;
+      ptrPulling   = true;
+      ptrTriggered = false;
+      ptrActive    = false;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', function (e) {
+      if (!ptrPulling) return;
+      if (window.scrollY > 4) { ptrPulling = false; return; }
+
+      const currentY = e.changedTouches[0].clientY;
+      const diffY    = currentY - ptrStartY;
+
+      if (diffY <= 0) return;
+
+      ptrActive = true;
+      setPull(diffY * 0.45); // factor de resistencia
+    }, { passive: true });
+
+    document.addEventListener('touchend', function (e) {
+      if (!ptrPulling || !ptrActive) { ptrPulling = false; return; }
+
+      const endY = e.changedTouches[0].clientY;
+      const dist = (endY - ptrStartY) * 0.45;
+
+      resetPull(dist >= THRESHOLD);
+    }, { passive: true });
+  })();
 
   // Toggle button
   if (navbarToggle) {
