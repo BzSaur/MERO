@@ -70,6 +70,7 @@
 }
 
 
+
 @media (max-width: 991.98px) {
   html,
   body {
@@ -83,6 +84,6 @@
 
   .content-wrapper {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: auto;
   }
 }
