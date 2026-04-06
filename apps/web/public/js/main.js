@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let isTrackingSwipe = false;
   let isVerticalScroll = false;
 
-  const MIN_SWIPE = 90;
+  const MIN_SWIPE = 110;
   const VERTICAL_TOLERANCE = 28;
   const HORIZONTAL_RATIO = 1.8;
   const TOP_REFRESH_SAFE_ZONE = 140; // deja libre la parte superior para pull-to-refresh
@@ -127,59 +127,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }, { passive: true });
 
 
-    // ============================================================
-  // CUSTOM PULL TO REFRESH
-  // ============================================================
-  let refreshStartY = 0;
-  let refreshCurrentY = 0;
-  let isPullingToRefresh = false;
-  let refreshTriggered = false;
-
-  const REFRESH_DISTANCE = 95;
-
-  document.addEventListener('touchstart', function (e) {
-    if (!e.changedTouches || !e.changedTouches.length) return;
-    if (window.innerWidth >= 992) return;
-
-    // solo permitir si estás hasta arriba
-    if (window.scrollY > 0) {
-      isPullingToRefresh = false;
-      return;
-    }
-
-    const target = e.target;
-    if (
-      target.closest('input, textarea, select, button, a, [contenteditable="true"], .modal, .dropdown-menu')
-    ) {
-      isPullingToRefresh = false;
-      return;
-    }
-
-    refreshStartY = e.changedTouches[0].clientY;
-    refreshCurrentY = refreshStartY;
-    refreshTriggered = false;
-    isPullingToRefresh = true;
-  }, { passive: true });
-
-  document.addEventListener('touchmove', function (e) {
-    if (!isPullingToRefresh || !e.changedTouches || !e.changedTouches.length) return;
-
-    refreshCurrentY = e.changedTouches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener('touchend', function () {
-    if (!isPullingToRefresh) return;
-
-    const diffY = refreshCurrentY - refreshStartY;
-    isPullingToRefresh = false;
-
-    // solo si jaló hacia abajo suficiente y sigue arriba
-    if (window.scrollY === 0 && diffY >= REFRESH_DISTANCE && !refreshTriggered) {
-      refreshTriggered = true;
-      window.location.reload();
-    }
-  }, { passive: true });
-  
   // Toggle button
   if (navbarToggle) {
     navbarToggle.addEventListener('click', function () {

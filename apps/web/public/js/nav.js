@@ -9,6 +9,35 @@
     }
   }
 
+  function getCookie(name) {
+    const escaped = name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const match = document.cookie.match(new RegExp('(?:^|; )' + escaped + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+
+  function deleteCookie(name) {
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+  }
+
+  function showWelcomeAlert() {
+    const welcomeName = getCookie('mero_welcome');
+    if (!welcomeName || typeof Swal === 'undefined') return;
+
+    deleteCookie('mero_welcome');
+
+    Swal.fire({
+      title: 'Bienvenido',
+      text: `Hola, ${welcomeName}. Has iniciado sesión correctamente.`,
+      icon: 'success',
+      timer: 1600,
+      showConfirmButton: false,
+      buttonsStyling: false,
+      customClass: {
+        popup: 'mero-swal mero-swal--light',
+      },
+    });
+  }
+
   // ============================================================
   // LOGOUT CON SWEETALERT
   // ============================================================
@@ -18,22 +47,20 @@
     const logoutBtn = event.currentTarget;
     const href = logoutBtn.getAttribute('href') || '/auth/logout';
 
-    // Fallback si SweetAlert2 no cargó
     if (typeof Swal === 'undefined') {
-      const ok = confirm('¿Está seguro de cerrar sesión?');
+      const ok = confirm('¿Seguro que quieres salir?');
       if (ok) {
-        alert('Sesión cerrada');
         window.location.href = href;
       }
       return;
     }
 
     Swal.fire({
-      title: '¿Cerrar sesión?',
-      text: '¿Está seguro de cerrar sesión?',
+      title: '¿Seguro que quieres salir?',
+      text: 'Se cerrará tu sesión actual.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, cerrar sesión',
+      confirmButtonText: 'Sí, salir',
       cancelButtonText: 'Cancelar',
       reverseButtons: true,
       buttonsStyling: false,
@@ -44,25 +71,14 @@
       },
     }).then((result) => {
       if (!result.isConfirmed) return;
-
-      Swal.fire({
-        title: 'Sesión cerrada',
-        text: 'Has cerrado sesión correctamente.',
-        icon: 'success',
-        timer: 1200,
-        showConfirmButton: false,
-        buttonsStyling: false,
-        customClass: {
-          popup: 'mero-swal mero-swal--light',
-        },
-      }).then(() => {
-        window.location.href = href;
-      });
+      window.location.href = href;
     });
   }
 
-    document.addEventListener('DOMContentLoaded', function () {
-  
+  document.addEventListener('DOMContentLoaded', function () {
+    // Bienvenida al iniciar sesión
+    showWelcomeAlert();
+
     // Botón del menú de usuario
     const userDropdownToggle =
       document.getElementById('userDropdownToggle') ||

@@ -69,9 +69,11 @@
   }
 }
 
+
 @media (max-width: 991.98px) {
-  html, body {
-    overscroll-behavior-y: none;
+  html,
+  body {
+    min-height: 100dvh;
   }
 
   .wrapper,
@@ -81,6 +83,6 @@
 
   .content-wrapper {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
   }
 }
