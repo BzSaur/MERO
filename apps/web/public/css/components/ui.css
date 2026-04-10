@@ -1461,3 +1461,92 @@ USUARIOS
   text-align: left;
   line-height: 1.6;
 }
+
+/* =========================================================
+   PANEL ENCARGADO — solo card de eficiencia por slot
+   NO toca Asignaciones activas
+   ========================================================= */
+
+.page--encargado .card--metrics-slot{
+  margin-top: 10px;
+  margin-bottom: 28px !important;
+  overflow: hidden;
+}
+
+.page--encargado .card--metrics-slot .card__header--metrics-slot{
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid rgba(15,23,42,.10);
+  background: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.page--encargado .card--metrics-slot .card__title{
+  margin: 0;
+  line-height: 1.1;
+}
+
+.page--encargado .card--metrics-slot .metrics-legend--slot{
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.page--encargado .card--metrics-slot .badge-summary{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: .7rem 1.15rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(15,23,42,.04);
+  color: inherit;
+  font-weight: 700;
+  font-size: .95rem;
+  line-height: 1;
+}
+
+.page--encargado .card--metrics-slot .legend-dot{
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+  flex: 0 0 12px;
+}
+
+.page--encargado .card--metrics-slot .legend-dot--ok{
+  background: #10b981;
+}
+
+.page--encargado .card--metrics-slot .legend-dot--warn{
+  background: #facc15;
+}
+
+.page--encargado .card--metrics-slot .legend-dot--fail{
+  background: #f43f5e;
+}
+
+.page--encargado .card--metrics-slot .card__body--metrics-slot{
+  padding: var(--gap) var(--gap-lg);
+}
+
+.page--encargado .card--metrics-slot .slot-area--metrics{
+  display: grid;
+  gap: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(15,23,42,.10);
+  border-radius: 20px;
+  background: rgba(255,255,255,.04);
+}
+
+.page--encargado .card--metrics-slot .slot-area--metrics:last-child{
+  margin-bottom: 0;
+}

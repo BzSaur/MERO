@@ -90,19 +90,35 @@
                 });
               %>
 
-              <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
-                <div class="card__header">
+              <div class="card card--asignar card--metrics-slot" style="margin-bottom:var(--gap-lg)">
+                <div class="card__header card__header--metrics-slot">
                   <h3><span class="card__title">Eficiencia por slot — hoy</span></h3>
-                  <span class="slot-legend">Verde &gt;=90% / Ámbar 70-89% / Rojo &lt;70%</span>
+
+                  <div class="metrics-legend metrics-legend--slot" aria-label="Leyenda de eficiencia">
+                    <span class="badge-summary">
+                      <span class="legend-dot legend-dot--ok"></span>
+                      Verde (≥90%)
+                    </span>
+
+                    <span class="badge-summary">
+                      <span class="legend-dot legend-dot--warn"></span>
+                      Riesgo (70-89%)
+                    </span>
+
+                    <span class="badge-summary">
+                      <span class="legend-dot legend-dot--fail"></span>
+                      Crítico (&lt;70%)
+                    </span>
+                  </div>
                 </div>
 
-                <div style="padding: var(--gap) var(--gap-lg);">
+                <div class="card__body--metrics-slot">
                   <% Object.entries(byArea).forEach(function(entry) { 
                     const area = entry[0];
                     const slots = entry[1];
                     const last = slots && slots.length ? slots[slots.length - 1] : null;
                   %>
-                    <div class="slot-area">
+                    <div class="slot-area slot-area--metrics">
                       <div class="slot-area__header">
                         <span class="slot-area__name"><%= area %></span>
                         <span class="eff-value <%= effClass(last ? last.eficiencia : null) %>">

@@ -1,7 +1,3 @@
-/* ============================================================
-   LAYOUT - Flexbox structure for sidebar + main content
-   ============================================================ */
-
 .wrapper {
   display: flex;
   min-height: 100vh;
@@ -10,25 +6,27 @@
 
 .main-content {
   flex: 1;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   transition: margin-left var(--transition), width var(--transition);
   margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
+  overflow: visible;
 }
 
-/* Sidebar collapsed (drawer mode): main-content full width */
 body.sidebar-collapsed .main-content {
   margin-left: 0;
   width: 100%;
 }
 
 .content-wrapper {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 1.5rem;
   width: 100%;
+  min-height: 0;
+  overflow: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 .container-fluid {
@@ -36,4 +34,3 @@ body.sidebar-collapsed .main-content {
   padding: 0;
   margin: 0;
 }
-

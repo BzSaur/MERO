@@ -23,8 +23,8 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: none;
-  overscroll-behavior-y: contain;
-  touch-action: pan-y;
+  overscroll-behavior-y: auto;
+  touch-action: auto;
 }
 
 a { color: var(--amber); text-decoration: none; }
@@ -72,4 +72,9 @@ table,
 .navbar,
 .sidebar {
   max-width: 100%;
+}
+
+body.sidebar-scroll-lock {
+  overflow: hidden !important;
+  touch-action: none;
 }

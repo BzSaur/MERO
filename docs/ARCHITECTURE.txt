@@ -19,7 +19,7 @@ Despliegue objetivo
 
 Arquitectura
 ------------
-1) Monolito modular (NestJS)
+1) Monolitico modular (NestJS)
    - Un solo backend desplegable (1 contenedor)
    - Módulos separados por dominio (no microservicios)
    - Reglas de negocio en capa de aplicación/servicios, acceso a datos en repositorios

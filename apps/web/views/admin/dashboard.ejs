@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/dark.css">
 </head>
 
-<body>
+<body class="sidebar-collapsed">
   <div class="wrapper">
     <%- include('../partials/sidebar') %>
 
@@ -46,7 +46,7 @@
         </div>
       </nav>
 
-      <main class="content-wrapper">
+      <main class="dashboard-content">
         <%- include('../partials/flash') %>
 
         <%
@@ -254,6 +254,7 @@
               <% } %>
             </div>
           </div>
+        </div>
 
         <footer class="footer d-flex justify-content-between mt-5 pt-3">
           <span>© 2026 MERO. Todos los derechos reservados.</span>
@@ -263,7 +264,7 @@
     </div>
   </div>
 
+  <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
-
 </body>
 </html>

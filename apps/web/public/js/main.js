@@ -3,7 +3,7 @@
  */
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ============================================================
+   // ============================================================
   // SIDEBAR DRAWER
   // ============================================================
   const sidebar = document.getElementById('sidebar');
@@ -21,19 +21,26 @@ document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('sidebar-collapsed');
   }
 
+  // Limpieza defensiva al entrar a cada vista
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
+  if (sidebar) sidebar.classList.remove('show');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('show');
+
   function openSidebar() {
     if (sidebar) sidebar.classList.add('show');
     if (sidebarOverlay) sidebarOverlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
+    // No bloquear body aquí, porque rompe el scroll de la vista
   }
 
   function closeSidebar() {
     if (sidebar) sidebar.classList.remove('show');
     if (sidebarOverlay) sidebarOverlay.classList.remove('show');
     document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
   }
 
-  // ============================================================
+   // ============================================================
   // MOBILE SWIPE FOR SIDEBAR
   // ============================================================
   let touchStartX = 0;
@@ -41,11 +48,12 @@ document.addEventListener('DOMContentLoaded', function () {
   let startScrollY = 0;
   let isTrackingSwipe = false;
   let isVerticalScroll = false;
+  let swipeStartedInsideSidebar = false;
 
-  const MIN_SWIPE = 90;
-  const VERTICAL_TOLERANCE = 28;
-  const HORIZONTAL_RATIO = 1.8;
-  const TOP_REFRESH_SAFE_ZONE = 140; // deja libre la parte superior para pull-to-refresh
+  const MIN_SWIPE = 54;
+  const VERTICAL_TOLERANCE = 56;
+  const HORIZONTAL_RATIO = 1.15;
+  const EDGE_SWIPE_ZONE = 72; // más ancho para que no compita con el gesto del navegador
 
   function isInteractiveElement(target) {
     return !!target.closest(
@@ -53,23 +61,41 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
+  function getScrollTop() {
+    return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  }
+
   document.addEventListener('touchstart', function (e) {
     if (!e.changedTouches || !e.changedTouches.length) return;
     if (window.innerWidth >= 992) return;
 
+    const touch = e.changedTouches[0];
     const target = e.target;
-    if (isInteractiveElement(target)) {
-      isTrackingSwipe = false;
+    const isOpen = sidebar && sidebar.classList.contains('show');
+
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    startScrollY = getScrollTop();
+    isVerticalScroll = false;
+    isTrackingSwipe = false;
+    swipeStartedInsideSidebar = !!target.closest('#sidebar, #sidebarOverlay');
+
+    // CERRADO: permitir abrir desde una franja izquierda más cómoda
+    if (!isOpen) {
+      if (touchStartX <= EDGE_SWIPE_ZONE) {
+        isTrackingSwipe = true;
+      }
       return;
     }
 
-    touchStartX = e.changedTouches[0].clientX;
-    touchStartY = e.changedTouches[0].clientY;
-    startScrollY = window.scrollY;
-    isVerticalScroll = false;
+    // ABIERTO: permitir cerrar si el gesto comenzó en el sidebar o en el overlay
+    if (swipeStartedInsideSidebar) {
+      isTrackingSwipe = true;
+      return;
+    }
 
-    // deja libre la zona superior para refrescar la página
-    if (touchStartY <= TOP_REFRESH_SAFE_ZONE) {
+    // Si empezó fuera y sobre un control interactivo, no tomar el gesto
+    if (isInteractiveElement(target)) {
       isTrackingSwipe = false;
       return;
     }
@@ -86,9 +112,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const diffX = Math.abs(currentX - touchStartX);
     const diffY = Math.abs(currentY - touchStartY);
 
-    // si el gesto ya es vertical, lo dejamos al navegador
-    if (diffY > 10 && diffY > diffX) {
+    // Si claramente va en vertical, soltamos el gesto
+    if (diffY > 10 && diffY > diffX * 1.05) {
       isVerticalScroll = true;
+      isTrackingSwipe = false;
     }
   }, { passive: true });
 
@@ -102,14 +129,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const diffX = touchEndX - touchStartX;
     const absX = Math.abs(diffX);
     const absY = Math.abs(touchEndY - touchStartY);
-    const scrollMoved = Math.abs(window.scrollY - startScrollY);
+    const scrollMoved = Math.abs(getScrollTop() - startScrollY);
     const isOpen = sidebar && sidebar.classList.contains('show');
 
     isTrackingSwipe = false;
 
-    // si el usuario estaba haciendo scroll/refresh, no abrir sidebar
     if (isVerticalScroll) return;
-    if (scrollMoved > 6) return;
+    if (scrollMoved > 10) return;
     if (absY > VERTICAL_TOLERANCE) return;
     if (absX < MIN_SWIPE) return;
     if (absX <= absY * HORIZONTAL_RATIO) return;
@@ -126,6 +152,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }, { passive: true });
 
+  document.addEventListener('touchcancel', function () {
+    isTrackingSwipe = false;
+    isVerticalScroll = false;
+    swipeStartedInsideSidebar = false;
+  }, { passive: true });
 
   // ============================================================
   // PULL-TO-REFRESH INDICATOR
@@ -252,6 +283,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Limpia estado al restaurar/navegar entre vistas
+  window.addEventListener('pageshow', function () {
+    closeSidebar();
+  });
+
   // ============================================================
   // SIDEBAR SUBMENUS
   // ============================================================
@@ -288,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Close drawer when clicking a nav link (not submenu toggle)
   document.querySelectorAll('.sidebar-nav a:not(.submenu-toggle)').forEach(function (link) {
     link.addEventListener('click', function () {
-      if (window.innerWidth < 992) closeSidebar();
+      closeSidebar();
     });
   });
 

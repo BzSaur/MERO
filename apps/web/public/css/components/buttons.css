@@ -217,23 +217,25 @@
      HISTORICP
 ********************************/
 
-/* ---------- PANEL ENCARGADO ---------- */
-.page--encargado .page-header{
+/* ---------- GLOBAL---------- */
+.page-header{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  padding-top: 50px;
 }
 
-.page--encargado .page-header > div:first-child{
+.page-header > div:first-child{
   min-width: 0;
 }
 
-.page--encargado .btn--history{
+.btn--history{
   margin-left: auto;
   align-self: center;
 }
+
 .page--metrics .btn--history{
   background: #2e9b5f;
   border: 1.5px solid #2e9b5f;
@@ -628,7 +630,7 @@
 /* Botón volver: separado y bien colocado */
 .page--asignar .btn--back{
   position: absolute;
-  top: 8px;
+  top: 30px;
   right: 0;
   z-index: 5;
 }
