@@ -165,7 +165,9 @@
     .content-wrapper {
       padding: 1.5rem 2rem;
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     
     /* Welcome header */
@@ -243,7 +245,7 @@
       border: none;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-      height: 10%;
+      height: auto;
     }
     
     .card-header {
@@ -409,4 +411,28 @@
 
 .sidebar-open .sidebar-overlay {
   display: none;
+}
+
+/* ============================================================
+   DASHBOARD ADMIN - Scroll real de página en escritorio
+   ============================================================ */
+.dashboard-content {
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
+  min-height: auto;
+  padding: 1.5rem 2rem;
+  overflow: visible;
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .dashboard-content {
+    padding: 0.75rem;
+  }
 }

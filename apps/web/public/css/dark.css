@@ -1436,3 +1436,92 @@ html[data-theme="dark"] .page--metrics .eff-value.fail{
 html[data-theme="dark"] .page--metrics .eff-value.none{
   color: var(--dm-ink-soft) !important;
 }
+
+/* =========================================================
+   PANEL ENCARGADO — Empty state de asignaciones en dark
+   FIX
+   ========================================================= */
+
+html[data-theme="dark"] .card--asignar-act .empty--asignar{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px dashed var(--dm-border-2) !important;
+  border-radius: 18px !important;
+  padding: 26px 18px !important;
+  margin: 16px !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25) !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 14px !important;
+
+  min-height: 180px !important;
+}
+
+html[data-theme="dark"] .card--asignar-act .empty--asignar .empty__text{
+  color: rgba(226,232,240,.92) !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em;
+  margin: 0 !important;
+  max-width: 220px !important;
+}
+
+html[data-theme="dark"] .card--asignar-act .empty--asignar .empty__sub{
+  color: rgba(148,163,184,.88) !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+  max-width: 260px !important;
+}
+@media (max-width: 480px){
+  html[data-theme="dark"] .card--asignar-act .empty--asignar{
+    min-height: 200px !important;
+    padding: 22px 16px !important;
+  }
+
+  html[data-theme="dark"] .card--asignar-act .empty--asignar .empty__text{
+    max-width: 180px !important;
+  }
+
+  html[data-theme="dark"] .card--asignar-act .empty--asignar .empty__sub{
+    max-width: 230px !important;
+    font-size: .95rem !important;
+  }
+}
+
+
+/* =========================================================
+   EMPLEADOS — empty state en dark mode
+   ========================================================= */
+
+html[data-theme="dark"] .page--usuarios .empty{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px dashed var(--dm-border-2) !important;
+  border-radius: 18px !important;
+  padding: 26px 24px !important; /* más aire horizontal */
+  margin: 16px !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,.25) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: left !important;   /* para que no se vea tan pegado visualmente */
+  min-height: 160px !important;
+}
+
+html[data-theme="dark"] .page--usuarios .empty .empty__text{
+  color: rgba(226,232,240,.90) !important;
+  font-weight: 600 !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  max-width: 420px !important;
+  width: 100%;
+  padding-left: 4px; /* separa un poco de la izquierda */
+}
+
+html[data-theme="dark"] .page--metrics .metrics-legend .badge-summary{
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: #ffffff !important;
+}

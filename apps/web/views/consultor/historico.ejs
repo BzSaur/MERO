@@ -91,8 +91,12 @@
                       <label class="form-label">Modelo</label>
                       <select class="form-control" name="modeloId">
                         <option value="">Todos</option>
-                        <% modelos.forEach(m => { %>
-                          <option value="<%= m.id %>" <%= filtros.modeloId == m.id ? 'selected' : '' %>><%= m.nombre %></option>
+                        <% (modelos || []).forEach(m => { %>
+                          <option
+                            value="<%= m.id %>"
+                            <%= String(filtros.modeloId || '') === String(m.id) ? 'selected' : '' %>>
+                            <%= m.nombreSku || m.nombre || m.id %>
+                          </option>
                         <% }) %>
                       </select>
                     </div>

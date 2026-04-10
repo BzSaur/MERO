@@ -1,0 +1,91 @@
+/* ============================================================
+   PULL-TO-REFRESH INDICATOR — #ptr-indicator
+   Agrega en head.ejs: <link rel="stylesheet" href="/css/ptr.css">
+   ============================================================ */
+
+#ptr-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transform: translateY(0);
+  opacity: 0;
+}
+
+.ptr-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 999px;
+  padding: 0.55rem 1.2rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  margin-top: 0.75rem;
+}
+
+.ptr-icon {
+  width: 20px;
+  height: 20px;
+  color: #1e40af;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.ptr-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+/* Estado listo para soltar */
+#ptr-indicator.ptr-ready .ptr-inner {
+  background: rgba(29, 78, 216, 0.08);
+  border-color: rgba(29, 78, 216, 0.22);
+}
+
+#ptr-indicator.ptr-ready .ptr-icon {
+  color: #2563eb;
+}
+
+#ptr-indicator.ptr-ready .ptr-text {
+  color: #1e40af;
+}
+
+/* Estado cargando */
+#ptr-indicator.ptr-loading .ptr-inner {
+  background: rgba(29, 78, 216, 0.10);
+  border-color: rgba(29, 78, 216, 0.28);
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark mode */
+html[data-theme="dark"] .ptr-inner {
+  background: rgba(15, 23, 42, 0.88);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .ptr-text {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] #ptr-indicator.ptr-ready .ptr-inner {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+html[data-theme="dark"] #ptr-indicator.ptr-ready .ptr-text {
+  color: #93c5fd;
+}

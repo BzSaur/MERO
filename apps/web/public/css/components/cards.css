@@ -381,3 +381,15 @@ DASHBOARD
     font-size: .95rem;
   }
 }
+
+
+.card-header--eficiencia{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.card-header--eficiencia .card-title{
+  margin-right: 1rem;
+}
