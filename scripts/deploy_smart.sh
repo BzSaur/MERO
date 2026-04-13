@@ -42,23 +42,23 @@ NEEDS_NGINX=0
 NEEDS_FULL=0
 NEEDS_PRISMA=0
 
-if printf '%s\n' "$CHANGED_FILES" | grep -Eq '^(apps/api/|packages/shared/|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|tsconfig\.base\.json|infra/docker/Dockerfile|infra/docker/entrypoint\.sh)$'; then
+if printf '%s\n' "$CHANGED_FILES" | grep -qE '^apps/api/|^packages/shared/|^package\.json$|^pnpm-lock\.yaml$|^pnpm-workspace\.yaml$|^tsconfig\.base\.json$|^infra/docker/Dockerfile$|^infra/docker/entrypoint\.sh$'; then
   NEEDS_API=1
 fi
 
-if printf '%s\n' "$CHANGED_FILES" | grep -Eq '^(apps/web/|packages/shared/|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|infra/docker/Dockerfile\.web)$'; then
+if printf '%s\n' "$CHANGED_FILES" | grep -qE '^apps/web/|^packages/shared/|^package\.json$|^pnpm-lock\.yaml$|^pnpm-workspace\.yaml$|^infra/docker/Dockerfile\.web$'; then
   NEEDS_WEB=1
 fi
 
-if printf '%s\n' "$CHANGED_FILES" | grep -Eq '^infra/docker/nginx/nginx\.conf$'; then
+if printf '%s\n' "$CHANGED_FILES" | grep -qE '^infra/docker/nginx/nginx\.conf$'; then
   NEEDS_NGINX=1
 fi
 
-if printf '%s\n' "$CHANGED_FILES" | grep -Eq '^apps/api/prisma/'; then
+if printf '%s\n' "$CHANGED_FILES" | grep -qE '^apps/api/prisma/'; then
   NEEDS_PRISMA=1
 fi
 
-if printf '%s\n' "$CHANGED_FILES" | grep -Eq '^(infra/docker/docker-compose\.yml|infra/docker/docker-compose\.tunnel\.yml)$'; then
+if printf '%s\n' "$CHANGED_FILES" | grep -qE '^infra/docker/docker-compose\.yml$|^infra/docker/docker-compose\.tunnel\.yml$'; then
   NEEDS_FULL=1
 fi
 
