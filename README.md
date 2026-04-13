@@ -331,6 +331,7 @@ Editar `.env` en la raíz. El archivo `.env.example` tiene todos los defaults.
 | `API_PORT` | Puerto externo API | `3002` |
 | `WEB_PORT` | Puerto externo Web | `4000` |
 | `API_URL` | URL interna API (para web) | `http://localhost:3000/api` |
+| `WEB_SESSION_COOKIE_SECURE` | Cookie de sesión web (`true`/`false`/`auto`) | `auto` |
 | `CORS_ORIGIN` | Origen CORS permitido | `http://localhost:4000` |
 | `VITA_DB_HOST` | Host de DB VITA | — |
 | `VITA_DB_PORT` | Puerto DB VITA | `5432` |

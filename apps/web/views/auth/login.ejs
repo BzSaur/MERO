@@ -73,6 +73,18 @@
           <p>Ingresa tus credenciales corporativas</p>
         </div>
 
+        <% if (flash?.error?.length) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= flash.error[0] %>
+          </div>
+        <% } %>
+
+        <% if (flash?.success?.length) { %>
+          <div class="alert alert-success" role="alert">
+            <%= flash.success[0] %>
+          </div>
+        <% } %>
+
         <form method="POST" action="/login">
           <div class="form-group">
             <label class="form-label" for="email">Correo</label>

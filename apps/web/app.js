@@ -14,12 +14,24 @@ const hasCustomSessionAge = Number.isFinite(sessionMaxAgeMinutes) && sessionMaxA
 const resolvedSessionMaxAgeMinutes = hasCustomSessionAge
   ? sessionMaxAgeMinutes
   : defaultSessionMaxAgeMinutes;
+
+// Permite operar con HTTP local y HTTPS detras de proxy/tunnel sin romper login.
+const secureCookieMode = (process.env.WEB_SESSION_COOKIE_SECURE || 'auto').toLowerCase();
+const sessionCookieSecure =
+  secureCookieMode === 'true'
+    ? true
+    : secureCookieMode === 'false'
+      ? false
+      : 'auto';
+
 const sessionCookie = {
   httpOnly: true,
   sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
+  secure: sessionCookieSecure,
   maxAge: resolvedSessionMaxAgeMinutes * 60 * 1000,
 };
+
+app.set('trust proxy', 1);
 
 // ─── View engine ───
 app.set('view engine', 'ejs');
@@ -38,6 +50,7 @@ app.use(session({
   resave: false,
   rolling: true,
   saveUninitialized: false,
+  proxy: true,
   unset: 'destroy',
   cookie: sessionCookie,
 }));

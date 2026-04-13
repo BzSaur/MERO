@@ -46,6 +46,26 @@ function destroySession(req, res) {
   });
 }
 
+function resolveLoginError(err) {
+  const status = err.response?.status;
+
+  if (status === 401) {
+    const raw = err.response?.data?.message || 'Credenciales incorrectas';
+    return Array.isArray(raw) ? raw.join(', ') : raw;
+  }
+
+  if (status) {
+    const raw = err.response?.data?.message || `Error de autenticación (HTTP ${status})`;
+    return Array.isArray(raw) ? raw.join(', ') : raw;
+  }
+
+  if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
+    return 'No se pudo conectar con el API de autenticación.';
+  }
+
+  return 'No se pudo iniciar sesión. Intenta de nuevo.';
+}
+
 router.get('/login', (req, res) => {
   if (req.session.user) {
     return res.redirect(ROLE_HOME[req.session.user.rol] || '/');
@@ -72,8 +92,12 @@ router.post('/login', async (req, res) => {
 
     return res.redirect(ROLE_HOME[data.usuario.rol] || '/');
   } catch (err) {
-    const raw = err.response?.data?.message || 'Credenciales incorrectas';
-    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    console.error('Error login web->api:', {
+      code: err.code,
+      status: err.response?.status,
+      data: err.response?.data,
+    });
+    req.flash('error', resolveLoginError(err));
     return res.redirect('/login');
   }
 });
