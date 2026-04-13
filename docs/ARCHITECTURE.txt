@@ -1,62 +1,144 @@
-MERO — Arquitectura y Estructura de Repositorio
-====================================================
+MERO — Arquitectura y Estructura del Sistema
+==============================================
 
 Contexto
 --------
 MERO (Medición de Eficiencia y Rendimiento Operativo) es el sistema hermano del ERP VITA.
 VITA administra personas; MERO mide productividad operativa por hora en planta.
-Objetivo: asignar empleados (QR) a subtareas y capturar producción por hora para calcular eficiencia en tiempo real vs estándares.
+Objetivo: asignar empleados (QR) a subtareas y capturar producción por hora para
+calcular eficiencia en tiempo real vs estándares.
 
-Despliegue objetivo
--------------------
+Despliegue
+----------
 - On-premise en Synology NAS
-- Usuarios: 100–200 (concurrencia esperada moderada: Encargados + Consultores)
+- Usuarios: 100–200 (concurrencia moderada: Encargados + Consultores)
+- Acceso externo vía Cloudflare Tunnel
 - Docker Compose como estándar de despliegue
 - PostgreSQL como fuente única de verdad
-- Backend Node.js (NestJS) monolito modular
-- Realtime: SSE principal + WebSocket auxiliar
-- CQRS ligero: escrituras normalizadas + lecturas optimizadas (vistas materializadas o tablas resumen)
 
-Arquitectura
-------------
-1) Monolitico modular (NestJS)
-   - Un solo backend desplegable (1 contenedor)
-   - Módulos separados por dominio (no microservicios)
-   - Reglas de negocio en capa de aplicación/servicios, acceso a datos en repositorios
 
-2) PostgreSQL
-   - Tablas normalizadas (core) para escrituras transaccionales
-   - Lecturas para dashboard optimizadas con vistas materializadas
+Stacks Docker (dos stacks independientes)
+------------------------------------------
 
-3) CQRS ligero
-   - Commands: escaneo QR, reasignación, captura, catálogos
-   - Queries: panel encargado, dashboards realtime e históricos
+Stack 1 — App (infra/docker/docker-compose.yml)
+  mero-db         PostgreSQL 16 (puerto 5433)
+  mero-api        NestJS backend (puerto 3002 → 3000 interno)
+  mero-web        Express+EJS frontend (puerto 4000)
+  mero-nginx      Reverse proxy (8080:80, 8081:8080)
 
-4) Realtime
-   - SSE para push unidireccional de métricas
-   - WebSocket (Socket.IO) solo si se necesita bidireccionalidad
+Stack 2 — Tunnel (infra/docker/docker-compose.tunnel.yml)
+  mero-cloudflared  Cloudflare Tunnel (network_mode: host)
 
-5) Infraestructura (Docker Compose)
-   - api (NestJS) + db (PostgreSQL) + nginx (reverse proxy)
+La separación en 2 stacks permite:
+  - Rebuild completo del App stack sin interrumpir el tunnel
+  - Cloudflared se conecta a nginx vía localhost:8080 (host network),
+    no por nombre de contenedor → sobrevive reinicios de nginx
 
-Módulos del backend
--------------------
-- Auth/Roles: JWT, RBAC (ADMIN / ENCARGADO / CONSULTOR)
-- Catálogos: Áreas, Subtareas, Modelos, Estándares
-- Empleados/QR: sync VITA, generación QR
-- Asignaciones: escaneo QR, reasignación, histórico
-- Capturas: registro por slot horario
-- Métricas: eficiencia, agregados, SSE
-- Auditoría: log inmutable
+Redes Docker:
+  default:        servicios del app stack (db, api, web, nginx)
+  vita_network:   red externa (erp_erp_network), creada por VITA
+                  usada por: api (sync VITA) y nginx (proxy VITA en 8081)
 
-Integración con VITA
---------------------
-- Solo lectura. Sync nocturno + on-demand.
-- MERO NO escribe en VITA.
 
-Reglas operativas
------------------
-- Escaneo QR crea asignación activa para el día
-- Cada hora se capturan cantidades sin re-escanear
-- Cambio de área cierra asignación anterior automáticamente
-- Histórico y capturas anteriores se conservan
+Backend — NestJS (apps/api)
+---------------------------
+Monolito modular: un solo contenedor, módulos separados por dominio.
+
+Módulos:
+  auth/         JWT + RBAC (ADMIN / ENCARGADO / CONSULTOR)
+  usuarios/     CRUD de usuarios del sistema
+  empleados/    Empleados sincronizados de VITA + generación de QR
+  asignaciones/ Escaneo QR, asignaciones activas, histórico
+  capturas/     Registro de producción por slot horario
+  metricas/     Cálculo de eficiencia, SSE para realtime
+  catalogos/    Áreas, Subtareas, Modelos, Estándares
+  auditoria/    Log inmutable de cambios (JSON before/after)
+  prisma/       Servicio compartido de Prisma
+
+Flujo de datos:
+  Empleado escanea QR → POST /api/asignaciones (abre asignación)
+  Encargado captura cada hora → POST /api/capturas
+  Métricas calculan eficiencia (capturas / estándar × factor antigüedad)
+  SSE pushea métricas en tiempo real al dashboard
+
+Integración VITA:
+  - Solo lectura. MERO NO escribe en VITA.
+  - vita-sync.service.ts: sync nocturno (cron) + on-demand
+  - Conexión via pool pg directo a DB de VITA (vita_network)
+  - Empleados referenciados por id_vita en mero_empleados
+
+
+Frontend — Express + EJS (apps/web)
+-------------------------------------
+Server-side rendering. Sin framework de frontend moderno.
+
+Roles y vistas:
+  ADMIN       routes/admin.js     → catálogos, usuarios, auditoría, dashboard
+  ENCARGADO   routes/encargado.js → asignaciones, captura por hora, dashboard
+  CONSULTOR   routes/consultor.js → dashboard histórico de solo lectura
+
+Comunicación: axios contra la API interna (API_URL=http://api:3000/api)
+Sesiones: express-session + connect-flash
+Realtime: EventSource (SSE) consumiendo /api/metricas/stream
+
+
+Base de datos — PostgreSQL 16 (Prisma)
+---------------------------------------
+Schema en: apps/api/prisma/schema.prisma
+Migraciones en: apps/api/prisma/migrations/
+
+Entidades principales:
+  MeroArea          Áreas de producción
+  MeroSubtarea      Subtareas por área
+  MeroModelo        Modelos de producto (SKU)
+  MeroEstandar      Piezas/hora esperadas por subtarea+modelo (versionadas por fecha)
+  MeroEmpleado      Empleados (vinculados a VITA por id_vita)
+  MeroUsuario       Usuarios del sistema (auth)
+  MeroAsignacion    Asignación empleado-subtarea-modelo-fecha
+  MeroCaptura       Capturas de producción por slot horario (slotHora 0-23)
+  MeroAuditoria     Log inmutable (timestamp, entity, before/after JSON)
+
+Índices clave:
+  idx_estandar_vigente      (subtareaId, modeloId, vigenteDesde DESC)
+  idx_asignacion_empleado   (empleadoId, fecha, activa)
+  idx_captura_asignacion    (asignacionId, slotHora)
+  idx_auditoria_timestamp   (timestamp DESC, usuarioId)
+
+
+Nginx (infra/docker/nginx/nginx.conf)
+---------------------------------------
+Puerto 80  → rutas MERO:
+  /api/metricas/stream  → SSE (proxy_buffering off, sin chunked)
+  /api/               → api:3000
+  /                   → web:4000
+
+Puerto 8080 → proxy VITA:
+  /                   → erp_rh_app:3001 (vía vita_network)
+
+
+Infraestructura (pnpm scripts)
+--------------------------------
+Todos los comandos del proyecto disponibles vía pnpm.
+El Makefile en la raíz es un alias equivalente para entornos Linux/NAS.
+
+Comandos principales:
+  pnpm mero:up                levantar app stack
+  pnpm mero:deploy            git pull + rebuild
+  pnpm mero:rebuild:api       rebuild solo API
+  pnpm mero:studio            Prisma Studio
+  pnpm mero:seed:estandares   cargar 429 estándares
+  pnpm mero:backup            backup PostgreSQL
+
+
+Shared package (packages/shared)
+----------------------------------
+Tipos TypeScript y constantes compartidas entre api y web.
+No tiene dependencias en runtime. Solo TypeScript.
+
+
+Estructura de archivos relevante
+----------------------------------
+apps/api/src/seed.ts          Seed inicial (áreas, subtareas, modelos, usuarios)
+scripts/sql/seed_estandares.sql  429 estándares de producción (idempotente)
+scripts/backup_pg.sh          Backup gzip con retención 30 días
+infra/docker/entrypoint.sh    Startup: migrate deploy → (seed opcional) → node main.js

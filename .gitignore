@@ -28,6 +28,9 @@ Thumbs.db
 infra/docker/nginx/certs/*.pem
 infra/docker/nginx/certs/*.key
 
+# Dev scripts (pueden contener tokens hardcodeados)
+scripts/dev/
+
 # Logs
 *.log
 logs/

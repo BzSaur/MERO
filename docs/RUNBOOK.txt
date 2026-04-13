@@ -1,82 +1,181 @@
 MERO — Runbook de operación
 ============================
 
-─── Requisitos ───
+─── Requisitos ───────────────────────────────────────────────────────────────
 
-- Node.js >= 20
-- pnpm >= 9
-- Docker y Docker Compose
-- PostgreSQL 16 (vía Docker o nativo)
+Docker: docker --version        (24+)
+Compose: docker compose version  (v2+)
+Node: node --version             (20+)
+pnpm: pnpm --version             (9+)
 
-─── Desarrollo local ───
 
-1. Clonar repo e instalar dependencias:
-   git clone <repo-url>
-   cd mero
-   cp .env.example .env    # Ajustar valores
-   pnpm install
+─── Primera instalación (NAS / servidor nuevo) ───────────────────────────────
 
-2. Levantar base de datos:
-   pnpm docker:up          # Solo DB y nginx
-   # O directamente:
-   docker compose -f infra/docker/docker-compose.yml up -d db
+1. Clonar repositorio:
+     git clone https://github.com/BzSaur/MERO
+     cd MERO
 
-3. Ejecutar migraciones y seed:
-   pnpm db:generate
-   pnpm db:migrate
-   pnpm db:seed
+2. Instalar dependencias:
+     pnpm install
 
-4. Iniciar API en modo desarrollo:
-   pnpm dev
+3. Configurar variables de entorno:
+     cp .env.example .env
+     # Editar .env: JWT_SECRET, JWT_REFRESH_SECRET, credenciales VITA y Cloudflare
 
-5. API disponible en http://localhost:3000/api
+4. Crear red de VITA (si VITA no está corriendo aún):
+     docker network create erp_erp_network
 
-─── Despliegue con Docker Compose ───
+5. Levantar Cloudflare tunnel (una sola vez, no se vuelve a tocar):
+     pnpm mero:tunnel:up
 
-1. Configurar .env con valores de producción
-2. Levantar todos los servicios:
-   pnpm docker:up
-3. Ejecutar migraciones:
-   docker exec mero-api npx prisma migrate deploy
-4. Ejecutar seed (solo primera vez):
-   docker exec mero-api npx ts-node prisma/seed.ts
+6. Levantar app:
+     pnpm mero:up
 
-─── Backups ───
+7. Ejecutar seed inicial (solo primera vez):
+     pnpm db:seed
+
+8. Cargar estándares de producción (429 registros):
+     pnpm mero:seed:estandares
+
+9. Verificar:
+     docker ps
+     # mero-db, mero-api, mero-web, mero-nginx deben ser healthy/running
+     # mero-cloudflared debe estar running (stack separado)
+
+
+─── Deploy normal (actualización de código) ──────────────────────────────────
+
+Desde el NAS, después de hacer push:
+
+     pnpm mero:deploy
+     # → git pull + rebuild solo lo que cambió
+     # → cloudflared NO se interrumpe
+
+Rebuild de un solo servicio (sin downtime en el otro):
+
+     pnpm mero:rebuild:api    # ~60-90s, web y tunnel siguen corriendo
+     pnpm mero:rebuild:web    # ~30s
+
+Reinicio completo del app stack (~3 min downtime, tunnel sobrevive):
+
+     pnpm mero:down
+     pnpm mero:up
+
+
+─── Desarrollo local ─────────────────────────────────────────────────────────
+
+1. Instalar dependencias:
+     pnpm install
+
+2. Levantar solo la base de datos:
+     docker compose -f infra/docker/docker-compose.yml up db -d
+
+3. Prisma:
+     pnpm db:generate    # genera cliente
+     pnpm db:migrate     # aplica migraciones pendientes
+
+4. Seed inicial:
+     pnpm db:seed
+
+5. Iniciar servicios con hot reload:
+     pnpm dev         # API en http://localhost:3000/api
+     pnpm dev:web     # Web en http://localhost:4000
+
+
+─── Prisma ───────────────────────────────────────────────────────────────────
+
+Prisma Studio (inspector visual):
+     pnpm mero:studio
+     # Abre en http://localhost:5555 (requiere DB corriendo)
+
+Nueva migración (desarrollo):
+     pnpm db:migrate
+
+Regenerar cliente (después de cambiar schema.prisma):
+     pnpm db:generate
+
+Seed en contenedor (producción):
+     pnpm db:seed
+
+Seed de estándares:
+     pnpm mero:seed:estandares
+
+
+─── Backups ──────────────────────────────────────────────────────────────────
 
 Crear backup:
-   ./scripts/backup_pg.sh
+     pnpm mero:backup
+     # Guarda en infra/docker/backups/ con retención de 30 días
 
 Restaurar backup:
-   ./scripts/restore_pg.sh ./backups/mero_backup_YYYYMMDD_HHMMSS.sql.gz
+     pnpm mero:restore
+     # Editar scripts/restore_pg.sh para apuntar al archivo correcto
 
-Los backups se guardan en ./backups/ y se retienen los últimos 30.
 
-─── Monitoreo ───
+─── Cloudflare Tunnel ────────────────────────────────────────────────────────
 
-- Logs API: docker logs -f mero-api
-- Logs DB:  docker logs -f mero-db
-- Health:   curl http://localhost:3000/api
+El tunnel corre en un stack Docker independiente (docker-compose.tunnel.yml).
+Sobrevive cualquier rebuild o reinicio del app stack.
 
-─── TLS / HTTPS ───
+Levantar (instalación inicial):
+     pnpm mero:tunnel:up
 
-1. Colocar certificados en infra/docker/nginx/certs/:
-   - fullchain.pem
-   - privkey.pem
-2. Descomentar bloque HTTPS en infra/docker/nginx/nginx.conf
-3. Descomentar redirect HTTP->HTTPS
-4. Reiniciar nginx: docker restart mero-nginx
+Reiniciar (si hay problemas de conectividad):
+     pnpm mero:tunnel:restart
 
-─── Troubleshooting ───
+Ver estado:
+     docker logs mero-cloudflared
 
-Problema: API no conecta a DB
-  - Verificar que mero-db está healthy: docker ps
-  - Verificar DATABASE_URL en .env
-  - Verificar que las migraciones se ejecutaron
+Bajar (CUIDADO: desconecta el acceso externo):
+     pnpm mero:tunnel:down
+
+Token configurado en .env: CLOUDFLARE_TUNNEL_TOKEN
+
+
+─── Red de VITA (erp_erp_network) ───────────────────────────────────────────
+
+La red es externa a MERO — la crea VITA con su propio docker-compose.
+Si el app stack no levanta por la red:
+
+     docker network create erp_erp_network
+
+
+─── Logs y monitoreo ─────────────────────────────────────────────────────────
+
+     pnpm mero:logs          # todos los servicios (follow)
+     pnpm mero:logs:api      # solo API
+     pnpm mero:logs:web      # solo Web
+     docker logs -f mero-cloudflared   # tunnel
+     docker logs -f mero-db            # base de datos
+
+
+─── Troubleshooting ──────────────────────────────────────────────────────────
+
+Problema: "network erp_erp_network declared as external, but could not be found"
+  Solución: docker network create erp_erp_network
+
+Problema: API en estado "unhealthy" (no pasa el healthcheck)
+  Solución: pnpm mero:logs:api
+  Causas comunes: fallo en migraciones, VITA DB no accesible, OOM
 
 Problema: SSE no funciona detrás de nginx
-  - Verificar que proxy_buffering off está en la config
-  - Verificar timeout largo (proxy_read_timeout 300s)
+  Verificar: proxy_buffering off en infra/docker/nginx/nginx.conf
+  Verificar: proxy_read_timeout >= 300s
 
 Problema: QR no encontrado al escanear
-  - Ejecutar sync manual: POST /api/empleados/sync
-  - Verificar que el empleado existe en VITA
+  Ejecutar sync manual: POST /api/empleados/sync (ADMIN)
+  Verificar que el empleado existe en VITA
+
+Problema: Cloudflared en restart loop
+  Verificar CLOUDFLARE_TUNNEL_TOKEN en .env
+  docker logs mero-cloudflared | tail -20
+
+Problema: Seed falla con duplicate key
+  El seed usa upsert y es idempotente. Si falla, revisar con: pnpm mero:studio
+
+Reset completo de DB (DESTRUYE TODOS LOS DATOS):
+  pnpm mero:down
+  docker volume rm mero_pgdata
+  pnpm mero:up
+  pnpm db:seed
+  pnpm mero:seed:estandares

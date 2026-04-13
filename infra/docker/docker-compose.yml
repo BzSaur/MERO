@@ -31,6 +31,7 @@ services:
     environment:
       TZ: America/Mexico_City
       DATABASE_URL: postgresql://${POSTGRES_USER:-mero}:${POSTGRES_PASSWORD:-mero_secret}@db:5432/${POSTGRES_DB:-mero_db}?schema=public
+      RUN_SEED: ${RUN_SEED:-false}
     ports:
       - '${API_PORT:-3002}:3000'
     networks:
@@ -39,6 +40,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/', r => process.exit(0)).on('error', () => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   web:
     build:
@@ -54,7 +61,8 @@ services:
     ports:
       - '${WEB_PORT:-4000}:4000'
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
@@ -71,17 +79,6 @@ services:
     depends_on:
       - api
       - web
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: mero-cloudflared
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
-    network_mode: host
-    depends_on:
-      - nginx
 
 networks:
   default:

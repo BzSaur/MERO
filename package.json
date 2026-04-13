@@ -14,8 +14,22 @@
     "db:seed": "pnpm --filter api prisma:seed",
     "db:seed:usuarios": "pnpm --filter api prisma:seed:usuarios",
     "lint": "pnpm -r lint",
-    "docker:up": "docker compose -f infra/docker/docker-compose.yml up -d",
-    "docker:down": "docker compose -f infra/docker/docker-compose.yml down"
+    "mero:init": "docker network create erp_erp_network 2>/dev/null ; docker compose -f infra/docker/docker-compose.yml up -d --build",
+    "mero:up": "docker compose -f infra/docker/docker-compose.yml up -d",
+    "mero:down": "docker compose -f infra/docker/docker-compose.yml down",
+    "mero:rebuild:api": "docker compose -f infra/docker/docker-compose.yml up -d --build --no-deps api",
+    "mero:rebuild:web": "docker compose -f infra/docker/docker-compose.yml up -d --build --no-deps web",
+    "mero:deploy": "git pull && docker compose -f infra/docker/docker-compose.yml up --build -d",
+    "mero:tunnel:up": "docker compose -f infra/docker/docker-compose.tunnel.yml --env-file .env up -d",
+    "mero:tunnel:down": "docker compose -f infra/docker/docker-compose.tunnel.yml down",
+    "mero:tunnel:restart": "docker compose -f infra/docker/docker-compose.tunnel.yml restart",
+    "mero:logs": "docker compose -f infra/docker/docker-compose.yml logs -f",
+    "mero:logs:api": "docker logs -f mero-api",
+    "mero:logs:web": "docker logs -f mero-web",
+    "mero:studio": "dotenv -e .env -- prisma studio --schema apps/api/prisma/schema.prisma",
+    "mero:seed:estandares": "docker exec -i mero-db psql -U mero mero_db < scripts/sql/seed_estandares.sql",
+    "mero:backup": "./scripts/backup_pg.sh",
+    "mero:restore": "./scripts/restore_pg.sh"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
