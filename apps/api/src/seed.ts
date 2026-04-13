@@ -246,6 +246,7 @@ async function main() {
         where: { email: u.email },
         data: {
           nombre: u.nombre,
+          passwordHash,
           rol: u.rol,
           areaId: u.areaId ?? null,
         },

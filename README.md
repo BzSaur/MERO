@@ -348,8 +348,8 @@ Después de ejecutar el seed inicial:
 
 | Email | Password | Rol |
 |-------|----------|-----|
-| `mario.martinez@empresa.com` | `Mero#2024` | ADMIN |
-| `fernando.alarcon@empresa.com` | `Mero#2024` | ADMIN |
+| `mario.martinez@ramelectronics.com` | `Mero#2024` | ADMIN |
+| `f.alarcon@ramelectronics.com.mx` | `Mero#2024` | ADMIN |
 | `admin@mero.local` | `admin1234` | ADMIN |
 
 Definidas en `apps/api/src/seed.ts`.
