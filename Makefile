@@ -51,9 +51,8 @@ rebuild-api: ## Rebuild y reiniciar solo la API (tunnel no se toca)
 rebuild-web: ## Rebuild y reiniciar solo el Web
 	$(COMPOSE) up -d --build --no-deps web
 
-deploy: ## Git pull + rebuild de lo que cambió (tunnel no se toca)
-	git -C . pull
-	$(COMPOSE) up -d --build
+deploy: ## Pull origin/main + deploy selectivo (Prisma condicional)
+	sh ./scripts/deploy_smart.sh
 
 # ─── Tunnel (tocar solo en instalación o emergencias) ─────────────────────────
 

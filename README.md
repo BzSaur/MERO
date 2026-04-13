@@ -9,7 +9,8 @@ Sistema de productividad en planta: asigna empleados (QR) a subtareas, captura p
 ```bash
 pnpm mero:up                # levantar app (db + api + web + nginx)
 pnpm mero:down              # bajar app (tunnel NO se toca)
-pnpm mero:deploy            # git pull + rebuild de lo que cambió
+pnpm mero:deploy            # pull origin/main + deploy selectivo (Prisma condicional)
+pnpm mero:deploy:full       # pull origin/main + rebuild completo
 pnpm mero:rebuild:api       # rebuild solo API (~60s)
 pnpm mero:rebuild:web       # rebuild solo Web
 
@@ -142,7 +143,9 @@ pnpm mero:seed:estandares
 ```bash
 # En el NAS, después de hacer push desde desarrollo:
 pnpm mero:deploy
-# → git pull + rebuild de lo que cambió
+# → git pull origin main
+# → si cambió Prisma: migrate deploy + generate
+# → rebuild selectivo de servicios tocados
 # → cloudflared NO se toca, sigue corriendo
 ```
 
