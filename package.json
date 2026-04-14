@@ -19,7 +19,7 @@
     "mero:down": "docker compose -f infra/docker/docker-compose.yml down",
     "mero:rebuild:api": "docker compose -f infra/docker/docker-compose.yml up -d --build --no-deps api",
     "mero:rebuild:web": "docker compose -f infra/docker/docker-compose.yml up -d --build --no-deps web",
-    "mero:deploy": "bash ./scripts/deploy_smart.sh",
+    "mero:deploy": "sh ./scripts/deploy_smart.sh",
     "mero:deploy:full": "git pull origin main && docker compose -f infra/docker/docker-compose.yml up --build -d",
     "mero:tunnel:up": "docker compose -f infra/docker/docker-compose.tunnel.yml --env-file .env up -d",
     "mero:tunnel:down": "docker compose -f infra/docker/docker-compose.tunnel.yml down",
