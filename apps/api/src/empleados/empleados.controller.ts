@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -46,7 +47,19 @@ export class EmpleadosController {
   }
 
   @Post('sync')
-  syncFromVita() {
-    return this.vitaSync.syncAll();
+  async syncFromVita() {
+    const sync = await this.vitaSync.syncAll();
+    const qr = await this.service.ensureQrsForActivos();
+    return { ...sync, qr };
+  }
+
+  /**
+   * Envía el QR por correo a los empleados indicados.
+   * Body: { ids: number[] }
+   * Response: { resultados: [...], totales: { enviados, fallidos, sinCorreo } }
+   */
+  @Post('enviar-qr')
+  async enviarQr(@Body() body: { ids: number[] }) {
+    return this.service.enviarQr(body.ids ?? []);
   }
 }

@@ -123,11 +123,6 @@
                       <span class="employee-info-item__value td-mono"><%= empleado.idVita %></span>
                     </div>
 
-                    <div class="employee-info-item">
-                      <span class="employee-info-item__label">UUID QR</span>
-                      <span class="employee-info-item__value td-mono"><%= empleado.uuidQr || '—' %></span>
-                    </div>
-
                     <% if (empleado.vita?.email) { %>
                       <div class="employee-info-item employee-info-item--full">
                         <span class="employee-info-item__label">Email corporativo</span>
@@ -175,38 +170,6 @@
                           : '—' %>
                       </strong>
                     </div>
-                  </div>
-                </div>
-              </section>
-
-              <section class="card employee-card employee-card--qr">
-                <div class="card__header employee-card__header">
-                  <span class="card__title">
-                    <svg class="icon"><use href="#icon-qr"/></svg>
-                    Código QR
-                  </span>
-                </div>
-
-                <div class="card__body employee-card__body employee-card__body--qr">
-                  <div class="employee-qr">
-                    <div class="employee-qr__box">
-                      <img
-                        src="/admin/empleados/<%= empleado.id %>/qr"
-                        alt="QR <%= empleado.nombre %>"
-                        class="employee-qr__img"
-                      >
-                    </div>
-
-                    <small class="employee-qr__code td-mono"><%= empleado.uuidQr %></small>
-
-                    <a
-                      href="/admin/empleados/<%= empleado.id %>/qr-download"
-                      class="btn btn--create btn--sm employee-qr__btn"
-                      download
-                    >
-                      <svg class="icon"><use href="#icon-qr"/></svg>
-                      Descargar QR
-                    </a>
                   </div>
                 </div>
               </section>

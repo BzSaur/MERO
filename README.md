@@ -338,6 +338,16 @@ Editar `.env` en la raíz. El archivo `.env.example` tiene todos los defaults.
 | `VITA_DB_USER` | Usuario DB VITA | — |
 | `VITA_DB_PASSWORD` | Password DB VITA | — |
 | `VITA_DB_NAME` | Nombre DB VITA | — |
+| `MAIL_PROVIDER` | Proveedor de correo (`smtp`, `graph`, `auto`) | `auto` |
+| `SMTP_HOST` | Host SMTP | `smtp-mail.outlook.com` |
+| `SMTP_PORT` | Puerto SMTP | `587` |
+| `SMTP_SECURE` | TLS implícito SMTP | `false` |
+| `SMTP_USER` | Usuario SMTP remitente | — |
+| `SMTP_PASS` | Password/app password SMTP | — |
+| `GRAPH_TENANT_ID` | Tenant de Microsoft Entra ID | — |
+| `GRAPH_CLIENT_ID` | Client ID de app Graph | — |
+| `GRAPH_CLIENT_SECRET` | Client secret de app Graph | — |
+| `GRAPH_SENDER_USER` | Mailbox remitente para Graph | usa `SMTP_USER` |
 | `CLOUDFLARE_TUNNEL_TOKEN` | Token del tunnel | — |
 | `LOG_LEVEL` | Nivel de logging | `info` |
 
@@ -403,6 +413,23 @@ docker logs mero-cloudflared
 # Verificar CLOUDFLARE_TUNNEL_TOKEN en .env
 pnpm mero:tunnel:restart
 ```
+
+**Error al enviar QR: `535 5.7.139 Authentication unsuccessful, basic authentication is disabled`**
+
+Outlook/Microsoft 365 bloqueó autenticación básica por SMTP. Opciones:
+
+1) Recomendado: Microsoft Graph
+```bash
+MAIL_PROVIDER=graph
+GRAPH_TENANT_ID=<tenant-id>
+GRAPH_CLIENT_ID=<client-id>
+GRAPH_CLIENT_SECRET=<client-secret>
+GRAPH_SENDER_USER=agomez_nextgen@outlook.com
+```
+
+2) Mantener SMTP
+
+Habilitar SMTP AUTH para el buzón en Microsoft 365 y usar app password (si aplica MFA).
 
 **Reset completo de DB (DESTRUYE TODOS LOS DATOS)**
 ```bash

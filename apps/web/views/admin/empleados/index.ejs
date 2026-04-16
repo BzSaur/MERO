@@ -14,105 +14,174 @@
       <%- include('../../partials/navbar') %>
 
       <main class="content">
-        <div class="page page--usuarios">
+        <div class="page page--empleados-agenda">
           <div class="container">
 
-            <div class="page-header page-header--usuarios page-header--empleados-list">
-              <div>
-                <h1>Empleados</h1>
-                <h2><p class="page-header__sub">
-                  Lectura en tiempo real desde VITA (ERP) &mdash; <%= empleados.length %> activos
-                </p></h2>
+            <!-- ── Header ── -->
+            <div class="emp-page-header">
+              <div class="emp-page-header__left">
+                <h1 class="emp-page-header__title">
+                  Empleados
+                  <span class="emp-page-header__count" id="headerCount"><%= empleados.length %> activos</span>
+                </h1>
+                <p class="emp-page-header__summary" id="headerSummary">Cargando resumen…</p>
               </div>
-
-              <form action="/admin/empleados/sync" method="POST">
-                <button type="submit" class="btn btn--create">
+              <form action="/admin/empleados/sync" method="POST" class="emp-page-header__sync">
+                <button type="submit" class="btn btn--ghost btn--sm" title="Sincronizar empleados con VITA">
                   <svg class="icon"><use href="#icon-refresh"/></svg>
-                  Sincronizar con VITA
                 </button>
               </form>
             </div>
 
             <%- include('../../partials/flash') %>
 
-            <div class="card">
-              <div class="card__header card__header--usuarios">
-                <h3><span class="card__title">Listado de empleados</span></h3>
-                <span class="badge badge--ok"><%= empleados.length %></span>
+            <!-- ── Controles de búsqueda y filtros ── -->
+            <div class="emp-controls card">
+              <div class="emp-controls__search">
+                <svg class="icon emp-controls__search-icon"><use href="#icon-search"/></svg>
+                <input
+                  type="search"
+                  id="empSearch"
+                  class="emp-controls__search-input"
+                  placeholder="Buscar por nombre o área…"
+                  autocomplete="off"
+                />
+                <button type="button" class="emp-controls__search-clear" id="searchClear" hidden title="Limpiar búsqueda">
+                  <svg class="icon"><use href="#icon-x-circle"/></svg>
+                </button>
               </div>
-
-              <% if (!empleados.length) { %>
-                <div class="empty">
-                  <p class="empty__text">
-                    No hay empleados sincronizados. Presiona "Sincronizar con VITA" para importarlos.
-                  </p>
+              <div class="emp-controls__filters">
+                <div class="emp-filter-chips" id="areaChips">
+                  <!-- generado por JS -->
                 </div>
-              <% } else { %>
-                <div class="table-wrap table-wrap--clean">
-                  <table class="table table--clean">
-                    <thead>
-                      <tr>
-                        <th>ID VITA</th>
-                        <th>Nombre</th>
-                        <th class="td-hide-mobile">Puesto</th>
-                        <th class="td-hide-mobile">Área (VITA)</th>
-                        <th class="td-hide-mobile">Fecha Ingreso</th>
-                        <th>QR</th>
-                        <th>Acciones</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      <% empleados.forEach(e => { %>
-                        <tr>
-                          <td class="td-mono"><%= e.idVita %></td>
-
-                          <td>
-                            <strong><%= e.nombre %> <%= e.apellidos || '' %></strong>
-                          </td>
-
-                          <td class="td-hide-mobile"><%= e.vita?.puesto || '—' %></td>
-                          <td class="td-hide-mobile"><%= e.vita?.area || '—' %></td>
-
-                          <td class="td-hide-mobile td-mono">
-                            <%= e.vita?.fechaIngreso ? new Date(e.vita.fechaIngreso).toLocaleDateString('es-MX') : '—' %>
-                          </td>
-
-                          <td>
-                            <a
-                              href="/admin/empleados/<%= e.id %>/qr-download"
-                              class="badge badge--ok"
-                              title="<%= e.uuidQr %>"
-                              download
-                            >
-                              <svg class="icon"><use href="#icon-qr"/></svg>
-                              QR
-                            </a>
-                          </td>
-
-                          <td>
-                            <div class="row-actions">
-                              <a href="/admin/empleados/<%= e.id %>" class="btn btn--ghost btn--sm">
-                                <svg class="icon"><use href="#icon-eye"/></svg>
-                                Ver
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
+                <div class="emp-quick-filters">
+                  <button type="button" class="chip chip--quick" data-qf="sin-correo" id="qfSinCorreo">
+                    <svg class="icon"><use href="#icon-mail-off"/></svg>
+                    Sin correo
+                  </button>
+                  <button type="button" class="chip chip--quick" data-qf="sin-qr" id="qfSinQr">
+                    <svg class="icon"><use href="#icon-qr"/></svg>
+                    Sin QR
+                  </button>
                 </div>
-              <% } %>
+              </div>
             </div>
 
-          </div>
-        </div>
+            <!-- ── Barra de selección ── -->
+            <div class="emp-selection-bar" id="selectionBar">
+              <label class="emp-selection-bar__all">
+                <input type="checkbox" id="selectAll" class="emp-cb">
+                <span>Seleccionar todos</span>
+              </label>
+              <span class="emp-selection-bar__count" id="selectedCount">0 seleccionados</span>
+            </div>
+
+            <!-- ── Lista agenda ── -->
+            <div id="agendaContainer">
+              <!-- Generado por empleados.js -->
+            </div>
+
+            <!-- ── Empty state ── -->
+            <div class="emp-empty" id="empEmpty" hidden>
+              <svg class="icon emp-empty__icon"><use href="#icon-filter"/></svg>
+              <p>No hay empleados que coincidan con los filtros aplicados.</p>
+            </div>
+
+          </div><!-- /container -->
+        </div><!-- /page -->
       </main>
     </div>
   </div>
 
+  <!-- ── Barra flotante de acciones ── -->
+  <div class="emp-action-bar" id="actionBar" hidden>
+    <span class="emp-action-bar__info" id="actionBarInfo">0 empleados seleccionados</span>
+    <button class="btn btn--send" id="sendQrBtn">
+      <svg class="icon"><use href="#icon-send"/></svg>
+      Enviar QR por correo
+    </button>
+  </div>
+
+  <!-- ── Modal de confirmación de envío ── -->
+  <div class="emp-modal-backdrop" id="sendModalBackdrop" hidden>
+    <div class="emp-modal" id="sendModal" role="dialog" aria-modal="true" aria-labelledby="sendModalTitle">
+
+      <!-- Vista: confirmación -->
+      <div id="sendViewConfirm">
+        <div class="emp-modal__header">
+          <h2 class="emp-modal__title" id="sendModalTitle">Enviar QR</h2>
+          <button class="emp-modal__close" id="sendModalClose" aria-label="Cerrar">
+            <svg class="icon"><use href="#icon-x"/></svg>
+          </button>
+        </div>
+        <div class="emp-modal__body">
+          <p id="sendModalDesc"></p>
+          <div class="emp-modal__breakdown" id="sendModalBreakdown"></div>
+        </div>
+        <div class="emp-modal__footer">
+          <button class="btn btn--ghost" id="cancelSendBtn">Cancelar</button>
+          <button class="btn btn--send" id="confirmSendBtn">
+            <svg class="icon"><use href="#icon-send"/></svg>
+            Enviar
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista: enviando -->
+      <div id="sendViewProgress" hidden>
+        <div class="emp-modal__header">
+          <h2 class="emp-modal__title">Enviando…</h2>
+        </div>
+        <div class="emp-modal__body">
+          <div class="emp-progress">
+            <div class="emp-progress__bar">
+              <div class="emp-progress__fill" id="progressFill" style="width:0%"></div>
+            </div>
+            <p class="emp-progress__label" id="progressLabel">Preparando envío…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista: resultados -->
+      <div id="sendViewResults" hidden>
+        <div class="emp-modal__header">
+          <h2 class="emp-modal__title">Resultados del envío</h2>
+          <button class="emp-modal__close" id="resultsModalClose" aria-label="Cerrar">
+            <svg class="icon"><use href="#icon-x"/></svg>
+          </button>
+        </div>
+        <div class="emp-modal__body">
+          <div class="emp-results-summary" id="resultsSummary"></div>
+          <div class="emp-results-detail" id="resultsDetail" hidden>
+            <table class="table table--clean emp-results-table">
+              <thead>
+                <tr>
+                  <th>Empleado</th>
+                  <th>Correo</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody"></tbody>
+            </table>
+          </div>
+          <button class="btn btn--ghost btn--sm emp-results-toggle" id="resultsToggleBtn">Ver detalle</button>
+        </div>
+        <div class="emp-modal__footer">
+          <button class="btn btn--create" id="closeResultsBtn">Cerrar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div id="sidebarOverlay"></div>
+
+  <!-- Datos de empleados para el JS -->
+  <script>
+    window.EMPLEADOS_DATA = <%- JSON.stringify(empleados) %>;
+  </script>
+
   <script src="/js/main.js"></script>
+  <script src="/js/empleados.js"></script>
 </body>
 </html>

@@ -122,43 +122,45 @@ router.get('/empleados/:id', async (req, res, next) => {
   }
 });
 
-router.get('/empleados/:id/qr', async (req, res, next) => {
-  try {
-    const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
-      responseType: 'arraybuffer',
-    });
-    res.set('Content-Type', 'image/png');
-    res.set('Content-Disposition', `inline; filename="qr-empleado-${req.params.id}.png"`);
-    res.send(Buffer.from(response.data));
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get('/empleados/:id/qr-download', async (req, res, next) => {
-  try {
-    const response = await api(req.session.user.token).get(`/empleados/${req.params.id}/qr-image`, {
-      responseType: 'arraybuffer',
-    });
-    res.set('Content-Type', 'image/png');
-    res.set('Content-Disposition', `attachment; filename="qr-empleado-${req.params.id}.png"`);
-    res.send(Buffer.from(response.data));
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.post('/empleados/sync', async (req, res) => {
   try {
     const { data } = await api(req.session.user.token).post('/empleados/sync');
+    const qrMsg = data?.qr
+      ? ` | QR: ${data.qr.generados} generados, ${data.qr.existentes} existentes, ${data.qr.errores} errores`
+      : '';
     req.flash(
       'success',
-      `Sync completado: ${data.sincronizados} sincronizados, ${data.desactivados} desactivados`
+      `Sync completado: ${data.sincronizados} sincronizados, ${data.desactivados} desactivados${qrMsg}`
     );
     res.redirect('/admin/empleados');
   } catch (err) {
     req.flash('error', getErrorMessage(err, 'Error al sincronizar'));
     res.redirect('/admin/empleados');
+  }
+});
+
+/**
+ * POST /admin/empleados/enviar-qr
+ * Proxy hacia la API: recibe { ids: number[] } y retorna JSON con resultados.
+ * Timeout extendido a 5 minutos para soportar envíos masivos con delay anti-throttling.
+ */
+router.post('/empleados/enviar-qr', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'No se proporcionaron IDs de empleados' });
+    }
+
+    const { data } = await api(req.session.user.token).post(
+      '/empleados/enviar-qr',
+      { ids },
+      { timeout: 300_000 } // 5 minutos para envíos masivos
+    );
+
+    res.json(data);
+  } catch (err) {
+    const msg = getErrorMessage(err, 'Error al enviar QR');
+    res.status(500).json({ error: msg });
   }
 });
 

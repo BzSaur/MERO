@@ -1365,6 +1365,297 @@ html[data-theme="dark"] .page--metrics .metrics-legend .badge-summary{
   color: #ffffff !important;
 }
 
+/* =========================================================
+   EMPLEADOS AGENDA — dark mode
+   ========================================================= */
+
+html[data-theme="dark"] .page--empleados-agenda{
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-page-header__title{
+  color: rgba(241,245,249,.98) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-page-header__count{
+  background: rgba(59,130,246,.16) !important;
+  border-color: rgba(59,130,246,.30) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-page-header__summary{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-page-header__sync .btn{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-page-header__sync .btn:hover{
+  background: rgba(59,130,246,.10) !important;
+  border-color: rgba(59,130,246,.28) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls{
+  background: linear-gradient(180deg, rgba(15,23,42,.96), rgba(17,28,51,.96)) !important;
+  border-color: var(--dm-border-2) !important;
+  box-shadow: 0 18px 40px rgba(0,0,0,.24) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls__search-icon{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls__search-input{
+  background: rgba(255,255,255,.04) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls__search-input::placeholder{
+  color: rgba(148,163,184,.86) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls__search-input:focus{
+  border-color: rgba(59,130,246,.55) !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.18) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-controls__search-clear{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .chip{
+  background: rgba(255,255,255,.03) !important;
+  border-color: var(--dm-border-2) !important;
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .chip:hover{
+  background: rgba(59,130,246,.12) !important;
+  border-color: rgba(59,130,246,.28) !important;
+  color: rgba(219,234,254,.95) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .chip--active{
+  background: rgba(59,130,246,.18) !important;
+  border-color: rgba(59,130,246,.34) !important;
+  color: rgba(219,234,254,.98) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .chip--all.chip--active{
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .chip--quick.chip--active{
+  background: #0f766e !important;
+  border-color: #0f766e !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-selection-bar{
+  background: rgba(15,23,42,.92) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-selection-bar__all{
+  color: rgba(226,232,240,.90) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-selection-bar__count{
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-letter-header{
+  background: linear-gradient(
+    to bottom,
+    rgba(11,18,32,.95) 68%,
+    rgba(11,18,32,0)
+  ) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-letter-header__letter{
+  color: #2dd4bf !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-letter-header__line{
+  background: rgba(45,212,191,.28) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-letter-header__check{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-letter-header__check:hover{
+  color: #5eead4 !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row{
+  border-color: rgba(148,163,184,.08) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row:hover{
+  background: rgba(255,255,255,.04) !important;
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row--selected,
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row--selected:hover{
+  background: rgba(59,130,246,.14) !important;
+  border-color: rgba(59,130,246,.28) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__name{
+  color: rgba(241,245,249,.98) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__area{
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__sep,
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__puesto{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .badge--muted{
+  background: rgba(148,163,184,.16) !important;
+  color: rgba(226,232,240,.88) !important;
+  border-color: rgba(148,163,184,.28) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .badge--danger{
+  background: rgba(239,68,68,.18) !important;
+  color: #fecaca !important;
+  border-color: rgba(239,68,68,.30) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-empty{
+  color: rgba(226,232,240,.82) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .emp-empty__icon{
+  opacity: .55 !important;
+}
+
+html[data-theme="dark"] .emp-action-bar{
+  background: linear-gradient(135deg, #0f172a, #111c33) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.45) !important;
+}
+
+html[data-theme="dark"] .emp-action-bar__info{
+  color: rgba(226,232,240,.86) !important;
+}
+
+html[data-theme="dark"] .emp-modal-backdrop{
+  background: rgba(2,6,23,.72) !important;
+}
+
+html[data-theme="dark"] .emp-modal{
+  background: linear-gradient(180deg, rgba(15,23,42,.99), rgba(17,28,51,.99)) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: 0 26px 72px rgba(0,0,0,.56) !important;
+}
+
+html[data-theme="dark"] .emp-modal__header{
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .emp-modal__title{
+  color: rgba(241,245,249,.98) !important;
+}
+
+html[data-theme="dark"] .emp-modal__close{
+  color: var(--dm-ink-soft) !important;
+}
+
+html[data-theme="dark"] .emp-modal__body p,
+html[data-theme="dark"] .emp-progress__label,
+html[data-theme="dark"] .emp-result-stat__lbl{
+  color: rgba(203,213,225,.90) !important;
+}
+
+html[data-theme="dark"] .emp-modal-badge--ok{
+  background: rgba(16,185,129,.14) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(16,185,129,.34) !important;
+}
+
+html[data-theme="dark"] .emp-modal-badge--muted{
+  background: rgba(148,163,184,.12) !important;
+  color: rgba(226,232,240,.90) !important;
+  border-color: rgba(148,163,184,.24) !important;
+}
+
+html[data-theme="dark"] .emp-modal__footer{
+  border-top-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .emp-progress__bar{
+  background: rgba(148,163,184,.18) !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--ok{
+  background: rgba(16,185,129,.12) !important;
+  border-color: rgba(16,185,129,.28) !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--fail{
+  background: rgba(239,68,68,.12) !important;
+  border-color: rgba(239,68,68,.28) !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--muted{
+  background: rgba(148,163,184,.12) !important;
+  border-color: rgba(148,163,184,.24) !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--ok .emp-result-stat__num{
+  color: #6ee7b7 !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--fail .emp-result-stat__num{
+  color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] .emp-result-stat--muted .emp-result-stat__num{
+  color: rgba(226,232,240,.9) !important;
+}
+
+html[data-theme="dark"] .emp-results-detail{
+  border-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .emp-results-table thead th{
+  background: rgba(255,255,255,.04) !important;
+  color: var(--dm-ink-soft) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .emp-results-table tbody td{
+  background: rgba(15,23,42,.95) !important;
+  color: var(--dm-ink) !important;
+  border-bottom-color: var(--dm-border-2) !important;
+}
+
+html[data-theme="dark"] .emp-results-table tbody tr:nth-child(even) td{
+  background: rgba(255,255,255,.015) !important;
+}
+
+html[data-theme="dark"] .emp-results-table tbody tr:hover td{
+  background: rgba(59,130,246,.12) !important;
+}
+
+html[data-theme="dark"] .emp-results-table .text-muted{
+  color: var(--dm-ink-soft) !important;
+}
+
 html[data-theme="dark"] .page--metrics .metrics-strip-body{
   padding: 16px 18px 18px !important;
 }

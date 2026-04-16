@@ -34,6 +34,8 @@ services:
       RUN_SEED: ${RUN_SEED:-false}
     ports:
       - '${API_PORT:-3002}:3000'
+    volumes:
+      - qr_files:/app/apps/api/QR
     networks:
       - default
       - vita_network
@@ -89,3 +91,4 @@ networks:
 volumes:
   pgdata:
   backups:
+  qr_files:

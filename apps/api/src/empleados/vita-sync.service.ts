@@ -24,6 +24,8 @@ export interface VitaEmpleado {
   Fecha_Ingreso: Date;
   Salario_Diario: number | null;
   Email_Corporativo: string | null;
+  Email_Personal: string | null;
+  Telefono_Celular: string | null;
   Nombre_Puesto: string | null;
   Nombre_Area: string | null;
 }
@@ -182,7 +184,8 @@ export class VitaSyncService implements OnModuleInit, OnModuleDestroy {
       const result = await this.vitaPool.query<VitaEmpleado>(
         `SELECT e."ID_Empleado", e."Nombre", e."Apellido_Paterno", e."Apellido_Materno",
                 e."ID_Area", e."ID_Estatus", e."Fecha_Ingreso",
-                e."Salario_Diario", e."Email_Corporativo",
+                e."Salario_Diario", e."Email_Corporativo", e."Email_Personal",
+                e."Telefono_Celular",
                 p."Nombre_Puesto", a."Nombre_Area"
          FROM "Empleados" e
          LEFT JOIN "Cat_Puestos" p ON e."ID_Puesto" = p."ID_Puesto"
@@ -236,14 +239,15 @@ export class VitaSyncService implements OnModuleInit, OnModuleDestroy {
   /* ────── Consultas directas a VITA (read-only) ────── */
 
   /**
-   * Lee todos los empleados de VITA con puesto y area.
+   * Lee todos los empleados de VITA con puesto, area, email y teléfono.
    */
   async queryVitaEmpleados(): Promise<VitaEmpleado[]> {
     try {
       const result = await this.vitaPool.query<VitaEmpleado>(
         `SELECT e."ID_Empleado", e."Nombre", e."Apellido_Paterno", e."Apellido_Materno",
                 e."ID_Area", e."ID_Estatus", e."Fecha_Ingreso",
-                e."Salario_Diario", e."Email_Corporativo",
+                e."Salario_Diario", e."Email_Corporativo", e."Email_Personal",
+                e."Telefono_Celular",
                 p."Nombre_Puesto", a."Nombre_Area"
          FROM "Empleados" e
          LEFT JOIN "Cat_Puestos" p ON e."ID_Puesto" = p."ID_Puesto"
@@ -269,7 +273,8 @@ export class VitaSyncService implements OnModuleInit, OnModuleDestroy {
       const result = await this.vitaPool.query<VitaEmpleado>(
         `SELECT e."ID_Empleado", e."Nombre", e."Apellido_Paterno", e."Apellido_Materno",
                 e."ID_Area", e."ID_Estatus", e."Fecha_Ingreso",
-                e."Salario_Diario", e."Email_Corporativo",
+                e."Salario_Diario", e."Email_Corporativo", e."Email_Personal",
+                e."Telefono_Celular",
                 p."Nombre_Puesto", a."Nombre_Area"
          FROM "Empleados" e
          LEFT JOIN "Cat_Puestos" p ON e."ID_Puesto" = p."ID_Puesto"
