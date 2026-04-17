@@ -1997,6 +1997,28 @@ USUARIOS
 
 .btn--send .icon{ width:16px; height:16px; }
 
+.btn--print-sheet{
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.28);
+  color: #fff;
+  border-radius: 999px;
+  padding: .55rem 1.15rem;
+  font-weight: 800;
+  font-size: .88rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.btn--print-sheet:hover{
+  background: rgba(255,255,255,.25);
+  border-color: rgba(255,255,255,.45);
+}
+
+.btn--print-sheet .icon{ width:16px; height:16px; }
+
 /* ── Modal ── */
 .emp-modal-backdrop{
   position: fixed;
@@ -2209,6 +2231,11 @@ USUARIOS
   }
 
   .btn--send{
+    flex: 1;
+    justify-content: center;
+  }
+
+  .btn--print-sheet{
     flex: 1;
     justify-content: center;
   }

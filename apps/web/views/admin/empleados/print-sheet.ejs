@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <style>
+    :root {
+      --page-width: 8.5in;
+      --page-padding: 0.5in;
+      --qr-size: 1in;
+      --col-gap: 0.85in;
+      --row-gap: 0.55in;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+      background: #f3f4f6;
+      color: #0f172a;
+    }
+
+    .print-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      background: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.24);
+    }
+
+    .print-toolbar__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .print-toolbar__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .print-btn {
+      border: 1px solid #ffffff;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .print-btn--ghost {
+      background: transparent;
+      color: #ffffff;
+    }
+
+    .print-container {
+      padding: 18px 12px 28px;
+    }
+
+    .sheet-wrap {
+      width: var(--page-width);
+      margin: 0 auto 18px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 18px 46px rgba(15, 23, 42, 0.14);
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .sheet-wrap:last-of-type {
+      page-break-after: auto;
+    }
+
+    .sheet {
+      padding: var(--page-padding);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--col-gap);
+      row-gap: var(--row-gap);
+    }
+
+    .qr-slot {
+      min-height: 2.35in;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+      padding-top: 0.08in;
+    }
+
+    .qr-slot.is-empty {
+      opacity: 0;
+    }
+
+    .qr-code {
+      width: var(--qr-size);
+      height: var(--qr-size);
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 6px;
+    }
+
+    .qr-name {
+      margin-top: 0.16in;
+      max-width: 2.65in;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .qr-area {
+      margin-top: 4px;
+      max-width: 2.65in;
+      font-size: 10px;
+      line-height: 1.2;
+      color: #475569;
+      word-break: break-word;
+    }
+
+    .sheet-footer {
+      padding: 0 0.5in 0.35in;
+      font-size: 10px;
+      color: #64748b;
+      text-align: right;
+    }
+
+    .print-alert {
+      width: var(--page-width);
+      margin: 0 auto 12px;
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+
+    .print-alert strong {
+      font-weight: 800;
+    }
+
+    @page {
+      size: letter portrait;
+      margin: var(--page-padding);
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .print-toolbar,
+      .print-alert {
+        display: none;
+      }
+
+      .print-container {
+        padding: 0;
+      }
+
+      .sheet-wrap {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .sheet {
+        padding: 0;
+      }
+
+      .sheet-footer {
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="print-toolbar">
+    <div class="print-toolbar__meta">
+      <span><strong><%= total %></strong> QR listos para imprimir</span>
+      <span>Solicitados: <strong><%= requested %></strong></span>
+      <span>Hojas: <strong><%= pages.length %></strong> (maximo 6 por hoja)</span>
+      <span>Generado: <strong><%= generatedAt %></strong></span>
+    </div>
+
+    <div class="print-toolbar__actions">
+      <button type="button" class="print-btn" onclick="window.print()">Imprimir</button>
+      <a href="/admin/empleados" class="print-btn print-btn--ghost">Regresar</a>
+    </div>
+  </header>
+
+  <main class="print-container">
+    <% if (fallidos && fallidos.length) { %>
+      <div class="print-alert">
+        <strong><%= fallidos.length %></strong> QR no se pudieron preparar y quedaron fuera de la hoja.
+      </div>
+    <% } %>
+
+    <% pages.forEach((page, pageIndex) => { %>
+      <section class="sheet-wrap">
+        <div class="sheet">
+          <% for (let slotIndex = 0; slotIndex < 6; slotIndex++) { %>
+            <% const item = page[slotIndex]; %>
+            <article class="qr-slot <%= item ? '' : 'is-empty' %>">
+              <% if (item) { %>
+                <img class="qr-code" src="<%= item.qrDataUrl %>" alt="QR de <%= item.nombre %>" />
+                <div class="qr-name"><%= item.nombre %></div>
+                <% if (item.area) { %>
+                  <div class="qr-area"><%= item.area %></div>
+                <% } %>
+              <% } %>
+            </article>
+          <% } %>
+        </div>
+        <div class="sheet-footer">Hoja <%= pageIndex + 1 %> de <%= pages.length %></div>
+      </section>
+    <% }) %>
+  </main>
+</body>
+</html>

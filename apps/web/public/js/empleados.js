@@ -55,6 +55,7 @@
   const actionBar       = document.getElementById('actionBar');
   const actionBarInfo   = document.getElementById('actionBarInfo');
   const sendQrBtn       = document.getElementById('sendQrBtn');
+  const printQrSheetBtn = document.getElementById('printQrSheetBtn');
   const headerSummary   = document.getElementById('headerSummary');
   const searchInput     = document.getElementById('empSearch');
   const searchClear     = document.getElementById('searchClear');
@@ -256,6 +257,9 @@
           : `<span class="badge badge--muted badge--xs" title="Sin correo"><svg class="icon"><use href="#icon-mail-off"/></svg></span>`}
       </div>
       <div class="agenda-employee-row__actions">
+        <a href="/admin/empleados/${emp.id}/qr-descargar" class="btn btn--ghost btn--sm" title="Descargar QR">
+          <svg class="icon"><use href="#icon-qr"/></svg>
+        </a>
         <a href="/admin/empleados/${emp.id}" class="btn btn--ghost btn--sm" title="Ver detalle">
           <svg class="icon"><use href="#icon-eye"/></svg>
         </a>
@@ -431,7 +435,32 @@
     viewResults.hidden  = v !== 'results';
   }
 
+  function openPrintSheet(ids) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/empleados/imprimir-qr-hoja';
+    form.target = '_blank';
+    form.style.display = 'none';
+
+    const idsInput = document.createElement('input');
+    idsInput.type = 'hidden';
+    idsInput.name = 'ids';
+    idsInput.value = ids.join(',');
+    form.appendChild(idsInput);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
   if (sendQrBtn) sendQrBtn.addEventListener('click', openModal);
+  if (printQrSheetBtn) {
+    printQrSheetBtn.addEventListener('click', () => {
+      const ids = [...selected];
+      if (!ids.length) return;
+      openPrintSheet(ids);
+    });
+  }
 
   document.getElementById('sendModalClose')?.addEventListener('click', closeModal);
   document.getElementById('cancelSendBtn')?.addEventListener('click', closeModal);

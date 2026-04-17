@@ -17,6 +17,42 @@ function getErrorMessage(err, fallback = 'Error') {
   return Array.isArray(raw) ? raw.join(', ') : raw;
 }
 
+function buildQrDownloadFilename(empleado, id) {
+  const rawName = `${empleado?.nombre || ''} ${empleado?.apellidos || ''}`.trim();
+  const normalized = rawName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  return `${normalized || `empleado_${id}`}_QR.png`;
+}
+
+function parseIdList(raw) {
+  if (Array.isArray(raw)) {
+    return raw
+      .map((value) => Number(value))
+      .filter((value, index, arr) => Number.isInteger(value) && value > 0 && arr.indexOf(value) === index);
+  }
+
+  if (typeof raw === 'string' && raw.trim()) {
+    return raw
+      .split(',')
+      .map((value) => Number(value.trim()))
+      .filter((value, index, arr) => Number.isInteger(value) && value > 0 && arr.indexOf(value) === index);
+  }
+
+  return [];
+}
+
+function chunkItems(items, size) {
+  const pages = [];
+  for (let i = 0; i < items.length; i += size) {
+    pages.push(items.slice(i, i + size));
+  }
+  return pages;
+}
+
 function toIsoDateStart(value) {
   return value ? `${value}T00:00:00.000Z` : undefined;
 }
@@ -121,6 +157,112 @@ router.get('/empleados/:id', async (req, res, next) => {
     next(err);
   }
 });
+
+router.get('/empleados/:id/qr-descargar', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    req.flash('error', 'ID de empleado inválido');
+    return res.redirect('/admin/empleados');
+  }
+
+  try {
+    const client = api(req.session.user.token);
+    const { data: qrBuffer } = await client.get(`/empleados/${id}/qr-image`, {
+      responseType: 'arraybuffer',
+      timeout: 60_000,
+    });
+
+    let filename = `empleado_${id}_QR.png`;
+    try {
+      const { data: empleado } = await client.get(`/empleados/${id}`);
+      filename = buildQrDownloadFilename(empleado, id);
+    } catch {
+      // Si falla el detalle, se conserva nombre genérico y se descarga de todos modos.
+    }
+
+    res.set({
+      'Content-Type': 'image/png',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    });
+
+    return res.send(Buffer.from(qrBuffer));
+  } catch (err) {
+    req.flash('error', getErrorMessage(err, 'No se pudo descargar el QR'));
+    return res.redirect(`/admin/empleados/${id}`);
+  }
+});
+
+async function renderPrintQrSheet(req, res) {
+  const ids = parseIdList(req.body?.ids ?? req.query?.ids);
+
+  if (!ids.length) {
+    req.flash('error', 'Selecciona al menos un empleado para imprimir QR');
+    return res.redirect('/admin/empleados');
+  }
+
+  try {
+    const client = api(req.session.user.token);
+    const { data: empleados } = await client.get('/empleados');
+    const byId = new Map((Array.isArray(empleados) ? empleados : []).map((emp) => [Number(emp.id), emp]));
+
+    const selected = ids
+      .map((id) => byId.get(id))
+      .filter(Boolean);
+
+    if (!selected.length) {
+      req.flash('error', 'No se encontraron empleados activos para los IDs seleccionados');
+      return res.redirect('/admin/empleados');
+    }
+
+    const printable = [];
+    const fallidos = [];
+
+    for (const emp of selected) {
+      try {
+        const { data: qrBuffer } = await client.get(`/empleados/${emp.id}/qr-image`, {
+          responseType: 'arraybuffer',
+          timeout: 60_000,
+        });
+
+        printable.push({
+          id: emp.id,
+          nombre: `${emp.nombre || ''} ${emp.apellidos || ''}`.trim() || `Empleado ${emp.id}`,
+          area: emp?.vita?.area || null,
+          qrDataUrl: `data:image/png;base64,${Buffer.from(qrBuffer).toString('base64')}`,
+        });
+      } catch (err) {
+        fallidos.push({
+          id: emp.id,
+          nombre: `${emp.nombre || ''} ${emp.apellidos || ''}`.trim() || `Empleado ${emp.id}`,
+          error: getErrorMessage(err, 'No se pudo generar QR para impresión'),
+        });
+      }
+    }
+
+    if (!printable.length) {
+      req.flash('error', 'No se pudo preparar ninguna etiqueta QR para impresión');
+      return res.redirect('/admin/empleados');
+    }
+
+    const pages = chunkItems(printable, 6);
+
+    return res.render('admin/empleados/print-sheet', {
+      title: 'Imprimir QR',
+      pages,
+      total: printable.length,
+      requested: ids.length,
+      fallidos,
+      generatedAt: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
+    });
+  } catch (err) {
+    req.flash('error', getErrorMessage(err, 'No se pudo preparar la hoja de impresión QR'));
+    return res.redirect('/admin/empleados');
+  }
+}
+
+router.post('/empleados/imprimir-qr-hoja', renderPrintQrSheet);
+router.get('/empleados/imprimir-qr-hoja', renderPrintQrSheet);
 
 router.post('/empleados/sync', async (req, res) => {
   try {
