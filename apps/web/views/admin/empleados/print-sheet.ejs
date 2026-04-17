@@ -8,7 +8,7 @@
     :root {
       --page-width: 8.5in;
       --page-padding: 0.5in;
-      --qr-size: <%= Number(qrSizeIn || 2.5).toFixed(2) %>in;
+      --qr-size: <%= Number(qrSizeIn || 2).toFixed(2) %>in;
       --col-gap: <%= Number(colGapIn || 0.42).toFixed(2) %>in;
       --row-gap: <%= Number(rowGapIn || 0.1).toFixed(2) %>in;
       --slot-min-height: <%= Number(slotMinHeightIn || 3.05).toFixed(2) %>in;
@@ -207,14 +207,14 @@
     <div class="print-toolbar__meta">
       <span><strong><%= total %></strong> QR listos para imprimir</span>
       <span>Solicitados: <strong><%= requested %></strong></span>
-      <span>Tamano QR: <strong><%= Number(qrSizeIn || 2.5).toFixed(1) %> in</strong></span>
+      <span>Tamano QR: <strong><%= Number(qrSizeIn || 2).toFixed(1) %> in</strong></span>
       <span>Hojas: <strong><%= pages.length %></strong> (maximo 6 por hoja)</span>
       <span>Generado: <strong><%= generatedAt %></strong></span>
     </div>
 
     <div class="print-toolbar__actions">
       <a
-        href="/admin/empleados/imprimir-qr-hoja?ids=<%= encodeURIComponent(selectedIds || '') %>&qrSizeIn=<%= Number(qrSizeIn || 2.5).toFixed(1) %>&format=pdf"
+        href="/admin/empleados/imprimir-qr-hoja?ids=<%= encodeURIComponent(selectedIds || '') %>&qrSizeIn=<%= Number(qrSizeIn || 2).toFixed(1) %>&format=pdf"
         class="print-btn"
       >
         Descargar PDF

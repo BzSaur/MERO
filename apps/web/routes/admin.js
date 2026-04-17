@@ -70,7 +70,7 @@ function buildQrSheetPdfFilename(printable, qrSizeIn) {
   const areaTag = areas.length === 1
     ? normalizeForFilename(areas[0]) || 'AREA'
     : 'GENERAL';
-  const sizeTag = String(Number(qrSizeIn || 2.5).toFixed(1)).replace('.', '_');
+  const sizeTag = String(Number(qrSizeIn || 2).toFixed(1)).replace('.', '_');
   return `QR_${areaTag}_${sizeTag}in_${dateTag}.pdf`;
 }
 
@@ -103,7 +103,7 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
 
   doc.pipe(res);
 
-  const qrSizePt = Number(qrSizeIn || 2.5) * 72;
+  const qrSizePt = Number(qrSizeIn || 2) * 72;
   const colGapPt = qrSizeIn === 2.5 ? 30 : 45;
   const rowGapPt = qrSizeIn === 2.5 ? 8 : 16;
   const slotHeightPt = qrSizePt + 40;
@@ -129,7 +129,7 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
       .font('Helvetica')
       .fontSize(9)
       .text(
-        `Hoja ${pageIndex + 1} de ${pages.length}  •  QR ${Number(qrSizeIn || 2.5).toFixed(1)}in`,
+        `Hoja ${pageIndex + 1} de ${pages.length}  •  QR ${Number(qrSizeIn || 2).toFixed(1)}in`,
         marginLeft,
         marginTop - 14,
         { width: contentWidth, align: 'right' },
@@ -345,7 +345,7 @@ router.get('/empleados/:id(\\d+)/qr-descargar', async (req, res) => {
 
 async function renderPrintQrSheet(req, res) {
   const ids = parseIdList(req.body?.ids ?? req.query?.ids);
-  const rawSize = Number(req.body?.qrSizeIn ?? req.query?.qrSizeIn ?? 2.5);
+  const rawSize = Number(req.body?.qrSizeIn ?? req.query?.qrSizeIn ?? 2);
   const qrSizeIn = rawSize >= 2.5 ? 2.5 : 2;
   const outputFormat = String(req.body?.format ?? req.query?.format ?? 'html').toLowerCase() === 'pdf'
     ? 'pdf'

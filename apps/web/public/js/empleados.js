@@ -436,7 +436,7 @@
   }
 
   function openPrintSheet(ids, format = 'pdf') {
-    const qrSizeIn = '2.5';
+    const qrSizeIn = '2';
 
     const form = document.createElement('form');
     form.method = 'POST';
