@@ -95,6 +95,47 @@ function fitSingleLineText(doc, value, maxWidth) {
   return best || suffix;
 }
 
+function fitTextLines(doc, value, maxWidth, maxLines = 2) {
+  const text = normalizeLabelText(value);
+  if (!text) return [];
+
+  if (doc.widthOfString(text) <= maxWidth) {
+    return [text];
+  }
+
+  const words = text.split(' ').filter(Boolean);
+  if (!words.length) return [];
+
+  const lines = [];
+  let current = '';
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+
+    if (doc.widthOfString(candidate) <= maxWidth) {
+      current = candidate;
+      continue;
+    }
+
+    if (current) {
+      lines.push(current);
+      current = word;
+    } else {
+      lines.push(fitSingleLineText(doc, word, maxWidth));
+      current = '';
+    }
+  }
+
+  if (current) lines.push(current);
+
+  if (lines.length <= maxLines) return lines;
+
+  const kept = lines.slice(0, maxLines);
+  const overflow = lines.slice(maxLines - 1).join(' ');
+  kept[maxLines - 1] = fitSingleLineText(doc, overflow, maxWidth);
+  return kept;
+}
+
 function buildQrSheetPdfFilename(printable, qrSizeIn) {
   const dateTag = new Date().toISOString().slice(0, 10);
   const areas = [...new Set(printable.map((item) => item.area).filter(Boolean))];
@@ -136,7 +177,7 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
   const qrSizePt = Number(qrSizeIn || 2) * 72;
   const colGapPt = qrSizeIn === 2.5 ? 30 : 45;
   const rowGapPt = qrSizeIn === 2.5 ? 8 : 16;
-  const slotHeightPt = qrSizePt + 40;
+  const slotHeightPt = qrSizePt + (qrSizeIn === 2.5 ? 46 : 40);
   const labelWidth = qrSizePt + 28;
 
   const pageWidth = doc.page.width;
@@ -182,25 +223,31 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
       doc
         .fillColor('#0f172a')
         .font('Helvetica-Bold')
-        .fontSize(qrSizeIn === 2.5 ? 11 : 10.5);
+        .fontSize(qrSizeIn === 2.5 ? 10.8 : 9.3);
 
-      const nameText = fitSingleLineText(doc, item.nombre, labelWidth);
+      const nameLines = fitTextLines(doc, item.nombre, labelWidth, 2);
+      const nameY = y + qrSizePt + 8;
+      const nameLineHeight = qrSizeIn === 2.5 ? 11.5 : 10.5;
 
-      doc.text(nameText, x - 14, y + qrSizePt + 8, {
+      nameLines.forEach((line, lineIndex) => {
+        doc.text(line, x - 14, nameY + (lineIndex * nameLineHeight), {
           width: labelWidth,
           align: 'center',
           lineBreak: false,
         });
+      });
+
+      const areaY = nameY + (Math.max(nameLines.length, 1) * nameLineHeight) + 2;
 
       if (item.area) {
         doc
           .fillColor('#475569')
           .font('Helvetica')
-          .fontSize(qrSizeIn === 2.5 ? 9.5 : 9);
+          .fontSize(qrSizeIn === 2.5 ? 9.2 : 8.6);
 
         const areaText = fitSingleLineText(doc, item.area, labelWidth);
 
-        doc.text(areaText, x - 14, y + qrSizePt + 23, {
+        doc.text(areaText, x - 14, areaY, {
             width: labelWidth,
             align: 'center',
             lineBreak: false,
