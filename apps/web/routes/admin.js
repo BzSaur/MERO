@@ -64,6 +64,37 @@ function truncateLabel(value, maxLength = 44) {
   return `${text.slice(0, maxLength - 1)}…`;
 }
 
+function normalizeLabelText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function fitSingleLineText(doc, value, maxWidth) {
+  const text = normalizeLabelText(value);
+  if (!text) return '';
+
+  if (doc.widthOfString(text) <= maxWidth) return text;
+
+  const suffix = '...';
+  if (doc.widthOfString(suffix) > maxWidth) return '';
+
+  let low = 0;
+  let high = text.length;
+  let best = '';
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const candidate = `${text.slice(0, mid).trim()}${suffix}`;
+    if (doc.widthOfString(candidate) <= maxWidth) {
+      best = candidate;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return best || suffix;
+}
+
 function buildQrSheetPdfFilename(printable, qrSizeIn) {
   const dateTag = new Date().toISOString().slice(0, 10);
   const areas = [...new Set(printable.map((item) => item.area).filter(Boolean))];
@@ -151,24 +182,28 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
       doc
         .fillColor('#0f172a')
         .font('Helvetica-Bold')
-        .fontSize(qrSizeIn === 2.5 ? 11 : 10.5)
-        .text(truncateLabel(item.nombre, qrSizeIn === 2.5 ? 40 : 30), x - 14, y + qrSizePt + 8, {
+        .fontSize(qrSizeIn === 2.5 ? 11 : 10.5);
+
+      const nameText = fitSingleLineText(doc, item.nombre, labelWidth);
+
+      doc.text(nameText, x - 14, y + qrSizePt + 8, {
           width: labelWidth,
           align: 'center',
           lineBreak: false,
-          ellipsis: true,
         });
 
       if (item.area) {
         doc
           .fillColor('#475569')
           .font('Helvetica')
-          .fontSize(qrSizeIn === 2.5 ? 9.5 : 9)
-          .text(truncateLabel(item.area, 38), x - 14, y + qrSizePt + 23, {
+          .fontSize(qrSizeIn === 2.5 ? 9.5 : 9);
+
+        const areaText = fitSingleLineText(doc, item.area, labelWidth);
+
+        doc.text(areaText, x - 14, y + qrSizePt + 23, {
             width: labelWidth,
             align: 'center',
             lineBreak: false,
-            ellipsis: true,
           });
       }
     }
@@ -358,8 +393,8 @@ async function renderPrintQrSheet(req, res) {
 
         printable.push({
           id: emp.id,
-          nombre: `${emp.nombre || ''} ${emp.apellidos || ''}`.trim() || `Empleado ${emp.id}`,
-          area: emp?.vita?.area || null,
+          nombre: normalizeLabelText(`${emp.nombre || ''} ${emp.apellidos || ''}`) || `Empleado ${emp.id}`,
+          area: normalizeLabelText(emp?.vita?.area || '') || null,
           qrDataUrl: `data:image/png;base64,${qrRawBuffer.toString('base64')}`,
           qrBuffer: qrRawBuffer,
         });
