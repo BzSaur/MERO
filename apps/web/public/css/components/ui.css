@@ -1997,49 +1997,28 @@ USUARIOS
 
 .btn--send .icon{ width:16px; height:16px; }
 
-.btn--print-sheet{
+.emp-action-bar .btn--qr-sheet{
   display: inline-flex;
   align-items: center;
   gap: .45rem;
-  background: rgba(255,255,255,.16);
-  border: 1px solid rgba(255,255,255,.28);
-  color: #fff;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
   border-radius: 999px;
   padding: .55rem 1.15rem;
   font-weight: 800;
   font-size: .88rem;
   cursor: pointer;
-  transition: background .15s, border-color .15s;
+  transition: background .15s, border-color .15s, color .15s;
 }
 
-.btn--print-sheet:hover{
-  background: rgba(255,255,255,.25);
-  border-color: rgba(255,255,255,.45);
+.emp-action-bar .btn--qr-sheet:hover{
+  background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #0b1325 !important;
 }
 
-.btn--print-sheet .icon{ width:16px; height:16px; }
-
-.btn--pdf-sheet{
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  background: rgba(34,197,94,.16);
-  border: 1px solid rgba(34,197,94,.30);
-  color: #dcfce7;
-  border-radius: 999px;
-  padding: .55rem 1.15rem;
-  font-weight: 800;
-  font-size: .88rem;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
-
-.btn--pdf-sheet:hover{
-  background: rgba(34,197,94,.24);
-  border-color: rgba(34,197,94,.46);
-}
-
-.btn--pdf-sheet .icon{ width:16px; height:16px; }
+.emp-action-bar .btn--qr-sheet .icon{ width:16px; height:16px; }
 
 /* ── Modal ── */
 .emp-modal-backdrop{
@@ -2257,12 +2236,7 @@ USUARIOS
     justify-content: center;
   }
 
-  .btn--print-sheet{
-    flex: 1;
-    justify-content: center;
-  }
-
-  .btn--pdf-sheet{
+  .emp-action-bar .btn--qr-sheet{
     flex: 1;
     justify-content: center;
   }

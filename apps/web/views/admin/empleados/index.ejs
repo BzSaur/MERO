@@ -96,15 +96,11 @@
   <!-- ── Barra flotante de acciones ── -->
   <div class="emp-action-bar" id="actionBar" hidden>
     <span class="emp-action-bar__info" id="actionBarInfo">0 empleados seleccionados</span>
-    <button class="btn btn--print-sheet" id="printQrSheetBtn">
+    <button type="button" class="btn btn--qr-sheet" id="qrSheetBtn">
       <svg class="icon"><use href="#icon-print"/></svg>
-      Imprimir hoja QR
+      Descargar QR (6)
     </button>
-    <button class="btn btn--pdf-sheet" id="downloadQrPdfBtn">
-      <svg class="icon"><use href="#icon-print"/></svg>
-      Descargar PDF QR (6)
-    </button>
-    <button class="btn btn--send" id="sendQrBtn">
+    <button type="button" class="btn btn--send" id="sendQrBtn">
       <svg class="icon"><use href="#icon-send"/></svg>
       Enviar QR por correo
     </button>
@@ -190,6 +186,6 @@
   </script>
 
   <script src="/js/main.js"></script>
-  <script src="/js/empleados.js"></script>
+  <script src="/js/empleados.js?v=20260417b"></script>
 </body>
 </html>

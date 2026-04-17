@@ -55,8 +55,7 @@
   const actionBar       = document.getElementById('actionBar');
   const actionBarInfo   = document.getElementById('actionBarInfo');
   const sendQrBtn       = document.getElementById('sendQrBtn');
-  const printQrSheetBtn = document.getElementById('printQrSheetBtn');
-  const downloadQrPdfBtn = document.getElementById('downloadQrPdfBtn');
+  const qrSheetBtn = document.getElementById('qrSheetBtn');
   const headerSummary   = document.getElementById('headerSummary');
   const searchInput     = document.getElementById('empSearch');
   const searchClear     = document.getElementById('searchClear');
@@ -436,13 +435,14 @@
     viewResults.hidden  = v !== 'results';
   }
 
-  function openPrintSheet(ids, format = 'html') {
+  function openPrintSheet(ids, format = 'pdf') {
     const qrSizeIn = '2.5';
 
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/admin/empleados/imprimir-qr-hoja';
-    form.target = '_blank';
+    // Keep navigation in the same tab to avoid popup blockers.
+    form.target = '_self';
     form.style.display = 'none';
 
     const idsInput = document.createElement('input');
@@ -469,15 +469,8 @@
   }
 
   if (sendQrBtn) sendQrBtn.addEventListener('click', openModal);
-  if (printQrSheetBtn) {
-    printQrSheetBtn.addEventListener('click', () => {
-      const ids = [...selected];
-      if (!ids.length) return;
-      openPrintSheet(ids, 'html');
-    });
-  }
-  if (downloadQrPdfBtn) {
-    downloadQrPdfBtn.addEventListener('click', () => {
+  if (qrSheetBtn) {
+    qrSheetBtn.addEventListener('click', () => {
       const ids = [...selected];
       if (!ids.length) return;
       openPrintSheet(ids, 'pdf');
