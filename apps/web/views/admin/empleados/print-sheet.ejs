@@ -213,6 +213,12 @@
     </div>
 
     <div class="print-toolbar__actions">
+      <a
+        href="/admin/empleados/imprimir-qr-hoja?ids=<%= encodeURIComponent(selectedIds || '') %>&qrSizeIn=<%= Number(qrSizeIn || 2.5).toFixed(1) %>&format=pdf"
+        class="print-btn"
+      >
+        Descargar PDF
+      </a>
       <button type="button" class="print-btn" onclick="window.print()">Imprimir</button>
       <a href="/admin/empleados" class="print-btn print-btn--ghost">Regresar</a>
     </div>

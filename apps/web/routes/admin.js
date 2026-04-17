@@ -17,13 +17,17 @@ function getErrorMessage(err, fallback = 'Error') {
   return Array.isArray(raw) ? raw.join(', ') : raw;
 }
 
-function buildQrDownloadFilename(empleado, id) {
-  const rawName = `${empleado?.nombre || ''} ${empleado?.apellidos || ''}`.trim();
-  const normalized = rawName
+function normalizeForFilename(value) {
+  return String(value || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
+}
+
+function buildQrDownloadFilename(empleado, id) {
+  const rawName = `${empleado?.nombre || ''} ${empleado?.apellidos || ''}`.trim();
+  const normalized = normalizeForFilename(rawName);
 
   return `${normalized || `empleado_${id}`}_QR.png`;
 }
@@ -51,6 +55,152 @@ function chunkItems(items, size) {
     pages.push(items.slice(i, i + size));
   }
   return pages;
+}
+
+function truncateLabel(value, maxLength = 44) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength - 1)}…`;
+}
+
+function buildQrSheetPdfFilename(printable, qrSizeIn) {
+  const dateTag = new Date().toISOString().slice(0, 10);
+  const areas = [...new Set(printable.map((item) => item.area).filter(Boolean))];
+  const areaTag = areas.length === 1
+    ? normalizeForFilename(areas[0]) || 'AREA'
+    : 'GENERAL';
+  const sizeTag = String(Number(qrSizeIn || 2.5).toFixed(1)).replace('.', '_');
+  return `QR_${areaTag}_${sizeTag}in_${dateTag}.pdf`;
+}
+
+function streamQrSheetPdf(res, printable, qrSizeIn) {
+  let PDFDocument;
+  try {
+    PDFDocument = require('pdfkit');
+  } catch {
+    throw new Error('PDF_EXPORT_DEPENDENCY_MISSING');
+  }
+
+  const pages = chunkItems(printable, 6);
+  const generatedAt = new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
+  const filename = buildQrSheetPdfFilename(printable, qrSizeIn);
+
+  const doc = new PDFDocument({
+    size: 'LETTER',
+    margins: { top: 36, left: 36, right: 36, bottom: 36 },
+    info: {
+      Title: 'Hoja de QRs MERO',
+      Author: 'MERO',
+    },
+  });
+
+  res.set({
+    'Content-Type': 'application/pdf',
+    'Content-Disposition': `attachment; filename="${filename}"`,
+    'Cache-Control': 'no-store',
+  });
+
+  doc.pipe(res);
+
+  const qrSizePt = Number(qrSizeIn || 2.5) * 72;
+  const colGapPt = qrSizeIn === 2.5 ? 30 : 45;
+  const rowGapPt = qrSizeIn === 2.5 ? 8 : 16;
+  const slotHeightPt = qrSizePt + 40;
+  const labelWidth = qrSizePt + 28;
+
+  const pageWidth = doc.page.width;
+  const pageHeight = doc.page.height;
+  const marginLeft = doc.page.margins.left;
+  const marginRight = doc.page.margins.right;
+  const marginTop = doc.page.margins.top;
+  const marginBottom = doc.page.margins.bottom;
+
+  const contentWidth = pageWidth - marginLeft - marginRight;
+  const gridWidth = qrSizePt * 2 + colGapPt;
+  const startX = marginLeft + Math.max((contentWidth - gridWidth) / 2, 0);
+  const startY = marginTop + 6;
+
+  pages.forEach((pageItems, pageIndex) => {
+    if (pageIndex > 0) doc.addPage();
+
+    doc
+      .fillColor('#334155')
+      .font('Helvetica')
+      .fontSize(9)
+      .text(
+        `Hoja ${pageIndex + 1} de ${pages.length}  •  QR ${Number(qrSizeIn || 2.5).toFixed(1)}in`,
+        marginLeft,
+        marginTop - 14,
+        { width: contentWidth, align: 'right' },
+      );
+
+    for (let slotIndex = 0; slotIndex < 6; slotIndex++) {
+      const item = pageItems[slotIndex];
+      if (!item?.qrBuffer) continue;
+
+      const row = Math.floor(slotIndex / 2);
+      const col = slotIndex % 2;
+      const x = startX + col * (qrSizePt + colGapPt);
+      const y = startY + row * (slotHeightPt + rowGapPt);
+
+      doc.save();
+      doc
+        .lineWidth(0.6)
+        .strokeColor('#94a3b8')
+        .rect(x - 1, y - 1, qrSizePt + 2, qrSizePt + 2)
+        .stroke();
+      doc.restore();
+
+      try {
+        doc.image(item.qrBuffer, x, y, { fit: [qrSizePt, qrSizePt] });
+      } catch {
+        doc
+          .fillColor('#ef4444')
+          .font('Helvetica')
+          .fontSize(9)
+          .text('QR no disponible', x + 8, y + qrSizePt / 2 - 4);
+      }
+
+      doc
+        .fillColor('#0f172a')
+        .font('Helvetica-Bold')
+        .fontSize(qrSizeIn === 2.5 ? 11 : 10.5)
+        .text(truncateLabel(item.nombre, qrSizeIn === 2.5 ? 42 : 48), x - 14, y + qrSizePt + 8, {
+          width: labelWidth,
+          align: 'center',
+        });
+
+      if (item.area) {
+        doc
+          .fillColor('#475569')
+          .font('Helvetica')
+          .fontSize(qrSizeIn === 2.5 ? 9.5 : 9)
+          .text(truncateLabel(item.area, 38), x - 14, y + qrSizePt + 23, {
+            width: labelWidth,
+            align: 'center',
+          });
+      }
+    }
+
+    const footerY = pageHeight - marginBottom + 8;
+
+    doc
+      .fillColor('#64748b')
+      .font('Helvetica')
+      .fontSize(9)
+      .text(`Generado ${generatedAt}`, marginLeft, footerY, {
+        width: contentWidth,
+        align: 'left',
+      });
+
+    doc.text(`Hoja ${pageIndex + 1} de ${pages.length}`, marginLeft, footerY, {
+      width: contentWidth,
+      align: 'right',
+    });
+  });
+
+  doc.end();
 }
 
 function toIsoDateStart(value) {
@@ -149,7 +299,7 @@ router.get('/empleados', async (req, res, next) => {
   }
 });
 
-router.get('/empleados/:id', async (req, res, next) => {
+router.get('/empleados/:id(\\d+)', async (req, res, next) => {
   try {
     const { data: empleado } = await api(req.session.user.token).get(`/empleados/${req.params.id}`);
     res.render('admin/empleados/detalle', { title: 'Detalle Empleado', empleado });
@@ -158,7 +308,7 @@ router.get('/empleados/:id', async (req, res, next) => {
   }
 });
 
-router.get('/empleados/:id/qr-descargar', async (req, res) => {
+router.get('/empleados/:id(\\d+)/qr-descargar', async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) {
     req.flash('error', 'ID de empleado inválido');
@@ -197,6 +347,9 @@ async function renderPrintQrSheet(req, res) {
   const ids = parseIdList(req.body?.ids ?? req.query?.ids);
   const rawSize = Number(req.body?.qrSizeIn ?? req.query?.qrSizeIn ?? 2.5);
   const qrSizeIn = rawSize >= 2.5 ? 2.5 : 2;
+  const outputFormat = String(req.body?.format ?? req.query?.format ?? 'html').toLowerCase() === 'pdf'
+    ? 'pdf'
+    : 'html';
 
   if (!ids.length) {
     req.flash('error', 'Selecciona al menos un empleado para imprimir QR');
@@ -227,11 +380,14 @@ async function renderPrintQrSheet(req, res) {
           timeout: 60_000,
         });
 
+        const qrRawBuffer = Buffer.from(qrBuffer);
+
         printable.push({
           id: emp.id,
           nombre: `${emp.nombre || ''} ${emp.apellidos || ''}`.trim() || `Empleado ${emp.id}`,
           area: emp?.vita?.area || null,
-          qrDataUrl: `data:image/png;base64,${Buffer.from(qrBuffer).toString('base64')}`,
+          qrDataUrl: `data:image/png;base64,${qrRawBuffer.toString('base64')}`,
+          qrBuffer: qrRawBuffer,
         });
       } catch (err) {
         fallidos.push({
@@ -245,6 +401,18 @@ async function renderPrintQrSheet(req, res) {
     if (!printable.length) {
       req.flash('error', 'No se pudo preparar ninguna etiqueta QR para impresión');
       return res.redirect('/admin/empleados');
+    }
+
+    if (outputFormat === 'pdf') {
+      try {
+        return streamQrSheetPdf(res, printable, qrSizeIn);
+      } catch (pdfErr) {
+        if (pdfErr?.message === 'PDF_EXPORT_DEPENDENCY_MISSING') {
+          req.flash('error', 'Exportación PDF no disponible en este entorno. Usa el botón Imprimir y guarda como PDF.');
+          return res.redirect('/admin/empleados');
+        }
+        throw pdfErr;
+      }
     }
 
     const pages = chunkItems(printable, 6);
@@ -261,6 +429,7 @@ async function renderPrintQrSheet(req, res) {
       total: printable.length,
       requested: ids.length,
       fallidos,
+      selectedIds: selected.map((emp) => emp.id).join(','),
       qrSizeIn,
       colGapIn,
       rowGapIn,

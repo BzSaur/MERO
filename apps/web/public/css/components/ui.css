@@ -2019,6 +2019,28 @@ USUARIOS
 
 .btn--print-sheet .icon{ width:16px; height:16px; }
 
+.btn--pdf-sheet{
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  background: rgba(34,197,94,.16);
+  border: 1px solid rgba(34,197,94,.30);
+  color: #dcfce7;
+  border-radius: 999px;
+  padding: .55rem 1.15rem;
+  font-weight: 800;
+  font-size: .88rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.btn--pdf-sheet:hover{
+  background: rgba(34,197,94,.24);
+  border-color: rgba(34,197,94,.46);
+}
+
+.btn--pdf-sheet .icon{ width:16px; height:16px; }
+
 /* ── Modal ── */
 .emp-modal-backdrop{
   position: fixed;
@@ -2236,6 +2258,11 @@ USUARIOS
   }
 
   .btn--print-sheet{
+    flex: 1;
+    justify-content: center;
+  }
+
+  .btn--pdf-sheet{
     flex: 1;
     justify-content: center;
   }

@@ -56,6 +56,7 @@
   const actionBarInfo   = document.getElementById('actionBarInfo');
   const sendQrBtn       = document.getElementById('sendQrBtn');
   const printQrSheetBtn = document.getElementById('printQrSheetBtn');
+  const downloadQrPdfBtn = document.getElementById('downloadQrPdfBtn');
   const headerSummary   = document.getElementById('headerSummary');
   const searchInput     = document.getElementById('empSearch');
   const searchClear     = document.getElementById('searchClear');
@@ -435,7 +436,7 @@
     viewResults.hidden  = v !== 'results';
   }
 
-  function openPrintSheet(ids) {
+  function openPrintSheet(ids, format = 'html') {
     const qrSizeIn = '2.5';
 
     const form = document.createElement('form');
@@ -456,6 +457,12 @@
     sizeInput.value = qrSizeIn;
     form.appendChild(sizeInput);
 
+    const formatInput = document.createElement('input');
+    formatInput.type = 'hidden';
+    formatInput.name = 'format';
+    formatInput.value = format === 'pdf' ? 'pdf' : 'html';
+    form.appendChild(formatInput);
+
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
@@ -466,7 +473,14 @@
     printQrSheetBtn.addEventListener('click', () => {
       const ids = [...selected];
       if (!ids.length) return;
-      openPrintSheet(ids);
+      openPrintSheet(ids, 'html');
+    });
+  }
+  if (downloadQrPdfBtn) {
+    downloadQrPdfBtn.addEventListener('click', () => {
+      const ids = [...selected];
+      if (!ids.length) return;
+      openPrintSheet(ids, 'pdf');
     });
   }
 

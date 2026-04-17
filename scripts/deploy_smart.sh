@@ -9,6 +9,7 @@ set -eu
 COMPOSE_FILE="infra/docker/docker-compose.yml"
 TARGET_REMOTE="${MERO_DEPLOY_REMOTE:-origin}"
 TARGET_BRANCH="${MERO_DEPLOY_BRANCH:-main}"
+QR_HOST_DIR="apps/api/QR"
 
 info() {
   echo ">> $*"
@@ -24,6 +25,9 @@ info "Haciendo git pull ${TARGET_REMOTE} ${TARGET_BRANCH}..."
 git pull "$TARGET_REMOTE" "$TARGET_BRANCH"
 
 AFTER_SHA="$(git rev-parse HEAD)"
+
+info "Asegurando carpeta local de QR (${QR_HOST_DIR})..."
+mkdir -p "$QR_HOST_DIR"
 
 if [ "$BEFORE_SHA" = "$AFTER_SHA" ]; then
   info "Sin commits nuevos. Verificando que el stack este arriba..."

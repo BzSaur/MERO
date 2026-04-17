@@ -35,7 +35,7 @@ services:
     ports:
       - '${API_PORT:-3002}:3000'
     volumes:
-      - qr_files:/app/apps/api/QR
+      - ../../apps/api/QR:/app/apps/api/QR
     networks:
       - default
       - vita_network
@@ -91,4 +91,3 @@ networks:
 volumes:
   pgdata:
   backups:
-  qr_files:
