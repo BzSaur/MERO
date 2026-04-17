@@ -83,7 +83,6 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
   }
 
   const pages = chunkItems(printable, 6);
-  const generatedAt = new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
   const filename = buildQrSheetPdfFilename(printable, qrSizeIn);
 
   const doc = new PDFDocument({
@@ -110,11 +109,9 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
   const labelWidth = qrSizePt + 28;
 
   const pageWidth = doc.page.width;
-  const pageHeight = doc.page.height;
   const marginLeft = doc.page.margins.left;
   const marginRight = doc.page.margins.right;
   const marginTop = doc.page.margins.top;
-  const marginBottom = doc.page.margins.bottom;
 
   const contentWidth = pageWidth - marginLeft - marginRight;
   const gridWidth = qrSizePt * 2 + colGapPt;
@@ -123,17 +120,6 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
 
   pages.forEach((pageItems, pageIndex) => {
     if (pageIndex > 0) doc.addPage();
-
-    doc
-      .fillColor('#334155')
-      .font('Helvetica')
-      .fontSize(9)
-      .text(
-        `Hoja ${pageIndex + 1} de ${pages.length}  •  QR ${Number(qrSizeIn || 2).toFixed(1)}in`,
-        marginLeft,
-        marginTop - 14,
-        { width: contentWidth, align: 'right' },
-      );
 
     for (let slotIndex = 0; slotIndex < 6; slotIndex++) {
       const item = pageItems[slotIndex];
@@ -166,9 +152,11 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
         .fillColor('#0f172a')
         .font('Helvetica-Bold')
         .fontSize(qrSizeIn === 2.5 ? 11 : 10.5)
-        .text(truncateLabel(item.nombre, qrSizeIn === 2.5 ? 42 : 48), x - 14, y + qrSizePt + 8, {
+        .text(truncateLabel(item.nombre, qrSizeIn === 2.5 ? 40 : 30), x - 14, y + qrSizePt + 8, {
           width: labelWidth,
           align: 'center',
+          lineBreak: false,
+          ellipsis: true,
         });
 
       if (item.area) {
@@ -179,25 +167,11 @@ function streamQrSheetPdf(res, printable, qrSizeIn) {
           .text(truncateLabel(item.area, 38), x - 14, y + qrSizePt + 23, {
             width: labelWidth,
             align: 'center',
+            lineBreak: false,
+            ellipsis: true,
           });
       }
     }
-
-    const footerY = pageHeight - marginBottom + 8;
-
-    doc
-      .fillColor('#64748b')
-      .font('Helvetica')
-      .fontSize(9)
-      .text(`Generado ${generatedAt}`, marginLeft, footerY, {
-        width: contentWidth,
-        align: 'left',
-      });
-
-    doc.text(`Hoja ${pageIndex + 1} de ${pages.length}`, marginLeft, footerY, {
-      width: contentWidth,
-      align: 'right',
-    });
   });
 
   doc.end();
