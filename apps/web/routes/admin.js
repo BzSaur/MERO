@@ -195,6 +195,8 @@ router.get('/empleados/:id/qr-descargar', async (req, res) => {
 
 async function renderPrintQrSheet(req, res) {
   const ids = parseIdList(req.body?.ids ?? req.query?.ids);
+  const rawSize = Number(req.body?.qrSizeIn ?? req.query?.qrSizeIn ?? 2.5);
+  const qrSizeIn = rawSize >= 2.5 ? 2.5 : 2;
 
   if (!ids.length) {
     req.flash('error', 'Selecciona al menos un empleado para imprimir QR');
@@ -246,6 +248,12 @@ async function renderPrintQrSheet(req, res) {
     }
 
     const pages = chunkItems(printable, 6);
+    const colGapIn = qrSizeIn === 2.5 ? 0.42 : 0.62;
+    const rowGapIn = qrSizeIn === 2.5 ? 0.1 : 0.22;
+    const slotMinHeightIn = qrSizeIn === 2.5 ? 3.05 : 2.5;
+    const nameMaxWidthIn = qrSizeIn === 2.5 ? 3.2 : 2.85;
+    const nameFontPx = qrSizeIn === 2.5 ? 13 : 12;
+    const areaFontPx = qrSizeIn === 2.5 ? 11 : 10;
 
     return res.render('admin/empleados/print-sheet', {
       title: 'Imprimir QR',
@@ -253,6 +261,13 @@ async function renderPrintQrSheet(req, res) {
       total: printable.length,
       requested: ids.length,
       fallidos,
+      qrSizeIn,
+      colGapIn,
+      rowGapIn,
+      slotMinHeightIn,
+      nameMaxWidthIn,
+      nameFontPx,
+      areaFontPx,
       generatedAt: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),
     });
   } catch (err) {

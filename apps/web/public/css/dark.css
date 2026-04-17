@@ -1523,6 +1523,18 @@ html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__puesto{
   color: var(--dm-ink-soft) !important;
 }
 
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__actions .btn--ghost{
+  background: rgba(148,163,184,.16) !important;
+  border-color: rgba(148,163,184,.34) !important;
+  color: rgba(241,245,249,.96) !important;
+}
+
+html[data-theme="dark"] .page--empleados-agenda .agenda-employee-row__actions .btn--ghost:hover{
+  background: rgba(59,130,246,.22) !important;
+  border-color: rgba(59,130,246,.45) !important;
+  color: #dbeafe !important;
+}
+
 html[data-theme="dark"] .page--empleados-agenda .badge--muted{
   background: rgba(148,163,184,.16) !important;
   color: rgba(226,232,240,.88) !important;
@@ -1551,6 +1563,18 @@ html[data-theme="dark"] .emp-action-bar{
 
 html[data-theme="dark"] .emp-action-bar__info{
   color: rgba(226,232,240,.86) !important;
+}
+
+html[data-theme="dark"] .emp-action-bar .btn--print-sheet{
+  background: #f8fafc !important;
+  border-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="dark"] .emp-action-bar .btn--print-sheet:hover{
+  background: #e2e8f0 !important;
+  border-color: #e2e8f0 !important;
+  color: #0b1325 !important;
 }
 
 html[data-theme="dark"] .emp-modal-backdrop{

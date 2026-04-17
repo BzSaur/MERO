@@ -8,9 +8,13 @@
     :root {
       --page-width: 8.5in;
       --page-padding: 0.5in;
-      --qr-size: 1in;
-      --col-gap: 0.85in;
-      --row-gap: 0.55in;
+      --qr-size: <%= Number(qrSizeIn || 2.5).toFixed(2) %>in;
+      --col-gap: <%= Number(colGapIn || 0.42).toFixed(2) %>in;
+      --row-gap: <%= Number(rowGapIn || 0.1).toFixed(2) %>in;
+      --slot-min-height: <%= Number(slotMinHeightIn || 3.05).toFixed(2) %>in;
+      --name-max-width: <%= Number(nameMaxWidthIn || 3.2).toFixed(2) %>in;
+      --name-font-size: <%= Number(nameFontPx || 13) %>px;
+      --area-font-size: <%= Number(areaFontPx || 11) %>px;
     }
 
     * {
@@ -98,7 +102,7 @@
     }
 
     .qr-slot {
-      min-height: 2.35in;
+      min-height: var(--slot-min-height);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -123,8 +127,8 @@
 
     .qr-name {
       margin-top: 0.16in;
-      max-width: 2.65in;
-      font-size: 12px;
+      max-width: var(--name-max-width);
+      font-size: var(--name-font-size);
       line-height: 1.25;
       font-weight: 700;
       word-break: break-word;
@@ -132,8 +136,8 @@
 
     .qr-area {
       margin-top: 4px;
-      max-width: 2.65in;
-      font-size: 10px;
+      max-width: var(--name-max-width);
+      font-size: var(--area-font-size);
       line-height: 1.2;
       color: #475569;
       word-break: break-word;
@@ -203,6 +207,7 @@
     <div class="print-toolbar__meta">
       <span><strong><%= total %></strong> QR listos para imprimir</span>
       <span>Solicitados: <strong><%= requested %></strong></span>
+      <span>Tamano QR: <strong><%= Number(qrSizeIn || 2.5).toFixed(1) %> in</strong></span>
       <span>Hojas: <strong><%= pages.length %></strong> (maximo 6 por hoja)</span>
       <span>Generado: <strong><%= generatedAt %></strong></span>
     </div>

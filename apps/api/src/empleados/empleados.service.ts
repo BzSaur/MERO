@@ -478,19 +478,42 @@ export class EmpleadosService {
 
   /* ────── Helpers privados ────── */
 
+  private resolveLogoPath(): string | null {
+    const envLogo = process.env.QR_LOGO_PATH?.trim();
+    const candidates = [
+      envLogo
+        ? path.isAbsolute(envLogo)
+          ? envLogo
+          : path.resolve(process.cwd(), envLogo)
+        : null,
+      path.resolve(process.cwd(), 'apps', 'api', 'assets', 'logo.png'),
+      path.resolve(process.cwd(), 'assets', 'logo.png'),
+      path.resolve(__dirname, '..', '..', 'assets', 'logo.png'),
+    ].filter((candidate): candidate is string => !!candidate);
+
+    for (const candidate of candidates) {
+      try {
+        if (fs.existsSync(candidate)) return candidate;
+      } catch {
+        // Ignorado: se prueba con el siguiente candidato.
+      }
+    }
+
+    return null;
+  }
+
   /**
    * Construye el buffer PNG del QR con watermark de logo.
    * El contenido codificado es el uuidQr del empleado.
    */
   private async buildQrBuffer(uuidQr: string): Promise<Buffer> {
-    const SIZE = 600;
+    const SIZE = 900;
+    const OUTPUT_SIZE = 900;
     const MARGIN = 3;
     const LOGO_RATIO = 0.18;
     const PAD_RATIO = 1.25;
     const DARK = '#000000';
     const LIGHT = '#FFFFFF';
-
-    const logoPath = path.join(process.cwd(), 'apps/api/assets/logo.png');
 
     const qrPng = await QRCode.toBuffer(uuidQr, {
       type: 'png',
@@ -500,36 +523,56 @@ export class EmpleadosService {
       color: { dark: DARK, light: LIGHT },
     });
 
-    const meta = await sharp(qrPng).metadata();
-    const w = meta.width ?? SIZE;
-    const h = meta.height ?? SIZE;
-    const qrSize = Math.min(w, h);
-
-    const logoSize = Math.round(qrSize * LOGO_RATIO);
-    const padSize = Math.round(logoSize * PAD_RATIO);
-
-    const logo = await sharp(logoPath)
-      .resize(logoSize, logoSize, { fit: 'contain' })
+    const baseQr = await sharp(qrPng)
+      .resize(OUTPUT_SIZE, OUTPUT_SIZE)
       .png()
       .toBuffer();
 
-    const whitePad = await sharp({
-      create: {
-        width: padSize,
-        height: padSize,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 1 },
-      },
-    })
-      .composite([{ input: logo, gravity: 'center' }])
-      .png()
-      .toBuffer();
+    const logoPath = this.resolveLogoPath();
+    if (!logoPath) {
+      this.logger.warn(
+        'No se encontró logo para watermark QR; se usará QR limpio',
+      );
+      return baseQr;
+    }
 
-    const composed = await sharp(qrPng)
-      .composite([{ input: whitePad, gravity: 'center' }])
-      .png()
-      .toBuffer();
+    try {
+      const meta = await sharp(qrPng).metadata();
+      const w = meta.width ?? SIZE;
+      const h = meta.height ?? SIZE;
+      const qrSize = Math.min(w, h);
 
-    return sharp(composed).resize(300, 300).png().toBuffer();
+      const logoSize = Math.round(qrSize * LOGO_RATIO);
+      const padSize = Math.round(logoSize * PAD_RATIO);
+
+      const logo = await sharp(logoPath)
+        .resize(logoSize, logoSize, { fit: 'contain' })
+        .png()
+        .toBuffer();
+
+      const whitePad = await sharp({
+        create: {
+          width: padSize,
+          height: padSize,
+          channels: 4,
+          background: { r: 255, g: 255, b: 255, alpha: 1 },
+        },
+      })
+        .composite([{ input: logo, gravity: 'center' }])
+        .png()
+        .toBuffer();
+
+      const composed = await sharp(qrPng)
+        .composite([{ input: whitePad, gravity: 'center' }])
+        .png()
+        .toBuffer();
+
+      return sharp(composed).resize(OUTPUT_SIZE, OUTPUT_SIZE).png().toBuffer();
+    } catch (error: any) {
+      this.logger.warn(
+        `Fallo al aplicar watermark de logo; se usará QR limpio (${error?.message || 'sin detalle'})`,
+      );
+      return baseQr;
+    }
   }
 }

@@ -436,6 +436,8 @@
   }
 
   function openPrintSheet(ids) {
+    const qrSizeIn = '2.5';
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/admin/empleados/imprimir-qr-hoja';
@@ -447,6 +449,12 @@
     idsInput.name = 'ids';
     idsInput.value = ids.join(',');
     form.appendChild(idsInput);
+
+    const sizeInput = document.createElement('input');
+    sizeInput.type = 'hidden';
+    sizeInput.name = 'qrSizeIn';
+    sizeInput.value = qrSizeIn;
+    form.appendChild(sizeInput);
 
     document.body.appendChild(form);
     form.submit();
