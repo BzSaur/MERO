@@ -30,6 +30,96 @@
     }) || null;
   }
 
+  const rolSelect = form.querySelector('#rol');
+  const areaSelect = form.querySelector('#areaId');
+  const roleScopedBlocks = document.querySelectorAll('[data-role-only]');
+  const actividadesSection = document.querySelector('.js-actividades');
+  const cambiosInput = document.getElementById('cambiosSubtareas');
+  const currentAreaId = actividadesSection
+    ? Number(actividadesSection.querySelector('[data-current-area]')?.dataset.currentArea) || null
+    : null;
+
+  function applyRoleVisibility() {
+    const rol = rolSelect ? rolSelect.value : '';
+    roleScopedBlocks.forEach((el) => {
+      const allowed = (el.dataset.roleOnly || '').split(',').map((v) => v.trim()).filter(Boolean);
+      const visible = allowed.includes(rol);
+      el.hidden = !visible;
+
+      el.querySelectorAll('input, select, textarea').forEach((field) => {
+        if (!visible) {
+          field.dataset.prevRequired = field.required ? '1' : '';
+          field.required = false;
+          field.disabled = false;
+        }
+      });
+    });
+
+    if (areaSelect) {
+      areaSelect.required = rol === 'ENCARGADO';
+    }
+  }
+
+  function recalcCambios() {
+    if (!cambiosInput || !actividadesSection) return;
+
+    if (actividadesSection.hidden) {
+      cambiosInput.value = '';
+      return;
+    }
+
+    const cambios = [];
+    const checks = actividadesSection.querySelectorAll('.js-actividad-check');
+
+    checks.forEach((chk) => {
+      const subtareaId = Number(chk.dataset.subtareaId);
+      const originalArea = Number(chk.dataset.originalArea);
+      const item = chk.closest('.js-actividad');
+      const moveBox = item ? item.querySelector('.user-form__actividad-move') : null;
+      const destSelect = moveBox ? moveBox.querySelector('.js-actividad-destino') : null;
+
+      if (originalArea === currentAreaId) {
+        if (!chk.checked) {
+          if (moveBox) moveBox.hidden = false;
+          if (destSelect) destSelect.required = true;
+          const destino = destSelect ? Number(destSelect.value) : NaN;
+          if (Number.isInteger(destino) && destino > 0) {
+            cambios.push({ subtareaId, nuevaAreaId: destino });
+          }
+        } else {
+          if (moveBox) moveBox.hidden = true;
+          if (destSelect) {
+            destSelect.required = false;
+            destSelect.value = '';
+          }
+        }
+      } else {
+        if (chk.checked && currentAreaId) {
+          cambios.push({ subtareaId, nuevaAreaId: currentAreaId });
+        }
+      }
+    });
+
+    cambiosInput.value = cambios.length ? JSON.stringify(cambios) : '';
+  }
+
+  if (rolSelect) {
+    rolSelect.addEventListener('change', () => {
+      applyRoleVisibility();
+      recalcCambios();
+    });
+    applyRoleVisibility();
+  }
+
+  if (actividadesSection) {
+    actividadesSection.addEventListener('change', (ev) => {
+      if (ev.target.matches('.js-actividad-check, .js-actividad-destino')) {
+        recalcCambios();
+      }
+    });
+    recalcCambios();
+  }
+
   function messageForField(field) {
     const key = field.name || field.id || '';
 
@@ -139,6 +229,23 @@
 
   form.noValidate = true;
 
+  function parseCambios() {
+    if (!cambiosInput || !cambiosInput.value) return [];
+    try { return JSON.parse(cambiosInput.value); } catch { return []; }
+  }
+
+  function buildCambiosHtml(cambios) {
+    if (!cambios.length) return '';
+    const items = cambios.map((c) => {
+      const li = document.querySelector(`.js-actividad[data-subtarea-id="${c.subtareaId}"]`);
+      const nombre = li ? li.querySelector('span')?.textContent?.trim() || `Subtarea #${c.subtareaId}` : `Subtarea #${c.subtareaId}`;
+      const areaEl = document.querySelector(`#areaId option[value="${c.nuevaAreaId}"]`);
+      const destino = areaEl ? areaEl.textContent.trim() : `Área #${c.nuevaAreaId}`;
+      return `<li><strong>${nombre}</strong> → ${destino}</li>`;
+    });
+    return `<ul style="text-align:left;margin:.5rem 0 0;padding-left:1.2rem;font-size:.92rem">${items.join('')}</ul>`;
+  }
+
   form.addEventListener('submit', async (e) => {
     if (form.dataset.submitting === '1') return;
 
@@ -150,7 +257,43 @@
       return;
     }
 
+    // Validar que subtareas desmarcadas tengan destino seleccionado
+    if (actividadesSection && !actividadesSection.hidden) {
+      const sinDestino = [...actividadesSection.querySelectorAll('.js-actividad-check')].find((chk) => {
+        if (Number(chk.dataset.originalArea) !== currentAreaId) return false;
+        if (chk.checked) return false;
+        const dest = chk.closest('.js-actividad')?.querySelector('.js-actividad-destino');
+        return dest && !dest.value;
+      });
+
+      if (sinDestino) {
+        const nombre = sinDestino.closest('.js-actividad')?.querySelector('span')?.textContent?.trim() || 'una subtarea';
+        await fire({
+          icon: 'warning',
+          title: 'Falta destino',
+          text: `Selecciona a qué área mover "${nombre}" antes de guardar.`,
+          confirmButtonText: 'Entendido',
+          showCancelButton: false,
+        });
+        return;
+      }
+    }
+
     const isEdit = !!form.action.match(/\/admin\/usuarios\/\d+$/);
+    const cambios = parseCambios();
+
+    // Si hay reasignaciones de subtareas, mostrar advertencia primero
+    if (cambios.length) {
+      const advertencia = await fire({
+        icon: 'warning',
+        title: `¿Reasignar ${cambios.length} subtarea${cambios.length > 1 ? 's' : ''}?`,
+        html: `Esta acción moverá las siguientes subtareas a otra área y quedará registrada en auditoría:${buildCambiosHtml(cambios)}`,
+        showCancelButton: true,
+        confirmButtonText: 'Sí, reasignar',
+        cancelButtonText: 'Cancelar',
+      });
+      if (!advertencia.isConfirmed) return;
+    }
 
     const result = await fire({
       icon: 'question',

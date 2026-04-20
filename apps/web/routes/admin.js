@@ -299,13 +299,28 @@ router.get('/usuarios', async (req, res, next) => {
   }
 });
 
-router.get('/usuarios/nuevo', (req, res) => {
-  res.render('admin/usuarios/form', { title: 'Nuevo usuario', usuario: null });
+router.get('/usuarios/nuevo', async (req, res, next) => {
+  try {
+    const { data: areas } = await api(req.session.user.token).get('/catalogos/areas');
+    res.render('admin/usuarios/form', {
+      title: 'Nuevo usuario',
+      usuario: null,
+      areas,
+      subtareas: [],
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/usuarios', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/usuarios', req.body);
+    const { nombre, email, password, rol } = req.body;
+    const payload = { nombre, email, password, rol };
+    if (rol === 'ENCARGADO' && req.body.areaId) {
+      payload.areaId = Number(req.body.areaId);
+    }
+    await api(req.session.user.token).post('/usuarios', payload);
     req.flash('success', 'Usuario creado');
     res.redirect('/admin/usuarios');
   } catch (err) {
@@ -316,8 +331,19 @@ router.post('/usuarios', async (req, res) => {
 
 router.get('/usuarios/:id/editar', async (req, res, next) => {
   try {
-    const { data: usuario } = await api(req.session.user.token).get(`/usuarios/${req.params.id}`);
-    res.render('admin/usuarios/form', { title: 'Editar usuario', usuario });
+    const client = api(req.session.user.token);
+    const [usuarioRes, areasRes, subtareasRes] = await Promise.all([
+      client.get(`/usuarios/${req.params.id}`),
+      client.get('/catalogos/areas'),
+      client.get('/catalogos/subtareas'),
+    ]);
+
+    res.render('admin/usuarios/form', {
+      title: 'Editar usuario',
+      usuario: usuarioRes.data,
+      areas: areasRes.data,
+      subtareas: subtareasRes.data,
+    });
   } catch (err) {
     next(err);
   }
@@ -325,8 +351,49 @@ router.get('/usuarios/:id/editar', async (req, res, next) => {
 
 router.post('/usuarios/:id', async (req, res) => {
   try {
-    await api(req.session.user.token).patch(`/usuarios/${req.params.id}`, req.body);
-    req.flash('success', 'Usuario actualizado');
+    const client = api(req.session.user.token);
+
+    const { nombre, email, password, rol, cambiosSubtareas } = req.body;
+    const payload = {};
+    if (nombre) payload.nombre = nombre;
+    if (email) payload.email = email;
+    if (password) payload.password = password;
+    if (rol) payload.rol = rol;
+    if (rol === 'ENCARGADO') {
+      payload.areaId = req.body.areaId ? Number(req.body.areaId) : null;
+    } else if (rol) {
+      payload.areaId = null;
+    }
+
+    await client.patch(`/usuarios/${req.params.id}`, payload);
+
+    let movidas = 0;
+    if (cambiosSubtareas) {
+      let cambios = [];
+      try {
+        cambios = JSON.parse(cambiosSubtareas);
+      } catch {
+        cambios = [];
+      }
+
+      for (const c of cambios) {
+        const id = Number(c.subtareaId);
+        const nuevaAreaId = Number(c.nuevaAreaId);
+        if (!Number.isInteger(id) || !Number.isInteger(nuevaAreaId)) continue;
+
+        try {
+          await client.patch(`/catalogos/subtareas/${id}`, { areaId: nuevaAreaId });
+          movidas++;
+        } catch (patchErr) {
+          // si falla una subtarea seguimos con las demás; el admin ve el aviso después
+        }
+      }
+    }
+
+    const msg = movidas
+      ? `Usuario actualizado (${movidas} subtarea${movidas === 1 ? '' : 's'} reasignada${movidas === 1 ? '' : 's'})`
+      : 'Usuario actualizado';
+    req.flash('success', msg);
     res.redirect('/admin/usuarios');
   } catch (err) {
     req.flash('error', getErrorMessage(err, 'Error al actualizar'));

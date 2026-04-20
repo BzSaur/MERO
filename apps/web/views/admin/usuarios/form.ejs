@@ -130,7 +130,127 @@
                         <% }) %>
                       </select>
                     </div>
+
+                    <div class="form-group js-area-group" data-role-only="ENCARGADO" <%= usuario?.rol === 'ENCARGADO' ? '' : 'hidden' %>>
+                      <label class="form-label" for="areaId">Área asignada</label>
+                      <select class="form-control" id="areaId" name="areaId">
+                        <option value="">— Selecciona un área —</option>
+                        <% (typeof areas !== 'undefined' ? areas : []).forEach(a => { %>
+                          <option value="<%= a.id %>" <%= usuario?.areaId === a.id ? 'selected' : '' %>>
+                            <%= a.nombre %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
                   </div>
+
+                  <% if (usuario && typeof subtareas !== 'undefined' && subtareas.length) { %>
+                    <section
+                      class="user-form__actividades js-actividades"
+                      data-role-only="ENCARGADO"
+                      <%= usuario.rol === 'ENCARGADO' ? '' : 'hidden' %>
+                    >
+                      <header class="user-form__actividades-header">
+                        <h2 class="user-form__actividades-title">Actividades del encargado</h2>
+                        <p class="user-form__actividades-subtitle">
+                          Marca o desmarca subtareas para reasignarlas. Al desmarcar una subtarea del área actual,
+                          elige a qué otra área moverla.
+                        </p>
+                      </header>
+
+                      <% const areasList = (typeof areas !== 'undefined' ? areas : []); %>
+                      <% const areasById = {}; areasList.forEach(a => { areasById[a.id] = a; }); %>
+                      <%
+                        const groups = {};
+                        subtareas.forEach(st => {
+                          const k = st.areaId;
+                          if (!groups[k]) groups[k] = [];
+                          groups[k].push(st);
+                        });
+                        const currentAreaId = usuario.areaId || null;
+                      %>
+
+                      <div class="user-form__actividades-current" data-current-area="<%= currentAreaId || '' %>">
+                        <h3 class="user-form__actividades-group-title">
+                          Subtareas del área actual
+                          <% if (currentAreaId && areasById[currentAreaId]) { %>
+                            — <%= areasById[currentAreaId].nombre %>
+                          <% } %>
+                        </h3>
+
+                        <% if (currentAreaId && groups[currentAreaId] && groups[currentAreaId].length) { %>
+                          <ul class="user-form__actividades-list">
+                            <% groups[currentAreaId].forEach(st => { %>
+                              <li class="user-form__actividad js-actividad" data-subtarea-id="<%= st.id %>" data-original-area="<%= st.areaId %>">
+                                <label class="user-form__actividad-label">
+                                  <input
+                                    type="checkbox"
+                                    class="js-actividad-check"
+                                    data-subtarea-id="<%= st.id %>"
+                                    data-original-area="<%= st.areaId %>"
+                                    checked
+                                  >
+                                  <span><%= st.nombre %></span>
+                                </label>
+
+                                <div class="user-form__actividad-move" hidden>
+                                  <label>
+                                    Mover a:
+                                    <select class="form-control form-control--sm js-actividad-destino">
+                                      <option value="">— elige área —</option>
+                                      <% areasList.forEach(a => { %>
+                                        <% if (a.id !== currentAreaId) { %>
+                                          <option value="<%= a.id %>"><%= a.nombre %></option>
+                                        <% } %>
+                                      <% }) %>
+                                    </select>
+                                  </label>
+                                </div>
+                              </li>
+                            <% }) %>
+                          </ul>
+                        <% } else { %>
+                          <p class="user-form__actividades-empty">
+                            Esta área aún no tiene subtareas asignadas. Puedes jalar subtareas desde abajo o crearlas en
+                            <a href="/admin/catalogos/subtareas">Catálogo de Subtareas</a>.
+                          </p>
+                        <% } %>
+                      </div>
+
+                      <details class="user-form__actividades-others">
+                        <summary>Ver subtareas de otras áreas para agregar al encargado</summary>
+
+                        <% Object.keys(groups).forEach(k => {
+                             const aid = Number(k);
+                             if (currentAreaId && aid === currentAreaId) return;
+                             const area = areasById[aid];
+                             if (!area) return;
+                        %>
+                          <div class="user-form__actividades-group">
+                            <h4 class="user-form__actividades-group-title"><%= area.nombre %></h4>
+                            <ul class="user-form__actividades-list">
+                              <% groups[k].forEach(st => { %>
+                                <li class="user-form__actividad js-actividad" data-subtarea-id="<%= st.id %>" data-original-area="<%= st.areaId %>">
+                                  <label class="user-form__actividad-label">
+                                    <input
+                                      type="checkbox"
+                                      class="js-actividad-check"
+                                      data-subtarea-id="<%= st.id %>"
+                                      data-original-area="<%= st.areaId %>"
+                                    >
+                                    <span><%= st.nombre %></span>
+                                    <small class="user-form__actividad-hint">(actualmente en: <%= area.nombre %>)</small>
+                                  </label>
+                                </li>
+                              <% }) %>
+                            </ul>
+                          </div>
+                        <% }) %>
+                      </details>
+                    </section>
+                  <% } %>
+
+                  <input type="hidden" name="cambiosSubtareas" id="cambiosSubtareas" form="userForm" value="">
                 </form>
 
                 <% if (usuario) { %>

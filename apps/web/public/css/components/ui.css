@@ -556,6 +556,117 @@ USUARIOS
   box-shadow: 0 0 0 4px rgba(29,78,216,.10);
 }
 
+.user-form__actividades{
+  margin: 16px 20px 4px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(248,250,252,.7);
+}
+
+.user-form__actividades[hidden]{ display: none; }
+
+.user-form__actividades-header{ margin-bottom: 12px; }
+
+.user-form__actividades-title{
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: rgba(15,23,42,.9);
+}
+
+.user-form__actividades-subtitle{
+  margin: 0;
+  font-size: .88rem;
+  color: rgba(15,23,42,.62);
+}
+
+.user-form__actividades-group-title{
+  margin: 8px 0 6px;
+  font-size: .92rem;
+  font-weight: 700;
+  color: rgba(15,23,42,.78);
+}
+
+.user-form__actividades-list{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 12px;
+}
+
+.user-form__actividad{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(15,23,42,.08);
+}
+
+.user-form__actividad-label{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: .92rem;
+  color: rgba(15,23,42,.88);
+}
+
+.user-form__actividad-label input[type="checkbox"]{
+  width: 16px;
+  height: 16px;
+  accent-color: #1d4ed8;
+}
+
+.user-form__actividad-hint{
+  margin-left: 4px;
+  font-size: .78rem;
+  color: rgba(15,23,42,.5);
+}
+
+.user-form__actividad-move{
+  margin-left: 24px;
+  font-size: .85rem;
+  color: rgba(15,23,42,.7);
+}
+
+.user-form__actividad-move select{
+  margin-top: 4px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.user-form__actividades-empty{
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px dashed rgba(15,23,42,.12);
+  font-size: .9rem;
+  color: rgba(15,23,42,.65);
+}
+
+.user-form__actividades-others{
+  margin-top: 14px;
+  border-top: 1px dashed rgba(15,23,42,.12);
+  padding-top: 10px;
+}
+
+.user-form__actividades-others > summary{
+  cursor: pointer;
+  font-weight: 700;
+  color: rgba(15,23,42,.8);
+  font-size: .92rem;
+  padding: 4px 0;
+}
+
+.user-form__actividades-group{ margin-top: 8px; }
+
 .user-form__actions{
   display: flex;
   align-items: center;

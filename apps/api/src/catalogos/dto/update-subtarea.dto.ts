@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class UpdateSubtareaDto {
   @IsOptional()
@@ -8,6 +8,10 @@ export class UpdateSubtareaDto {
   @IsOptional()
   @IsString()
   descripcion?: string;
+
+  @IsOptional()
+  @IsInt()
+  areaId?: number;
 
   @IsOptional()
   @IsBoolean()
