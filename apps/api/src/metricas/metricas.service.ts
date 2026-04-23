@@ -43,12 +43,15 @@ export class MetricasService {
     const metricas = [];
 
     for (const asignacion of asignaciones) {
+      // Excluir indirectas de métricas productivas
+      if (asignacion.tipo === 'INDIRECTA') continue;
+
       // 1) estándar base (ya existe)
       let estandarBase = 0;
       try {
         const estandar = await this.estandares.findVigente(
-          asignacion.subtareaId,
-          asignacion.modeloId,
+          asignacion.subtareaId!,
+          asignacion.modeloId!,
         );
         estandarBase = estandar.piezasPorHora;
       } catch {
@@ -92,9 +95,9 @@ export class MetricasService {
         metricas.push({
           asignacionId: asignacion.id,
           empleado: asignacion.empleado.nombre,
-          area: asignacion.area.nombre,
-          subtarea: asignacion.subtarea.nombre,
-          modelo: asignacion.modelo.nombreSku,
+          area: asignacion.area?.nombre ?? '—',
+          subtarea: asignacion.subtarea?.nombre ?? '—',
+          modelo: asignacion.modelo?.nombreSku ?? '—',
           slotHora: captura.slotHora,
           cantidad: captura.cantidad,
 
@@ -175,6 +178,7 @@ export class MetricasService {
   ) {
     const asignaciones = await this.prisma.meroAsignacion.findMany({
       where: {
+        tipo: 'DIRECTA',
         fecha: { gte: new Date(desde), lte: new Date(hasta) },
         ...(areaId ? { areaId } : {}),
         ...(subtareaId ? { subtareaId } : {}),
@@ -185,11 +189,52 @@ export class MetricasService {
         area: true,
         subtarea: true,
         modelo: true,
-        capturas: true,
+        capturas: {
+          include: {
+            rechazos: true,
+          },
+          orderBy: { slotHora: 'asc' },
+        },
       },
       orderBy: { fecha: 'asc' },
     });
 
-    return asignaciones;
+    // Aplanar a nivel captura con nombres resueltos y eficiencia calculada
+    const rows: object[] = [];
+
+    for (const asignacion of asignaciones) {
+      let estandarBase = 0;
+      try {
+        const estandar = await this.estandares.findVigente(
+          asignacion.subtareaId!,
+          asignacion.modeloId!,
+        );
+        estandarBase = estandar.piezasPorHora;
+      } catch { /* sin estándar */ }
+
+      for (const captura of asignacion.capturas) {
+        const totalRechazados = captura.rechazos.reduce((s, r) => s + r.cantidad, 0);
+        const cantidadNeta = captura.cantidad - totalRechazados;
+        const eficiencia = estandarBase > 0
+          ? Math.round((cantidadNeta / estandarBase) * 100 * 100) / 100
+          : null;
+
+        rows.push({
+          fecha: asignacion.fecha.toISOString().slice(0, 10),
+          slotHora: captura.slotHora,
+          areaNombre: asignacion.area?.nombre ?? '—',
+          subtareaNombre: asignacion.subtarea?.nombre ?? '—',
+          modeloNombre: asignacion.modelo?.nombreSku ?? '—',
+          empleadoNombre: `${asignacion.empleado.nombre} ${asignacion.empleado.apellidos ?? ''}`.trim(),
+          cantidadReal: captura.cantidad,
+          cantidadRechazada: totalRechazados,
+          cantidadNeta,
+          cantidadEstandar: estandarBase || null,
+          eficiencia,
+        });
+      }
+    }
+
+    return rows;
   }
 }

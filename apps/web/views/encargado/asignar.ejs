@@ -28,6 +28,8 @@
                 Volver
               </a>
             </div>
+            <%- include('../partials/flash') %>
+
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
                 <h3><span class="card__title">Escanear QR</span></h3>
@@ -107,6 +109,52 @@
               </form>
             </div>
 
+            <% if ((actividadesIndirectas || []).length > 0) { %>
+            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+              <div class="card__header">
+                <h3><span class="card__title">Actividad indirecta</span></h3>
+                <span class="badge badge--muted">Sin estándar productivo</span>
+              </div>
+
+              <form method="POST" action="/encargado/asignar/scan-indirecta" id="formIndirecta">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+                  <div class="users-controls__left">
+
+                    <div class="form-group users-controls__field">
+                      <label class="form-label" for="uuidQrIndirecta">UUID del empleado</label>
+                      <input
+                        class="form-control mono"
+                        type="text"
+                        id="uuidQrIndirecta"
+                        name="uuidQr"
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        required
+                      >
+                    </div>
+
+                    <div class="form-group users-controls__field users-controls__field--wide">
+                      <label class="form-label" for="actividadIndirectaId">Actividad</label>
+                      <select class="form-control" id="actividadIndirectaId" name="actividadIndirectaId" required>
+                        <option value="">— Seleccionar actividad —</option>
+                        <% (actividadesIndirectas || []).forEach(a => { %>
+                          <option value="<%= a.id %>"><%= a.nombre %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="form-group users-controls__actions">
+                      <button type="submit" class="btn btn--ghost btn--indirecta">
+                        <svg class="icon"><use href="#icon-qr"/></svg>
+                        Registrar indirecta
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              </form>
+            </div>
+            <% } %>
+
             <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); place-items:center; z-index:9999;">
               <div style="background:#fff; padding:16px; border-radius:12px; width:min(640px, 92vw);">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -142,8 +190,19 @@
                     <tbody>
                       <% (asignaciones || []).forEach(a => { %>
                         <tr>
-                          <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                          <td><%= a.area?.nombre || a.areaId || '—' %></td>
+                          <td>
+                            <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
+                            <% if (a.tipo === 'INDIRECTA') { %>
+                              <span class="badge badge--muted" style="margin-left:.3rem; font-size:.72rem;">Indirecta</span>
+                            <% } %>
+                          </td>
+                          <td>
+                            <% if (a.tipo === 'INDIRECTA') { %>
+                              <%= a.actividadIndirecta?.nombre || '—' %>
+                            <% } else { %>
+                              <%= a.area?.nombre || '—' %>
+                            <% } %>
+                          </td>
                           <td class="td-mono">
                             <%
                               let desde = '—';

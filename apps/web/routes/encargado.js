@@ -74,7 +74,8 @@ function getMexicoNowParts(date = new Date()) {
 function getSlotsDelDia(isoDay) {
   if (isoDay === 7) return [];
   if (isoDay === 6) return [8, 9, 10, 11, 12, 13];
-  return [8, 9, 10, 11, 12, 13, 15, 16, 17, 18];
+  // Lunes–Viernes: turno base 8-18 + horas extra flexibles 19-20
+  return [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 }
 
 function getSlotsDisponiblesParaCaptura() {
@@ -85,12 +86,11 @@ function getSlotsDisponiblesParaCaptura() {
 
   const disponibles = [];
 
-  // Slot anterior: sigue disponible durante toda la hora siguiente
-  if (slotsDelDia.includes(hour - 1)) {
-    disponibles.push({
-      hora: hour - 1,
-      label: `${hour - 1}:00 – ${hour}:00`,
-    });
+  // Slot anterior: último slot válido antes de la hora actual
+  const slotsPrev = slotsDelDia.filter(h => h < hour);
+  if (slotsPrev.length) {
+    const prev = slotsPrev[slotsPrev.length - 1];
+    disponibles.push({ hora: prev, label: `${prev}:00 – ${prev + 1}:00` });
   }
 
   // Slot actual: si la hora actual es un slot válido, también se puede capturar
@@ -123,10 +123,26 @@ async function renderDashboard(req, res, next) {
       client.get(asignacionesUrl),
     ]);
 
+    const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+
+    // Cargar capturas (con rechazos) para mostrar indicadores en dashboard
+    const capturasMap = {};
+    await Promise.all(
+      asignaciones.map(async (a) => {
+        try {
+          const r = await client.get(`/capturas/asignacion/${a.id}`);
+          capturasMap[a.id] = Array.isArray(r.data) ? r.data : [];
+        } catch {
+          capturasMap[a.id] = [];
+        }
+      })
+    );
+
     res.render('encargado/dashboard', {
       title: 'Panel Encargado',
       metricas: metRes.data,
-      asignaciones: asnRes.data,
+      asignaciones,
+      capturasMap,
       hoy,
     });
   } catch (err) {
@@ -148,15 +164,13 @@ router.get('/captura', async (req, res, next) => {
     const client = apiClient(req.session.user.token);
     const scope = getUserAreaScope(req);
 
-    const areasPromise = client.get('/catalogos/areas');
-    const modelosPromise = client.get('/catalogos/modelos');
     const asignacionesPromise = scope.isScoped
       ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
       : client.get('/asignaciones/activas');
 
     const [areasRes, modRes, asnRes] = await Promise.all([
-      areasPromise,
-      modelosPromise,
+      client.get('/catalogos/areas'),
+      client.get('/catalogos/modelos'),
       asignacionesPromise,
     ]);
 
@@ -164,12 +178,24 @@ router.get('/captura', async (req, res, next) => {
     const modelos = Array.isArray(modRes.data) ? modRes.data : [];
     const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
 
+    // Cargar capturas existentes de cada asignación para bloquear slots ya registrados
+    const capturasMap = {};
+    await Promise.all(
+      asignaciones.map(async (a) => {
+        try {
+          const r = await client.get(`/capturas/asignacion/${a.id}`);
+          capturasMap[a.id] = Array.isArray(r.data) ? r.data : [];
+        } catch {
+          capturasMap[a.id] = [];
+        }
+      })
+    );
+
     const areaFija = scope.isScoped
       ? areas.find((a) => Number(a.id) === Number(scope.areaId)) || null
       : null;
 
-    const slotsDisponibles = getSlotsDisponiblesParaCaptura();
-
+    const { isoDay } = getMexicoNowParts();
     res.render('encargado/captura', {
       title: 'Registrar Captura',
       areas: scope.isScoped ? (areaFija ? [areaFija] : []) : areas,
@@ -177,7 +203,9 @@ router.get('/captura', async (req, res, next) => {
       asignaciones,
       areaFija,
       lockArea: scope.isScoped,
-      slotsDisponibles,
+      slotsDisponibles: getSlotsDisponiblesParaCaptura(),
+      todosSlotsDia: getSlotsDelDia(isoDay).map(h => ({ hora: h, label: `${h}:00` })),
+      capturasMap,
     });
   } catch (err) {
     next(err);
@@ -190,8 +218,14 @@ router.post('/captura', async (req, res) => {
     req.flash('success', 'Captura registrada');
     res.redirect('/encargado/captura');
   } catch (err) {
+    // 409 = slot ya capturado, mostrar mensaje específico
+    const status = err.response?.status;
     const raw = err.response?.data?.message || 'Error al registrar captura';
-    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    if (status === 409) {
+      req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    } else {
+      req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    }
     res.redirect('/encargado/captura');
   }
 });
@@ -208,17 +242,19 @@ router.get('/asignar', async (req, res, next) => {
       ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
       : client.get('/asignaciones/activas');
 
-    const [asnRes, areasRes, subRes, modRes] = await Promise.all([
+    const [asnRes, areasRes, subRes, modRes, actIndRes] = await Promise.all([
       asignacionesPromise,
       client.get('/catalogos/areas'),
       client.get('/catalogos/subtareas'),
       client.get('/catalogos/modelos'),
+      client.get('/catalogos/actividades-indirectas'),
     ]);
 
     const areas = Array.isArray(areasRes.data) ? areasRes.data : [];
     const subtareas = Array.isArray(subRes.data) ? subRes.data : [];
     const modelos = Array.isArray(modRes.data) ? modRes.data : [];
     const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+    const actividadesIndirectas = Array.isArray(actIndRes.data) ? actIndRes.data : [];
 
     let areaFija = null;
     let areasFiltradas = areas;
@@ -238,6 +274,7 @@ router.get('/asignar', async (req, res, next) => {
       areas: areasFiltradas,
       subtareas: subtareasFiltradas,
       modelos,
+      actividadesIndirectas,
       areaFija,
       lockArea: scope.isScoped,
     });
@@ -295,9 +332,39 @@ router.post('/asignar/scan', async (req, res) => {
   }
 });
 
+/* ───────────────────────────────────────────────
+ * Asignar actividad indirecta por QR
+ * ─────────────────────────────────────────────── */
+router.post('/asignar/scan-indirecta', async (req, res) => {
+  try {
+    const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    const uuidQr = (req.body.uuidQr || '').trim();
+    const actividadIndirectaId = toInt(req.body.actividadIndirectaId);
+
+    if (!uuidQr || !actividadIndirectaId) {
+      req.flash('error', 'Selecciona una actividad indirecta y escanea el QR');
+      return res.redirect('/encargado/asignar');
+    }
+
+    await client.post('/asignaciones/scan-indirecta', {
+      uuidQr,
+      actividadIndirectaId,
+      areaId: scope.areaId ?? undefined,
+    });
+
+    req.flash('success', 'Actividad indirecta registrada');
+    res.redirect('/encargado/asignar');
+  } catch (err) {
+    const raw = err.response?.data?.message || 'Error al registrar actividad indirecta';
+    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    res.redirect('/encargado/asignar');
+  }
+});
+
 /**
  * Finalizar asignación (activa=false, horaFin=ahora)
- * Requiere que exista PATCH /api/asignaciones/:id/finalizar en el API.
  */
 router.post('/asignar/:id/finalizar', async (req, res) => {
   try {
@@ -319,6 +386,63 @@ router.post('/asignar/:id/finalizar', async (req, res) => {
     req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
   }
   res.redirect('/encargado/asignar');
+});
+
+/* ───────────────────────────────────────────────
+ * Registrar rechazo contra una captura existente
+ * ─────────────────────────────────────────────── */
+router.post('/rechazos', async (req, res) => {
+  try {
+    const capturaId = toInt(req.body.capturaId);
+    const cantidad = toInt(req.body.cantidad);
+    const motivo = (req.body.motivo || '').trim() || undefined;
+
+    if (!capturaId || !cantidad) {
+      req.flash('error', 'Datos incompletos para registrar rechazo');
+      return res.redirect('/encargado/captura');
+    }
+
+    await apiClient(req.session.user.token).post('/rechazos', { capturaId, cantidad, motivo });
+    req.flash('success', `Rechazo de ${cantidad} piezas registrado`);
+    res.redirect('/encargado/captura');
+  } catch (err) {
+    const raw = err.response?.data?.message || 'Error al registrar rechazo';
+    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    res.redirect('/encargado/captura');
+  }
+});
+
+/* ───────────────────────────────────────────────
+ * AJAX endpoints — captura y rechazo sin recarga
+ * ─────────────────────────────────────────────── */
+router.post('/captura/ajax', async (req, res) => {
+  try {
+    const { data } = await apiClient(req.session.user.token).post('/capturas', req.body);
+    res.json({ ok: true, captura: data });
+  } catch (err) {
+    const status = err.response?.status || 500;
+    const raw = err.response?.data?.message || 'Error al registrar captura';
+    res.status(status).json({ ok: false, message: Array.isArray(raw) ? raw.join(', ') : raw });
+  }
+});
+
+router.post('/rechazos/ajax', async (req, res) => {
+  try {
+    const capturaId = toInt(req.body.capturaId);
+    const cantidad = toInt(req.body.cantidad);
+    const motivo = (req.body.motivo || '').trim() || undefined;
+
+    if (!capturaId || !cantidad) {
+      return res.status(400).json({ ok: false, message: 'Datos incompletos' });
+    }
+
+    const { data } = await apiClient(req.session.user.token).post('/rechazos', { capturaId, cantidad, motivo });
+    res.json({ ok: true, rechazo: data });
+  } catch (err) {
+    const status = err.response?.status || 500;
+    const raw = err.response?.data?.message || 'Error al registrar rechazo';
+    res.status(status).json({ ok: false, message: Array.isArray(raw) ? raw.join(', ') : raw });
+  }
 });
 
 module.exports = router;

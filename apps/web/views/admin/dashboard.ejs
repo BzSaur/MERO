@@ -154,92 +154,205 @@
 
               <% if ((metricas || []).length > 0) { %>
                 <%
-                  function getAreaName(m) {
-                    return (
-                      m?.areaNombre ||
-                      m?.area?.nombre ||
-                      (typeof m?.area === 'string' ? m.area : null) ||
-                      'Área'
-                    );
-                  }
-
-                  function getEff(m) {
-                    const v = m?.eficienciaPct ?? m?.eficiencia ?? null;
-                    if (v == null) return null;
-
+                  function effClass(v) {
+                    if (v == null || !Number.isFinite(Number(v))) return 'none';
                     const n = Number(v);
-                    if (!Number.isFinite(n)) return null;
-
-                    return n;
-                  }
-
-                  function getSlotHora(m) {
-                    return m?.slotHora ?? m?.slot ?? m?.hora ?? null;
-                  }
-
-                  function slotClass(val) {
-                    if (val == null) return 'none';
-                    if (val >= 90) return 'ok';
-                    if (val >= 70) return 'warn';
+                    if (n >= 90) return 'ok';
+                    if (n >= 70) return 'warn';
                     return 'fail';
                   }
-
-                  function fmtEff(val) {
-                    if (val == null || !Number.isFinite(Number(val))) return '—';
-                    return Number(val).toFixed(1) + '%';
+                  function fmtEff(v) {
+                    if (v == null || !Number.isFinite(Number(v))) return '—';
+                    return Number(v).toFixed(1) + '%';
+                  }
+                  function avgArr(arr) {
+                    const valid = arr.filter(x => x != null && Number.isFinite(Number(x)));
+                    return valid.length ? valid.reduce((s,x) => s + Number(x), 0) / valid.length : null;
                   }
 
-                  const byArea = {};
-
+                  // Construir árbol: área → subtarea → empleado → [registros]
+                  const tree = {};
                   (metricas || []).forEach(m => {
-                    const key = getAreaName(m);
-                    if (!byArea[key]) byArea[key] = [];
-                    byArea[key].push(m);
+                    const area = m.area || m.areaNombre || 'Sin área';
+                    const sub  = m.subtarea || m.subtareaNombre || 'Sin subtarea';
+                    const emp  = m.empleado || m.empleadoNombre || '—';
+                    if (!tree[area]) tree[area] = {};
+                    if (!tree[area][sub]) tree[area][sub] = {};
+                    if (!tree[area][sub][emp]) tree[area][sub][emp] = [];
+                    tree[area][sub][emp].push(m);
                   });
 
-                  Object.values(byArea).forEach(arr => {
-                    arr.sort((a, b) => Number(getSlotHora(a) ?? 0) - Number(getSlotHora(b) ?? 0));
+                  // Mapa de rechazos por asignacionId
+                  const _capturasMap = capturasMap || {};
+                  const _rechByAsig = {};
+                  (asignaciones || []).forEach(function(a) {
+                    const caps = _capturasMap[a.id] || [];
+                    let totalRec = 0, okConRec = 0;
+                    caps.forEach(function(c) {
+                      const recs = (c.rechazos || []).reduce(function(s,r) { return s + r.cantidad; }, 0);
+                      if (recs > 0) { totalRec += recs; okConRec++; }
+                    });
+                    _rechByAsig[a.id] = { totalRec, okConRec };
                   });
                 %>
 
-                <div class="card-body">
-                  <div style="padding: 0;">
-                    <% Object.entries(byArea).forEach(([area, slots]) => {
-                        let areaSum = 0, areaCount = 0;
-
-                        slots.forEach(s => {
-                          const e = getEff(s);
-                          if (e != null) {
-                            areaSum += e;
-                            areaCount++;
-                          }
-                        });
-
-                        const areaAvg = areaCount ? (areaSum / areaCount) : null;
-                    %>
-                      <div class="slot-area">
-                        <div class="slot-area__header">
-                          <span class="slot-area__name"><%= area %></span>
-                          <span class="eff-value <%= slotClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
-                        </div>
-
-                        <div class="slot-strip slot-strip--lg">
-                          <% slots.forEach(s => { %>
-                            <div
-                              class="slot-strip__seg slot-strip__seg--<%= slotClass(getEff(s)) %>"
-                              title="<%= (getSlotHora(s) != null ? getSlotHora(s) + ':00' : 'Sin hora') %> — <%= fmtEff(getEff(s)) %>">
+                <div class="card-body" style="padding:0;">
+                  <table class="table table--clean rexp-table">
+                    <thead>
+                      <tr>
+                        <th style="width:2rem"></th>
+                        <th>Área / Subtarea / Empleado</th>
+                        <th style="width:7rem;text-align:right">Eficiencia</th>
+                        <th style="width:10rem" class="td-hide-mobile">Slots hoy</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% let areaIdx = 0; Object.entries(tree).forEach(([area, subs]) => {
+                           const allRecs = Object.values(subs).flatMap(em => Object.values(em).flat());
+                           const areaAvg = avgArr(allRecs.map(m => m.eficienciaPct ?? m.eficiencia ?? null));
+                           const allSlots = allRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                           const aId = 'area-' + areaIdx++;
+                           // Rechazos del área
+                           let areaTotalRec = 0, areaOkConRec = 0;
+                           (asignaciones || []).forEach(a => {
+                             if ((a.area?.nombre || '') === area) {
+                               const rd = _rechByAsig[a.id] || {};
+                               areaTotalRec += rd.totalRec || 0;
+                               areaOkConRec += rd.okConRec || 0;
+                             }
+                           });
+                      %>
+                        <!-- Fila ÁREA -->
+                        <tr class="rexp-row rexp-row--area" data-target="<%= aId %>" onclick="toggleRexp(this)">
+                          <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
+                          <td>
+                            <strong><%= area %></strong>
+                            <% if (areaTotalRec > 0) { %>
+                              <span class="dash-rec-badge" style="margin-left:.5rem;">
+                                <span class="dash-rec-badge__dot"></span>
+                                <%= areaTotalRec %> rec<% if (areaOkConRec > 0) { %> · <%= areaOkConRec %> OK<% } %>
+                              </span>
+                            <% } %>
+                          </td>
+                          <td style="text-align:right">
+                            <span class="eff-badge eff-badge--<%= effClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
+                          </td>
+                          <td class="td-hide-mobile">
+                            <div class="slot-strip slot-strip--sm">
+                              <% allSlots.forEach(s => { %>
+                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(s.eficienciaPct ?? s.eficiencia) %>"
+                                  title="<%= s.slotHora %>:00 — <%= fmtEff(s.eficienciaPct ?? s.eficiencia) %>"></div>
+                              <% }) %>
                             </div>
-                          <% }) %>
-                        </div>
+                          </td>
+                        </tr>
 
-                        <div class="slot-area__hours">
-                          <% slots.forEach(s => { %>
-                            <span class="slot-area__hour"><%= getSlotHora(s) %>h</span>
+                        <!-- Filas SUBTAREA -->
+                        <% let subIdx = 0; Object.entries(subs).forEach(([sub, empMap]) => {
+                             const subRecs = Object.values(empMap).flat();
+                             const subAvg  = avgArr(subRecs.map(r => r.eficienciaPct ?? r.eficiencia ?? null));
+                             const subSlots = subRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                             const sId = aId + '-sub-' + subIdx++;
+                             let subTotalRec = 0, subOkConRec = 0;
+                             (asignaciones || []).forEach(a => {
+                               if ((a.subtarea?.nombre || '') === sub && (a.area?.nombre || '') === area) {
+                                 const rd = _rechByAsig[a.id] || {};
+                                 subTotalRec += rd.totalRec || 0;
+                                 subOkConRec += rd.okConRec || 0;
+                               }
+                             });
+                        %>
+                          <tr class="rexp-row rexp-row--sub rexp-child--<%= aId %>" style="display:none"
+                              data-target="<%= sId %>" onclick="toggleRexp(this)">
+                            <td class="rexp-toggle" style="padding-left:1.8rem">
+                              <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                            </td>
+                            <td style="padding-left:1.4rem;color:rgba(15,23,42,.72);font-size:.9rem">
+                              <%= sub %>
+                              <% if (subTotalRec > 0) { %>
+                                <span class="dash-rec-badge" style="margin-left:.5rem;font-size:.72rem;">
+                                  <span class="dash-rec-badge__dot"></span>
+                                  <%= subTotalRec %> rec<% if (subOkConRec > 0) { %> · <%= subOkConRec %> OK<% } %>
+                                </span>
+                              <% } %>
+                            </td>
+                            <td style="text-align:right">
+                              <span class="eff-badge eff-badge--<%= effClass(subAvg) %>" style="font-size:.78rem"><%= fmtEff(subAvg) %></span>
+                            </td>
+                            <td class="td-hide-mobile">
+                              <div class="slot-strip slot-strip--sm">
+                                <% subSlots.forEach(s => { %>
+                                  <div class="slot-strip__seg slot-strip__seg--<%= effClass(s.eficienciaPct ?? s.eficiencia) %>"
+                                    title="<%= s.slotHora %>:00 — <%= fmtEff(s.eficienciaPct ?? s.eficiencia) %>"></div>
+                                <% }) %>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <!-- Filas EMPLEADO -->
+                          <% let empIdx = 0; Object.entries(empMap).forEach(([emp, empRecs]) => {
+                               const empAvg   = avgArr(empRecs.map(r => r.eficienciaPct ?? r.eficiencia ?? null));
+                               const empSlots = empRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                               const eId = sId + '-emp-' + empIdx++;
+                               const _asnEmp = (asignaciones || []).find(a =>
+                                 (a.subtarea?.nombre || '') === sub &&
+                                 (a.area?.nombre || '') === area &&
+                                 ((a.empleado?.nombre || '') === emp || `${a.empleado?.nombre||''} ${a.empleado?.apellidos||''}`.trim() === emp)
+                               );
+                               const _empRd = _asnEmp ? (_rechByAsig[_asnEmp.id] || {}) : {};
+                               const empTotalRec = _empRd.totalRec || 0;
+                               const empOkConRec = _empRd.okConRec || 0;
+                          %>
+                            <tr class="rexp-row rexp-row--sub rexp-child--<%= sId %>" style="display:none"
+                                data-target="<%= eId %>" onclick="toggleRexp(this)">
+                              <td class="rexp-toggle" style="padding-left:3rem">
+                                <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                              </td>
+                              <td style="padding-left:2.6rem;font-size:.88rem;font-weight:700">
+                                <%= emp %>
+                                <% if (empTotalRec > 0) { %>
+                                  <span class="dash-rec-badge" style="margin-left:.5rem;font-size:.72rem;">
+                                    <span class="dash-rec-badge__dot"></span>
+                                    <%= empTotalRec %> rec<% if (empOkConRec > 0) { %> · <%= empOkConRec %> OK<% } %>
+                                  </span>
+                                <% } %>
+                              </td>
+                              <td style="text-align:right">
+                                <span class="eff-badge eff-badge--<%= effClass(empAvg) %>" style="font-size:.75rem"><%= fmtEff(empAvg) %></span>
+                              </td>
+                              <td class="td-hide-mobile">
+                                <div class="slot-strip slot-strip--sm">
+                                  <% empSlots.forEach(s => { %>
+                                    <div class="slot-strip__seg slot-strip__seg--<%= effClass(s.eficienciaPct ?? s.eficiencia) %>"
+                                      title="<%= s.slotHora %>:00 — <%= fmtEff(s.eficienciaPct ?? s.eficiencia) %>"></div>
+                                  <% }) %>
+                                </div>
+                              </td>
+                            </tr>
+
+                            <!-- Filas SLOT -->
+                            <% empRecs.sort((a,b) => (a.slotHora??0)-(b.slotHora??0)).forEach(r => { %>
+                              <tr class="rexp-row rexp-row--slot rexp-child--<%= eId %>" style="display:none">
+                                <td></td>
+                                <td style="padding-left:4rem;font-size:.82rem;color:rgba(15,23,42,.60)">
+                                  <%= r.slotHora %>:00
+                                </td>
+                                <td style="text-align:right">
+                                  <span class="eff-badge eff-badge--<%= effClass(r.eficienciaPct ?? r.eficiencia) %>" style="font-size:.72rem">
+                                    <%= fmtEff(r.eficienciaPct ?? r.eficiencia) %>
+                                  </span>
+                                </td>
+                                <td class="td-hide-mobile" style="font-size:.78rem;color:rgba(15,23,42,.50)">
+                                  <%= r.cantidad %> pzas / std <%= r.estandar %>
+                                </td>
+                              </tr>
+                            <% }) %>
+
                           <% }) %>
-                        </div>
-                      </div>
-                    <% }) %>
-                  </div>
+                        <% }) %>
+                      <% }) %>
+                    </tbody>
+                  </table>
                 </div>
               <% } else { %>
                 <div class="card-body d-flex flex-column align-items-center justify-content-center">
@@ -266,5 +379,40 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+  <script>
+    function toggleRexp(row) {
+      const target = row.dataset.target;
+      if (!target) return;
+
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      const arrow    = row.querySelector('.rexp-arrow');
+      const isOpen   = row.classList.contains('rexp-row--open');
+
+      if (isOpen) {
+        // Cerrar: ocultar hijos directos y todos sus descendientes
+        collapseAll(target);
+        row.classList.remove('rexp-row--open');
+        if (arrow) arrow.textContent = '▶';
+      } else {
+        // Abrir: mostrar hijos directos únicamente
+        children.forEach(c => { c.style.display = ''; });
+        row.classList.add('rexp-row--open');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+
+    function collapseAll(target) {
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      children.forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('rexp-row--open');
+        const arrow = c.querySelector('.rexp-arrow');
+        if (arrow) arrow.textContent = '▶';
+        // Colapsar recursivamente sus hijos
+        const subTarget = c.dataset.target;
+        if (subTarget) collapseAll(subTarget);
+      });
+    }
+  </script>
 </body>
 </html>

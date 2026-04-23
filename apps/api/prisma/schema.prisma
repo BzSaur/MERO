@@ -16,6 +16,11 @@ enum Rol {
   CONSULTOR
 }
 
+enum TipoAsignacion {
+  DIRECTA
+  INDIRECTA
+}
+
 // ─── Catálogos ───
 
 model MeroArea {
@@ -30,6 +35,7 @@ model MeroArea {
   subtareas    MeroSubtarea[]
   asignaciones MeroAsignacion[]
   usuarios     MeroUsuario[]
+  resumenes    MeroResumenBimestral[]
 
   @@map("mero_areas")
 }
@@ -47,6 +53,7 @@ model MeroSubtarea {
   area         MeroArea         @relation(fields: [areaId], references: [id])
   estandares   MeroEstandar[]
   asignaciones MeroAsignacion[]
+  resumenes    MeroResumenBimestral[]
 
   @@map("mero_subtareas")
 }
@@ -62,6 +69,7 @@ model MeroModelo {
 
   estandares   MeroEstandar[]
   asignaciones MeroAsignacion[]
+  resumenes    MeroResumenBimestral[]
 
   @@map("mero_modelos")
 }
@@ -83,6 +91,22 @@ model MeroEstandar {
   @@map("mero_estandares")
 }
 
+// ─── Catálogo de actividades indirectas ───
+
+model MeroActividadIndirecta {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @db.VarChar(100)
+  descripcion String?  @db.VarChar(255)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   Int?     @map("created_by")
+
+  asignaciones MeroAsignacion[]
+
+  @@map("mero_actividades_indirectas")
+}
+
 // ─── Empleados ───
 
 model MeroEmpleado {
@@ -97,6 +121,7 @@ model MeroEmpleado {
   updatedAt  DateTime @updatedAt @map("updated_at")
 
   asignaciones MeroAsignacion[]
+  resumenes    MeroResumenBimestral[]
 
   @@map("mero_empleados")
 }
@@ -113,7 +138,10 @@ model MeroUsuario {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  area MeroArea? @relation(fields: [areaId], references: [id])
+  area          MeroArea?        @relation(fields: [areaId], references: [id])
+  asignaciones  MeroAsignacion[] @relation("AsignacionEncargado")
+  capturas      MeroCaptura[]    @relation("CapturaEncargado")
+  rechazos      MeroRechazo[]    @relation("RechazoEncargado")
 
   @@map("mero_usuarios")
 }
@@ -121,25 +149,34 @@ model MeroUsuario {
 // ─── Core operativo ───
 
 model MeroAsignacion {
-  id         Int      @id @default(autoincrement())
-  empleadoId Int      @map("empleado_id")
-  areaId     Int      @map("area_id")
-  subtareaId Int      @map("subtarea_id")
-  modeloId   Int      @map("modelo_id")
-  fecha      DateTime @db.Date
-  horaInicio String   @map("hora_inicio") @db.VarChar(5)
-  horaFin    String?  @map("hora_fin") @db.VarChar(5)
-  activa     Boolean  @default(true)
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                    Int             @id @default(autoincrement())
+  empleadoId            Int             @map("empleado_id")
+  encargadoId           Int?            @map("encargado_id")
+  areaId                Int?            @map("area_id")
+  subtareaId            Int?            @map("subtarea_id")
+  modeloId              Int?            @map("modelo_id")
+  tipo                  TipoAsignacion  @default(DIRECTA)
+  actividadIndirectaId  Int?            @map("actividad_indirecta_id")
+  fecha                 DateTime        @db.Date
+  horaInicio            String          @map("hora_inicio") @db.VarChar(5)
+  horaFin               String?         @map("hora_fin") @db.VarChar(5)
+  // Minutos entre horaInicio y horaFin; se escribe al cerrar la asignación
+  duracionMinutos       Int?            @map("duracion_minutos")
+  activa                Boolean         @default(true)
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
 
-  empleado MeroEmpleado @relation(fields: [empleadoId], references: [id])
-  area     MeroArea     @relation(fields: [areaId], references: [id])
-  subtarea MeroSubtarea @relation(fields: [subtareaId], references: [id])
-  modelo   MeroModelo   @relation(fields: [modeloId], references: [id])
-  capturas MeroCaptura[]
+  empleado             MeroEmpleado            @relation(fields: [empleadoId], references: [id])
+  encargado            MeroUsuario?            @relation("AsignacionEncargado", fields: [encargadoId], references: [id])
+  area                 MeroArea?               @relation(fields: [areaId], references: [id])
+  subtarea             MeroSubtarea?           @relation(fields: [subtareaId], references: [id])
+  modelo               MeroModelo?             @relation(fields: [modeloId], references: [id])
+  actividadIndirecta   MeroActividadIndirecta? @relation(fields: [actividadIndirectaId], references: [id])
+  capturas             MeroCaptura[]
 
   @@index([empleadoId, fecha, activa], name: "idx_asignacion_empleado_fecha")
+  @@index([fecha], name: "idx_asignacion_fecha")
+  @@index([encargadoId, fecha], name: "idx_asignacion_encargado_fecha")
   @@map("mero_asignaciones")
 }
 
@@ -153,9 +190,56 @@ model MeroCaptura {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   asignacion MeroAsignacion @relation(fields: [asignacionId], references: [id])
+  encargado  MeroUsuario    @relation("CapturaEncargado", fields: [capturadoPor], references: [id])
+  rechazos   MeroRechazo[]
 
   @@index([asignacionId, slotHora], name: "idx_captura_asignacion_slot")
+  @@index([createdAt(sort: Desc)], name: "idx_captura_created_at")
   @@map("mero_capturas")
+}
+
+// ─── Rechazos por pieza ───
+
+model MeroRechazo {
+  id             Int      @id @default(autoincrement())
+  capturaId      Int      @map("captura_id")
+  cantidad       Int
+  motivo         String?  @db.VarChar(255)
+  registradoPor  Int      @map("registrado_por")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  captura       MeroCaptura  @relation(fields: [capturaId], references: [id])
+  encargado     MeroUsuario  @relation("RechazoEncargado", fields: [registradoPor], references: [id])
+
+  @@index([capturaId], name: "idx_rechazo_captura")
+  @@map("mero_rechazos")
+}
+
+
+model MeroResumenBimestral {
+  id               Int      @id @default(autoincrement())
+  periodoInicio    DateTime @map("periodo_inicio") @db.Date
+  periodoFin       DateTime @map("periodo_fin") @db.Date
+  empleadoId       Int      @map("empleado_id")
+  areaId           Int      @map("area_id")
+  subtareaId       Int      @map("subtarea_id")
+  modeloId         Int      @map("modelo_id")
+  totalPiezas      Int      @map("total_piezas")
+  totalRechazos    Int      @default(0) @map("total_rechazos")
+  // Suma de duracionMinutos de todas las asignaciones INDIRECTAS del periodo
+  minutosIndirectos Int     @default(0) @map("minutos_indirectos")
+  horasActivas     Float    @map("horas_activas")
+  empleadosCount   Int      @map("empleados_count")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  empleado  MeroEmpleado  @relation(fields: [empleadoId], references: [id])
+  area      MeroArea      @relation(fields: [areaId], references: [id])
+  subtarea  MeroSubtarea  @relation(fields: [subtareaId], references: [id])
+  modelo    MeroModelo    @relation(fields: [modeloId], references: [id])
+
+  @@index([periodoInicio, areaId], name: "idx_resumen_periodo_area")
+  @@index([periodoInicio, empleadoId], name: "idx_resumen_periodo_empleado")
+  @@map("mero_resumenes_bimestrales")
 }
 
 // ─── Auditoría ───

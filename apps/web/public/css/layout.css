@@ -25,7 +25,8 @@ body.sidebar-collapsed .main-content {
   padding: 1.5rem;
   width: 100%;
   min-height: 0;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 

@@ -11,6 +11,8 @@ import { AsignacionesModule } from './asignaciones/asignaciones.module';
 import { CapturasModule } from './capturas/capturas.module';
 import { MetricasModule } from './metricas/metricas.module';
 import { AuditoriaModule } from './auditoria/auditoria.module';
+import { RechazosModule } from './rechazos/rechazos.module';
+import { LimpiezaModule } from './limpieza/limpieza.module';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { AuditoriaModule } from './auditoria/auditoria.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
+        level: process.env.NODE_ENV !== 'production' ? 'warn' : 'info',
         transport:
           process.env.NODE_ENV !== 'production'
             ? { target: 'pino-pretty', options: { colorize: true } }
@@ -37,6 +40,8 @@ import { AuditoriaModule } from './auditoria/auditoria.module';
     CapturasModule,
     MetricasModule,
     AuditoriaModule,
+    RechazosModule,
+    LimpiezaModule,
   ],
 })
 export class AppModule {}

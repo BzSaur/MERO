@@ -35,10 +35,25 @@ router.get('/', async (req, res, next) => {
       client.get('/catalogos/areas'),
     ]);
 
+    const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+
+    const capturasMap = {};
+    await Promise.all(
+      asignaciones.map(async (a) => {
+        try {
+          const r = await client.get(`/capturas/asignacion/${a.id}`);
+          capturasMap[a.id] = Array.isArray(r.data) ? r.data : [];
+        } catch {
+          capturasMap[a.id] = [];
+        }
+      })
+    );
+
     res.render('admin/dashboard', {
       title: 'Panel Administrador',
       metricas: metRes.data,
-      asignaciones: asnRes.data,
+      asignaciones,
+      capturasMap,
       areas: areasRes.data,
       hoy,
     });
@@ -115,8 +130,167 @@ router.get('/empleados', async (req, res, next) => {
 
 router.get('/empleados/:id', async (req, res, next) => {
   try {
-    const { data: empleado } = await api(req.session.user.token).get(`/empleados/${req.params.id}`);
-    res.render('admin/empleados/detalle', { title: 'Detalle Empleado', empleado });
+    const client = api(req.session.user.token);
+    const { data: empleado } = await client.get(`/empleados/${req.params.id}`);
+
+    const asignaciones = Array.isArray(empleado?.asignaciones)
+      ? empleado.asignaciones
+      : [];
+
+    const asignacionesDirectas = asignaciones.filter((asignacion) => {
+      if (!Number.isInteger(Number(asignacion?.id))) return false;
+      return asignacion?.tipo !== 'INDIRECTA';
+    });
+
+    const fechasUnicas = [...new Set(
+      asignacionesDirectas
+        .map((asignacion) => {
+          if (!asignacion?.fecha) return null;
+          return new Date(asignacion.fecha).toISOString().slice(0, 10);
+        })
+        .filter(Boolean)
+    )];
+
+    const metricasPorFecha = new Map();
+    await Promise.all(
+      fechasUnicas.map(async (fecha) => {
+        try {
+          const { data } = await client.get(`/metricas/hora?fecha=${fecha}`);
+          metricasPorFecha.set(fecha, Array.isArray(data) ? data : []);
+        } catch {
+          metricasPorFecha.set(fecha, []);
+        }
+      })
+    );
+
+    const eficienciaPorSlot = new Map();
+    metricasPorFecha.forEach((rows) => {
+      rows.forEach((row) => {
+        const asignacionId = Number(row?.asignacionId);
+        const slotHora = Number(row?.slotHora);
+        const eficiencia = Number(row?.eficienciaPct);
+
+        if (!Number.isInteger(asignacionId) || !Number.isInteger(slotHora)) {
+          return;
+        }
+
+        eficienciaPorSlot.set(
+          `${asignacionId}-${slotHora}`,
+          Number.isFinite(eficiencia) ? eficiencia : null,
+        );
+      });
+    });
+
+    const capturasPorAsignacion = {};
+    await Promise.all(
+      asignacionesDirectas.map(async (asignacion) => {
+        try {
+          const { data } = await client.get(`/capturas/asignacion/${asignacion.id}`);
+          capturasPorAsignacion[asignacion.id] = Array.isArray(data) ? data : [];
+        } catch {
+          capturasPorAsignacion[asignacion.id] = [];
+        }
+      })
+    );
+
+    const resumenPorFecha = new Map();
+    const eficienciasCapturadas = [];
+    let totalPiezas = 0;
+    let totalRechazos = 0;
+    let totalNeto = 0;
+    let totalSlots = 0;
+
+    asignacionesDirectas.forEach((asignacion) => {
+      const fechaIso = asignacion?.fecha
+        ? new Date(asignacion.fecha).toISOString().slice(0, 10)
+        : null;
+      const capturas = capturasPorAsignacion[asignacion.id] || [];
+
+      capturas.forEach((captura) => {
+        const cantidad = Number(captura?.cantidad) || 0;
+        const rechazadas = Array.isArray(captura?.rechazos)
+          ? captura.rechazos.reduce((sum, rechazo) => sum + (Number(rechazo?.cantidad) || 0), 0)
+          : 0;
+        const neto = Math.max(cantidad - rechazadas, 0);
+
+        totalPiezas += cantidad;
+        totalRechazos += rechazadas;
+        totalNeto += neto;
+        totalSlots += 1;
+
+        const slotKey = `${Number(asignacion.id)}-${Number(captura?.slotHora)}`;
+        const eficiencia = eficienciaPorSlot.get(slotKey);
+
+        if (Number.isFinite(eficiencia)) {
+          eficienciasCapturadas.push(eficiencia);
+        }
+
+        if (!fechaIso) return;
+
+        if (!resumenPorFecha.has(fechaIso)) {
+          resumenPorFecha.set(fechaIso, {
+            productividadNeta: 0,
+            rechazos: 0,
+            eficiencia: [],
+          });
+        }
+
+        const dia = resumenPorFecha.get(fechaIso);
+        dia.productividadNeta += neto;
+        dia.rechazos += rechazadas;
+        if (Number.isFinite(eficiencia)) {
+          dia.eficiencia.push(eficiencia);
+        }
+      });
+    });
+
+    const round2 = (value) => Math.round(value * 100) / 100;
+    const eficienciaPromedio = eficienciasCapturadas.length
+      ? round2(eficienciasCapturadas.reduce((sum, value) => sum + value, 0) / eficienciasCapturadas.length)
+      : null;
+    const productividadPromedioSlot = totalSlots
+      ? round2(totalNeto / totalSlots)
+      : 0;
+    const tasaRechazo = totalPiezas
+      ? round2((totalRechazos / totalPiezas) * 100)
+      : 0;
+
+    const fechasOrdenadas = [...resumenPorFecha.keys()].sort((a, b) => a.localeCompare(b));
+    const chartLabels = fechasOrdenadas.map((fecha) => {
+      const [year, month, day] = fecha.split('-').map(Number);
+      return new Date(year, month - 1, day).toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: '2-digit',
+      });
+    });
+
+    const chartProductividad = fechasOrdenadas.map((fecha) => round2(resumenPorFecha.get(fecha).productividadNeta));
+    const chartRechazos = fechasOrdenadas.map((fecha) => round2(resumenPorFecha.get(fecha).rechazos));
+    const chartEficiencia = fechasOrdenadas.map((fecha) => {
+      const values = resumenPorFecha.get(fecha).eficiencia;
+      if (!values.length) return null;
+      return round2(values.reduce((sum, value) => sum + value, 0) / values.length);
+    });
+
+    res.render('admin/empleados/detalle', {
+      title: 'Detalle Empleado',
+      empleado,
+      empleadoMetricas: {
+        totalPiezas,
+        totalNeto,
+        totalRechazos,
+        totalSlots,
+        eficienciaPromedio,
+        productividadPromedioSlot,
+        tasaRechazo,
+      },
+      empleadoCharts: {
+        labels: chartLabels,
+        productividad: chartProductividad,
+        rechazos: chartRechazos,
+        eficiencia: chartEficiencia,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -384,6 +558,60 @@ router.post('/catalogos/estandares/:id/eliminar', async (req, res) => {
   } catch (err) {
     req.flash('error', getErrorMessage(err, 'Error al eliminar estándar'));
     res.redirect('/admin/catalogos/estandares');
+  }
+});
+
+/* ─────────── Actividades Indirectas ─────────── */
+router.get('/catalogos/actividades-indirectas', async (req, res, next) => {
+  try {
+    const { data } = await api(req.session.user.token).get('/catalogos/actividades-indirectas/todas');
+    res.render('admin/catalogos/actividades-indirectas', {
+      title: 'Actividades Indirectas',
+      actividades: Array.isArray(data) ? data : [],
+    });
+  } catch (err) { next(err); }
+});
+
+router.post('/catalogos/actividades-indirectas', async (req, res) => {
+  try {
+    await api(req.session.user.token).post('/catalogos/actividades-indirectas', {
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion || undefined,
+    });
+    req.flash('success', 'Actividad indirecta creada');
+    res.redirect('/admin/catalogos/actividades-indirectas');
+  } catch (err) {
+    req.flash('error', getErrorMessage(err, 'Error al crear actividad indirecta'));
+    res.redirect('/admin/catalogos/actividades-indirectas');
+  }
+});
+
+router.post('/catalogos/actividades-indirectas/:id/editar', async (req, res) => {
+  try {
+    await api(req.session.user.token).patch(
+      `/catalogos/actividades-indirectas/${req.params.id}`,
+      {
+        nombre: req.body.nombre,
+        descripcion: req.body.descripcion || undefined,
+        activo: req.body.activo === 'true',
+      },
+    );
+    req.flash('success', 'Actividad indirecta actualizada');
+    res.redirect('/admin/catalogos/actividades-indirectas');
+  } catch (err) {
+    req.flash('error', getErrorMessage(err, 'Error al editar actividad indirecta'));
+    res.redirect('/admin/catalogos/actividades-indirectas');
+  }
+});
+
+router.post('/catalogos/actividades-indirectas/:id/eliminar', async (req, res) => {
+  try {
+    await api(req.session.user.token).delete(`/catalogos/actividades-indirectas/${req.params.id}`);
+    req.flash('success', 'Actividad desactivada');
+    res.redirect('/admin/catalogos/actividades-indirectas');
+  } catch (err) {
+    req.flash('error', getErrorMessage(err, 'Error al desactivar actividad indirecta'));
+    res.redirect('/admin/catalogos/actividades-indirectas');
   }
 });
 

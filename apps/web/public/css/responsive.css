@@ -18,6 +18,8 @@
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 }
 

@@ -7,20 +7,29 @@ import {
   Param,
   ParseIntPipe,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { AsignacionesService } from './asignaciones.service';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AsignacionesService, ScanIndirectaDto } from './asignaciones.service';
 import { ScanQrDto } from './dto/scan-qr.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('asignaciones')
 export class AsignacionesController {
   constructor(private readonly asignaciones: AsignacionesService) {}
 
-  /**
-   * Crear asignación por escaneo (QR → empleado)
-   */
   @Post('scan')
-  scan(@Body() dto: ScanQrDto) {
-    return this.asignaciones.scan(dto);
+  scan(@Body() dto: ScanQrDto, @Req() req: Request) {
+    const user = req.user as { id: number };
+    return this.asignaciones.scan(dto, user.id);
+  }
+
+  @Post('scan-indirecta')
+  scanIndirecta(@Body() dto: ScanIndirectaDto, @Req() req: Request) {
+    const user = req.user as { id: number };
+    return this.asignaciones.scanIndirecta(dto, user.id);
   }
 
   /**

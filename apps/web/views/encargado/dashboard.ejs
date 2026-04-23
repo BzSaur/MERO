@@ -36,17 +36,33 @@
             <%- include('../partials/flash') %>
 
             <%
+              const _capturasMap = capturasMap || {};
               const totalAsignados = asignaciones.length;
               let sumEff = 0, countEff = 0;
 
               metricas.forEach(function(m) {
-                if (m.eficiencia != null) {
-                  sumEff += Number(m.eficiencia);
+                const eff = m.eficienciaPct ?? m.eficiencia ?? null;
+                if (eff != null) {
+                  sumEff += Number(eff);
                   countEff++;
                 }
               });
 
               const avgEff = countEff ? (sumEff / countEff) : null;
+
+              // Totales de rechazos para stat-cards
+              let totalRechazosHoy = 0, totalOkConRechazo = 0;
+              asignaciones.forEach(function(a) {
+                const caps = _capturasMap[a.id] || [];
+                caps.forEach(function(c) {
+                  const recs = c.rechazos || [];
+                  const totalRec = recs.reduce(function(s,r) { return s + r.cantidad; }, 0);
+                  if (totalRec > 0) {
+                    totalRechazosHoy += totalRec;
+                    totalOkConRechazo++;
+                  }
+                });
+              });
             %>
 
             <div class="grid-stats grid-stats--metrics" style="margin-bottom:var(--gap-lg)">
@@ -67,26 +83,46 @@
                 <div class="stat-card__value"><%= totalAsignados %></div>
                 <div class="stat-card__sub">asignados ahora</div>
               </div>
+
+              <div class="stat-card stat-card--gradient stat-card--orange">
+                <div class="stat-card__label">Rechazos hoy</div>
+                <div class="stat-card__value"><%= totalRechazosHoy %></div>
+                <div class="stat-card__sub"><%= totalOkConRechazo %> captura<%= totalOkConRechazo !== 1 ? 's' : '' %> con rechazo</div>
+              </div>
             </div>
 
             <% if (metricas.length > 0) { %>
               <%
-                const byArea = {};
+                const bySubarea = {};
 
                 metricas.forEach(function(m) {
-                  let areaKey = 'Sin área';
+                  let subareaKey = 'Sin subtarea';
 
-                  if (m && m.areaNombre) {
-                    areaKey = String(m.areaNombre);
-                  } else if (m && m.area && m.area.nombre) {
-                    areaKey = String(m.area.nombre);
+                  if (m && m.subtarea) {
+                    subareaKey = String(m.subtarea);
+                  } else if (m && m.subtareaNombre) {
+                    subareaKey = String(m.subtareaNombre);
                   }
 
-                  if (!byArea[areaKey]) {
-                    byArea[areaKey] = [];
+                  if (!bySubarea[subareaKey]) {
+                    bySubarea[subareaKey] = [];
                   }
 
-                  byArea[areaKey].push(m);
+                  // Normalizar campo de eficiencia
+                  m._eff = m.eficienciaPct ?? m.eficiencia ?? null;
+                  bySubarea[subareaKey].push(m);
+                });
+
+                // Mapa de rechazos por asignacionId para la card de eficiencia
+                const _rechByAsig = {};
+                asignaciones.forEach(function(a) {
+                  const caps = _capturasMap[a.id] || [];
+                  let totalRec = 0, okConRec = 0;
+                  caps.forEach(function(c) {
+                    const recs = (c.rechazos || []).reduce(function(s,r) { return s + r.cantidad; }, 0);
+                    if (recs > 0) { totalRec += recs; okConRec++; }
+                  });
+                  _rechByAsig[a.id] = { totalRec, okConRec };
                 });
               %>
 
@@ -113,24 +149,46 @@
                 </div>
 
                 <div class="card__body--metrics-slot">
-                  <% Object.entries(byArea).forEach(function(entry) { 
-                    const area = entry[0];
+                  <% Object.entries(bySubarea).forEach(function(entry) {
+                    const subarea = entry[0];
                     const slots = entry[1];
-                    const last = slots && slots.length ? slots[slots.length - 1] : null;
+                    // Promedio de eficiencia de la subárea
+                    const validSlots = slots.filter(function(s) { return s._eff != null; });
+                    const subareaAvg = validSlots.length
+                      ? validSlots.reduce(function(sum, s) { return sum + Number(s._eff); }, 0) / validSlots.length
+                      : null;
+                    // Rechazos de la subárea (sumar por asignacionId que pertenezcan a esta subtarea)
+                    let subareaRec = 0, subareaOkConRec = 0;
+                    asignaciones.forEach(function(a) {
+                      const aSubNombre = a.subtarea?.nombre || '';
+                      if (aSubNombre === subarea) {
+                        const rdata = _rechByAsig[a.id] || {};
+                        subareaRec += rdata.totalRec || 0;
+                        subareaOkConRec += rdata.okConRec || 0;
+                      }
+                    });
                   %>
                     <div class="slot-area slot-area--metrics">
                       <div class="slot-area__header">
-                        <span class="slot-area__name"><%= area %></span>
-                        <span class="eff-value <%= effClass(last ? last.eficiencia : null) %>">
-                          <%= fmtEff(last ? last.eficiencia : null) %>
-                        </span>
+                        <span class="slot-area__name"><%= subarea %></span>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                          <% if (subareaRec > 0) { %>
+                            <span class="dash-rec-badge">
+                              <span class="dash-rec-badge__dot"></span>
+                              <%= subareaRec %> rec<% if (subareaOkConRec > 0) { %> · <%= subareaOkConRec %> OK<% } %>
+                            </span>
+                          <% } %>
+                          <span class="eff-value <%= effClass(subareaAvg) %>">
+                            <%= fmtEff(subareaAvg) %>
+                          </span>
+                        </div>
                       </div>
 
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.forEach(function(s) { %>
+                        <% slots.slice().sort(function(a,b){ return (a.slotHora??0)-(b.slotHora??0); }).forEach(function(s) { %>
                           <div
-                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s ? s.eficiencia : null) %>"
-                            title="<%= (s && s.slotHora != null ? s.slotHora + ':00' : 'Sin hora') %> — <%= fmtEff(s ? s.eficiencia : null) %>">
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s ? s._eff : null) %>"
+                            title="<%= (s && s.slotHora != null ? s.slotHora + ':00' : 'Sin hora') %> — <%= fmtEff(s ? s._eff : null) %>">
                           </div>
                         <% }) %>
                       </div>
@@ -140,13 +198,43 @@
               </div>
             <% } %>
 
-            <div class="card card--asignar card--asignar-act">
+            <%
+              // Árbol: subtarea → empleado → [métricas de slots]
+              const metTree = {};
+              metricas.forEach(m => {
+                const sub = m.subtarea || m.subtareaNombre || 'Sin subtarea';
+                const emp = m.empleado || m.empleadoNombre || '—';
+                if (!metTree[sub]) metTree[sub] = {};
+                if (!metTree[sub][emp]) metTree[sub][emp] = [];
+                metTree[sub][emp].push(m);
+              });
+
+              function avgE(arr) {
+                const v = arr.filter(x => x != null && Number.isFinite(Number(x)));
+                return v.length ? v.reduce((s,x) => s + Number(x), 0) / v.length : null;
+              }
+
+              // Mapa de rechazos disponible fuera del bloque de métricas
+              if (typeof _rechByAsig === 'undefined') {
+                var _rechByAsig = {};
+                asignaciones.forEach(function(a) {
+                  const caps = _capturasMap[a.id] || [];
+                  let totalRec = 0, okConRec = 0;
+                  caps.forEach(function(c) {
+                    const recs = (c.rechazos || []).reduce(function(s,r) { return s + r.cantidad; }, 0);
+                    if (recs > 0) { totalRec += recs; okConRec++; }
+                  });
+                  _rechByAsig[a.id] = { totalRec, okConRec };
+                });
+              }
+            %>
+
+            <div class="card card--asignar card--asignar-act card--usuarios">
               <div class="card__header card__header--usuarios card__header--split">
                 <div class="card__header-left">
                   <h3><span class="card__title">Asignaciones activas</span></h3>
                   <span class="badge badge--ok"><%= asignaciones.length %></span>
                 </div>
-
                 <a href="/encargado/asignar" class="btn btn--manage">
                   <svg class="icon"><use href="#icon-assign"/></svg>
                   Gestionar
@@ -158,28 +246,143 @@
                   <p class="empty__text">Sin asignaciones activas.</p>
                   <p class="empty__sub">Cuando asignes personal, aparecerán aquí en tiempo real.</p>
                 </div>
-              <% } else { %>
+              <% } else if (!metricas.length) { %>
+                <!-- Sin métricas aún: mostrar tabla simple de asignaciones -->
                 <div class="table-wrap table-wrap--asignar table-wrap--blue">
                   <table class="table table--asignar table--blue">
                     <thead>
                       <tr>
                         <th>Empleado</th>
-                        <th>Área</th>
-                        <th class="td-hide-mobile">Subtarea</th>
+                        <th>Subtarea</th>
+                        <th class="td-hide-mobile">Área</th>
                         <th class="td-hide-mobile">Modelo</th>
-                        <th>Desde</th>
                       </tr>
                     </thead>
                     <tbody>
                       <% asignaciones.forEach(function(a) { %>
                         <tr>
-                          <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                          <td><span class="badge badge--none"><%= a.area?.nombre %></span></td>
-                          <td class="td-hide-mobile"><%= a.subtarea?.nombre %></td>
-                          <td class="td-hide-mobile"><%= a.modelo?.nombre %></td>
-                          <td class="td-mono"><%= fmtDate(a.createdAt) %></td>
+                          <td><%= (a.empleado?.nombre || '') + ' ' + (a.empleado?.apellidos || '') %></td>
+                          <td><%= a.subtarea?.nombre || '—' %></td>
+                          <td class="td-hide-mobile"><span class="badge badge--none"><%= a.area?.nombre || '—' %></span></td>
+                          <td class="td-hide-mobile"><%= a.modelo?.nombreSku || a.modelo?.nombre || '—' %></td>
                         </tr>
                       <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } else { %>
+                <!-- Árbol: Subtarea → Empleado → Slots -->
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean rexp-table">
+                    <thead>
+                      <tr>
+                        <th style="width:2rem"></th>
+                        <th>Subtarea / Empleado</th>
+                        <th style="width:7rem;text-align:right">Eficiencia</th>
+                        <th style="width:9rem" class="td-hide-mobile">Slots hoy</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    <% let dSIdx = 0; Object.entries(metTree).forEach(([sub, empMap]) => {
+                         const subRecs = Object.values(empMap).flat();
+                         const subAvg  = avgE(subRecs.map(m => m._eff));
+                         const dSId    = 'dash-sub-' + dSIdx++;
+                         // Rechazos de la subtarea
+                         let subTotalRec = 0, subOkConRec = 0;
+                         asignaciones.forEach(a => {
+                           if ((a.subtarea?.nombre || '') === sub) {
+                             const rd = _rechByAsig[a.id] || {};
+                             subTotalRec += rd.totalRec || 0;
+                             subOkConRec += rd.okConRec || 0;
+                           }
+                         });
+                    %>
+                      <!-- FILA SUBTAREA -->
+                      <tr class="rexp-row rexp-row--area" data-target="<%= dSId %>" onclick="toggleRexp(this)">
+                        <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
+                        <td>
+                          <strong><%= sub %></strong>
+                          <% if (subTotalRec > 0) { %>
+                            <span class="dash-rec-badge" style="margin-left:.5rem;">
+                              <span class="dash-rec-badge__dot"></span>
+                              <%= subTotalRec %> rec<% if (subOkConRec > 0) { %> · <%= subOkConRec %> OK<% } %>
+                            </span>
+                          <% } %>
+                        </td>
+                        <td style="text-align:right">
+                          <span class="eff-badge eff-badge--<%= effClass(subAvg) %>"><%= fmtEff(subAvg) %></span>
+                        </td>
+                        <td class="td-hide-mobile">
+                          <div class="slot-strip slot-strip--sm">
+                            <% subRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0)).forEach(s => { %>
+                              <div class="slot-strip__seg slot-strip__seg--<%= slotClass(s._eff) %>"
+                                title="<%= s.slotHora %>:00 — <%= fmtEff(s._eff) %>"></div>
+                            <% }) %>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <% let dEIdx = 0; Object.entries(empMap).forEach(([emp, empRecs]) => {
+                           const empAvg   = avgE(empRecs.map(m => m._eff));
+                           const empSlots = empRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                           const dEId     = dSId + '-emp-' + dEIdx++;
+                           // Buscar asignación de este empleado en esta subtarea
+                           const _asnEmp = asignaciones.find(a =>
+                             (a.subtarea?.nombre || '') === sub &&
+                             (`${a.empleado?.nombre || ''} ${(a.empleado?.apellidos || '').split(' ')[0]}`.trim() === emp ||
+                              (a.empleado?.nombre || '') === emp)
+                           );
+                           const _empRd = _asnEmp ? (_rechByAsig[_asnEmp.id] || {}) : {};
+                           const empTotalRec = _empRd.totalRec || 0;
+                           const empOkConRec = _empRd.okConRec || 0;
+                      %>
+                        <!-- FILA EMPLEADO -->
+                        <tr class="rexp-row rexp-row--sub rexp-child--<%= dSId %>" style="display:none"
+                            data-target="<%= dEId %>" onclick="toggleRexp(this)">
+                          <td class="rexp-toggle" style="padding-left:1.8rem">
+                            <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                          </td>
+                          <td style="padding-left:1.4rem;font-size:.9rem;font-weight:700">
+                            <%= emp %>
+                            <% if (empTotalRec > 0) { %>
+                              <span class="dash-rec-badge" style="margin-left:.5rem;font-size:.72rem;">
+                                <span class="dash-rec-badge__dot"></span>
+                                <%= empTotalRec %> rec<% if (empOkConRec > 0) { %> · <%= empOkConRec %> OK<% } %>
+                              </span>
+                            <% } %>
+                          </td>
+                          <td style="text-align:right">
+                            <span class="eff-badge eff-badge--<%= effClass(empAvg) %>" style="font-size:.78rem"><%= fmtEff(empAvg) %></span>
+                          </td>
+                          <td class="td-hide-mobile">
+                            <div class="slot-strip slot-strip--sm">
+                              <% empSlots.forEach(s => { %>
+                                <div class="slot-strip__seg slot-strip__seg--<%= slotClass(s._eff) %>"
+                                  title="<%= s.slotHora %>:00 — <%= fmtEff(s._eff) %>"></div>
+                              <% }) %>
+                            </div>
+                          </td>
+                        </tr>
+
+                        <!-- FILAS SLOT -->
+                        <% empRecs.sort((a,b) => (a.slotHora??0)-(b.slotHora??0)).forEach(r => { %>
+                          <tr class="rexp-row rexp-row--slot rexp-child--<%= dEId %>" style="display:none">
+                            <td></td>
+                            <td style="padding-left:3rem;font-size:.82rem;color:rgba(15,23,42,.55)">
+                              <%= r.slotHora %>:00
+                            </td>
+                            <td style="text-align:right">
+                              <span class="eff-badge eff-badge--<%= effClass(r._eff) %>" style="font-size:.72rem">
+                                <%= fmtEff(r._eff) %>
+                              </span>
+                            </td>
+                            <td class="td-hide-mobile" style="font-size:.78rem;color:rgba(15,23,42,.45)">
+                              <%= r.cantidad %> pzas / std <%= r.estandar %>
+                            </td>
+                          </tr>
+                        <% }) %>
+                      <% }) %>
+                    <% }) %>
                     </tbody>
                   </table>
                 </div>
@@ -194,5 +397,33 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+  <script>
+    function toggleRexp(row) {
+      const target = row.dataset.target;
+      if (!target) return;
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      const arrow    = row.querySelector('.rexp-arrow');
+      const isOpen   = row.classList.contains('rexp-row--open');
+      if (isOpen) {
+        collapseRexp(target);
+        row.classList.remove('rexp-row--open');
+        if (arrow) arrow.textContent = '▶';
+      } else {
+        children.forEach(c => { c.style.display = ''; });
+        row.classList.add('rexp-row--open');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('rexp-row--open');
+        const a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        const sub = c.dataset.target;
+        if (sub) collapseRexp(sub);
+      });
+    }
+  </script>
 </body>
 </html>

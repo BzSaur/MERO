@@ -7,7 +7,9 @@
   left: 0;
   top: 0;
   width: var(--sidebar-width);
+  /* dvh respeta la barra del navegador en móvil; cae a 100vh en navegadores sin soporte */
   height: 100vh;
+  height: 100dvh;
   background: var(--sidebar-bg);
   color: var(--color-white);
   z-index: 1050;

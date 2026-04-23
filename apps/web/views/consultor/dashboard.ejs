@@ -248,44 +248,163 @@
                 </div>
               </div>
 
-              <!-- Tabla resultados -->
-              <div class="card card--asignar card--asignar-act">
+              <!-- Gráficas por área (eficiencia por slot) -->
+              <%
+                const hoyChartData = {};
+                metricas.forEach(m => {
+                  const area = getAreaName(m);
+                  const sh   = getSlotHora(m);
+                  const eff  = getEff(m);
+                  if (!hoyChartData[area]) hoyChartData[area] = {};
+                  if (!hoyChartData[area][sh]) hoyChartData[area][sh] = [];
+                  if (eff != null) hoyChartData[area][sh].push(eff);
+                });
+              %>
+              <% Object.entries(hoyChartData).forEach(([area, slotsMap], ci) => {
+                   const slotKeys = Object.keys(slotsMap).map(Number).sort((a,b) => a-b);
+                   const slotLabels = slotKeys.map(h => h + ':00');
+                   const slotValues = slotKeys.map(h => {
+                     const vals = slotsMap[h];
+                     return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length * 10) / 10 : 0;
+                   });
+              %>
+              <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
                 <div class="card__header card__header--usuarios">
-                  <h3><span class="card__title">Resultados</span></h3>
+                  <h3><span class="card__title">Eficiencia por slot — <%= area %></span></h3>
+                  <span class="badge badge--none" style="font-size:.78rem;">hoy</span>
+                </div>
+                <div style="padding:var(--gap) var(--gap-lg) var(--gap-lg);">
+                  <canvas id="hoy-chart-<%= ci %>" height="90"
+                    data-labels="<%= JSON.stringify(slotLabels) %>"
+                    data-values="<%= JSON.stringify(slotValues) %>">
+                  </canvas>
+                </div>
+              </div>
+              <% }) %>
+
+              <!-- Árbol expandible: Área → Subtarea → Empleado → Slots -->
+              <%
+                // Build tree
+                const hoyTree = {};
+                metricas.forEach(m => {
+                  const area = getAreaName(m);
+                  const sub  = m?.subtarea || m?.subtareaNombre || 'Sin subtarea';
+                  const emp  = m?.empleado || m?.empleadoNombre || '—';
+                  if (!hoyTree[area]) hoyTree[area] = {};
+                  if (!hoyTree[area][sub]) hoyTree[area][sub] = {};
+                  if (!hoyTree[area][sub][emp]) hoyTree[area][sub][emp] = [];
+                  hoyTree[area][sub][emp].push(m);
+                });
+
+                function avgHoy(arr) {
+                  const valid = arr.filter(x => x != null && Number.isFinite(Number(x)));
+                  return valid.length ? valid.reduce((s,x) => s + Number(x), 0) / valid.length : null;
+                }
+              %>
+              <div class="card card--asignar card--asignar-act card--usuarios">
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Detalle por área</span></h3>
                   <span class="badge badge--ok"><%= metricas.length %></span>
                 </div>
-
-                <div class="table-wrap table-wrap--asignar table-wrap--blue">
-                  <table class="table table--asignar table--blue">
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean rexp-table">
                     <thead>
                       <tr>
-                        <th>Área</th>
-                        <th>Slot</th>
-                        <th class="td-hide-mobile">Real</th>
-                        <th class="td-hide-mobile">Estándar</th>
-                        <th>Eficiencia</th>
+                        <th style="width:2rem"></th>
+                        <th>Área / Subtarea / Empleado</th>
+                        <th style="width:7rem;text-align:right">Eficiencia</th>
+                        <th style="width:8rem" class="td-hide-mobile">Slots hoy</th>
                       </tr>
                     </thead>
-
                     <tbody>
-                      <% metricas.forEach(m => {
-                           const sh = getSlotHora(m);
-                           const r  = getReal(m);
-                           const st = getStd(m);
-                           const e  = getEff(m);
+                    <% let hAIdx = 0; Object.entries(hoyTree).forEach(([area, subs]) => {
+                         const allCaps = Object.values(subs).flatMap(em => Object.values(em).flat());
+                         const aAvg = avgHoy(allCaps.map(m => getEff(m)));
+                         const allSlots = allCaps.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0));
+                         const hAId = 'hoy-area-' + hAIdx++;
+                    %>
+                      <tr class="rexp-row rexp-row--area" data-target="<%= hAId %>" onclick="toggleRexp(this)">
+                        <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
+                        <td><strong><%= area %></strong></td>
+                        <td style="text-align:right">
+                          <span class="eff-badge eff-badge--<%= effClass(aAvg) %>"><%= fmtEff(aAvg) %></span>
+                        </td>
+                        <td class="td-hide-mobile">
+                          <div class="slot-strip slot-strip--sm">
+                            <% allSlots.forEach(s => { %>
+                              <div class="slot-strip__seg slot-strip__seg--<%= effClass(getEff(s)) %>"
+                                title="<%= getSlotHora(s) %>:00 — <%= fmtEff(getEff(s)) %>"></div>
+                            <% }) %>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <% let hSIdx = 0; Object.entries(subs).forEach(([sub, empMap]) => {
+                           const subCaps = Object.values(empMap).flat();
+                           const sAvg = avgHoy(subCaps.map(m => getEff(m)));
+                           const hSId = hAId + '-sub-' + hSIdx++;
                       %>
-                        <tr>
-                          <td><%= getAreaName(m) %></td>
-                          <td class="td-mono"><%= sh %>:00</td>
-                          <td class="td-mono td-hide-mobile"><%= (r == null ? '—' : r) %></td>
-                          <td class="td-mono td-hide-mobile"><%= (st == null ? '—' : st) %></td>
-                          <td>
-                            <span class="eff-value <%= effClass(e) %>">
-                              <%= fmtEff(e) %>
-                            </span>
+                        <tr class="rexp-row rexp-row--sub rexp-child--<%= hAId %>" style="display:none"
+                            data-target="<%= hSId %>" onclick="toggleRexp(this)">
+                          <td class="rexp-toggle" style="padding-left:1.8rem">
+                            <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                          </td>
+                          <td style="padding-left:1.4rem;color:rgba(15,23,42,.72);font-size:.9rem"><%= sub %></td>
+                          <td style="text-align:right">
+                            <span class="eff-badge eff-badge--<%= effClass(sAvg) %>" style="font-size:.78rem"><%= fmtEff(sAvg) %></span>
+                          </td>
+                          <td class="td-hide-mobile">
+                            <div class="slot-strip slot-strip--sm">
+                              <% subCaps.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0)).forEach(s => { %>
+                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(getEff(s)) %>"
+                                  title="<%= getSlotHora(s) %>:00 — <%= fmtEff(getEff(s)) %>"></div>
+                              <% }) %>
+                            </div>
                           </td>
                         </tr>
+
+                        <% let hEIdx = 0; Object.entries(empMap).forEach(([emp, rows]) => {
+                             const eAvg = avgHoy(rows.map(m => getEff(m)));
+                             const hEId = hSId + '-emp-' + hEIdx++;
+                        %>
+                          <tr class="rexp-row rexp-row--sub rexp-child--<%= hSId %>" style="display:none"
+                              data-target="<%= hEId %>" onclick="toggleRexp(this)">
+                            <td class="rexp-toggle" style="padding-left:3rem">
+                              <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                            </td>
+                            <td style="padding-left:2.6rem;font-size:.88rem;font-weight:700"><%= emp %></td>
+                            <td style="text-align:right">
+                              <span class="eff-badge eff-badge--<%= effClass(eAvg) %>" style="font-size:.75rem"><%= fmtEff(eAvg) %></span>
+                            </td>
+                            <td class="td-hide-mobile">
+                              <div class="slot-strip slot-strip--sm">
+                                <% rows.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0)).forEach(s => { %>
+                                  <div class="slot-strip__seg slot-strip__seg--<%= effClass(getEff(s)) %>"
+                                    title="<%= getSlotHora(s) %>:00 — <%= fmtEff(getEff(s)) %>"></div>
+                                <% }) %>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <% rows.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0)).forEach(r => { %>
+                            <tr class="rexp-row rexp-row--slot rexp-child--<%= hEId %>" style="display:none">
+                              <td></td>
+                              <td style="padding-left:4rem;font-size:.82rem;color:rgba(15,23,42,.55)">
+                                <%= getSlotHora(r) %>:00
+                              </td>
+                              <td style="text-align:right">
+                                <span class="eff-badge eff-badge--<%= effClass(getEff(r)) %>" style="font-size:.72rem">
+                                  <%= fmtEff(getEff(r)) %>
+                                </span>
+                              </td>
+                              <td class="td-hide-mobile" style="font-size:.78rem;color:rgba(15,23,42,.45)">
+                                <%= getReal(r) ?? '—' %> pzas / std <%= getStd(r) ?? '—' %>
+                              </td>
+                            </tr>
+                          <% }) %>
+                        <% }) %>
                       <% }) %>
+                    <% }) %>
                     </tbody>
                   </table>
                 </div>
@@ -315,5 +434,73 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    function effColor(val) {
+      if (val == null) return 'rgba(148,163,184,.4)';
+      if (val >= 90) return 'rgba(34,197,94,.75)';
+      if (val >= 70) return 'rgba(234,179,8,.75)';
+      return 'rgba(239,68,68,.75)';
+    }
+    document.querySelectorAll('canvas[data-labels]').forEach(canvas => {
+      const labels = JSON.parse(canvas.dataset.labels);
+      const values = JSON.parse(canvas.dataset.values);
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Eficiencia (%)',
+            data: values,
+            backgroundColor: values.map(effColor),
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + '%' : '—' } }
+          },
+          scales: {
+            y: {
+              min: 0, max: 120,
+              ticks: { callback: v => v + '%', stepSize: 20, font: { size: 11 } },
+              grid: { color: 'rgba(15,23,42,.06)' }
+            },
+            x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+          }
+        }
+      });
+    });
+
+    function toggleRexp(row) {
+      const target = row.dataset.target;
+      if (!target) return;
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      const arrow    = row.querySelector('.rexp-arrow');
+      const isOpen   = row.classList.contains('rexp-row--open');
+      if (isOpen) {
+        collapseRexp(target);
+        row.classList.remove('rexp-row--open');
+        if (arrow) arrow.textContent = '▶';
+      } else {
+        children.forEach(c => { c.style.display = ''; });
+        row.classList.add('rexp-row--open');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('rexp-row--open');
+        const a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        const sub = c.dataset.target;
+        if (sub) collapseRexp(sub);
+      });
+    }
+  </script>
 </body>
 </html>

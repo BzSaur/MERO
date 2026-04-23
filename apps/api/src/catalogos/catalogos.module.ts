@@ -7,6 +7,8 @@ import { ModelosController } from './modelos.controller';
 import { ModelosService } from './modelos.service';
 import { EstandaresController } from './estandares.controller';
 import { EstandaresService } from './estandares.service';
+import { ActividadesIndirectasController } from './actividades-indirectas.controller';
+import { ActividadesIndirectasService } from './actividades-indirectas.service';
 
 @Module({
   controllers: [
@@ -14,8 +16,15 @@ import { EstandaresService } from './estandares.service';
     SubtareasController,
     ModelosController,
     EstandaresController,
+    ActividadesIndirectasController,
   ],
-  providers: [AreasService, SubtareasService, ModelosService, EstandaresService],
-  exports: [EstandaresService],
+  providers: [
+    AreasService,
+    SubtareasService,
+    ModelosService,
+    EstandaresService,
+    ActividadesIndirectasService,
+  ],
+  exports: [EstandaresService, ActividadesIndirectasService],
 })
 export class CatalogosModule {}

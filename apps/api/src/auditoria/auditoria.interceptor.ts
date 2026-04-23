@@ -8,9 +8,17 @@ import { Observable, tap } from 'rxjs';
 import { Request } from 'express';
 import { AuditoriaService } from './auditoria.service';
 
+// Rutas operativas de alto volumen que no aportan valor en auditoría
+const RUTAS_EXCLUIDAS = [
+  '/auth/',
+  '/metricas/stream',
+  '/capturas',
+  '/asignaciones',
+];
+
 /**
- * Interceptor global que registra operaciones de escritura (POST, PATCH, PUT, DELETE)
- * en la tabla de auditoría.
+ * Interceptor global que registra operaciones de escritura (POST, PATCH, PUT, DELETE).
+ * Excluye rutas operativas de alto volumen (capturas, asignaciones) para no saturar auditoría.
  */
 @Injectable()
 export class AuditoriaInterceptor implements NestInterceptor {
@@ -20,14 +28,12 @@ export class AuditoriaInterceptor implements NestInterceptor {
     const req = context.switchToHttp().getRequest<Request>();
     const method = req.method;
 
-    // Solo auditar operaciones de escritura
     if (!['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       return next.handle();
     }
 
-    // Excluir rutas de auth y métricas stream
     const url = req.url;
-    if (url.includes('/auth/') || url.includes('/metricas/stream')) {
+    if (RUTAS_EXCLUIDAS.some((ruta) => url.includes(ruta))) {
       return next.handle();
     }
 

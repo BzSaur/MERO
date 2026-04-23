@@ -54,7 +54,17 @@ export class EmpleadosService {
   async findOne(id: number) {
     const empleado = await this.prisma.meroEmpleado.findUnique({
       where: { id },
-      include: { asignaciones: { take: 10, orderBy: { fecha: 'desc' } } },
+      include: {
+        asignaciones: {
+          take: 10,
+          orderBy: { fecha: 'desc' },
+          include: {
+            area: { select: { nombre: true } },
+            subtarea: { select: { nombre: true } },
+            modelo: { select: { nombreSku: true } },
+          },
+        },
+      },
     });
 
     if (!empleado) throw new NotFoundException('Empleado no encontrado');
