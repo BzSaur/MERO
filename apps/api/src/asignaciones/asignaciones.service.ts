@@ -234,6 +234,24 @@ export class AsignacionesService {
     });
   }
 
+  async findHoy(areaId?: number) {
+    const { fechaDate } = nowMxParts();
+    return this.prisma.meroAsignacion.findMany({
+      where: {
+        fecha: fechaDate,
+        tipo: 'DIRECTA',
+        ...(areaId ? { areaId } : {}),
+      },
+      include: {
+        empleado: true,
+        area: true,
+        subtarea: true,
+        modelo: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findOne(id: number) {
     const asignacion = await this.prisma.meroAsignacion.findUnique({
       where: { id },

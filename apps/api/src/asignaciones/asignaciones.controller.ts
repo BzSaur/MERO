@@ -42,6 +42,15 @@ export class AsignacionesController {
   }
 
   /**
+   * Listar todas las asignaciones directas del día (activas + cerradas)
+   */
+  @Get('hoy')
+  hoy(@Query('areaId') areaId?: string) {
+    const parsed = areaId ? parseInt(areaId, 10) : undefined;
+    return this.asignaciones.findHoy(Number.isFinite(parsed) ? parsed : undefined);
+  }
+
+  /**
    * Listar asignaciones por empleado (opcional fecha YYYY-MM-DD)
    */
   @Get('empleado/:empleadoId')

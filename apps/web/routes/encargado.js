@@ -164,9 +164,11 @@ router.get('/captura', async (req, res, next) => {
     const client = apiClient(req.session.user.token);
     const scope = getUserAreaScope(req);
 
+    // Carga TODAS las asignaciones directas del día (activas + cerradas)
+    // para permitir registrar rechazos a empleados que ya terminaron su turno
     const asignacionesPromise = scope.isScoped
-      ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
-      : client.get('/asignaciones/activas');
+      ? client.get(`/asignaciones/hoy?areaId=${scope.areaId}`)
+      : client.get('/asignaciones/hoy');
 
     const [areasRes, modRes, asnRes] = await Promise.all([
       client.get('/catalogos/areas'),
