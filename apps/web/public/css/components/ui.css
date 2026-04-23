@@ -814,7 +814,7 @@ USUARIOS
   line-height: .98;
   font-weight: 900;
   color: #0f172a;
-  text-transform: lowercase;
+  text-transform: uppercase;
   word-break: break-word;
 }
 
@@ -1032,6 +1032,80 @@ USUARIOS
 }
 
 /* -------------------------
+   METRICS
+------------------------- */
+.page--empleado-detalle .employee-card__body--metrics{
+  padding: 16px 18px 18px;
+}
+
+.page--empleado-detalle .employee-metrics__stats{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.page--empleado-detalle .employee-kpi{
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.78);
+  padding: 14px;
+  min-height: 112px;
+}
+
+.page--empleado-detalle .employee-kpi__label{
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: rgba(15,23,42,.58);
+}
+
+.page--empleado-detalle .employee-kpi__value{
+  margin: 7px 0 4px;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.page--empleado-detalle .employee-kpi__sub{
+  margin: 0;
+  color: rgba(15,23,42,.56);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.page--empleado-detalle .employee-kpi--prod .employee-kpi__value{
+  color: #1d4ed8;
+}
+
+.page--empleado-detalle .employee-kpi--reject .employee-kpi__value{
+  color: #b91c1c;
+}
+
+.page--empleado-detalle .employee-kpi--eff .employee-kpi__value{
+  color: #0d9488;
+}
+
+.page--empleado-detalle .employee-kpi--slot .employee-kpi__value{
+  color: #0284c7;
+}
+
+.page--empleado-detalle .employee-metrics__chart-wrap{
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.72);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.page--empleado-detalle .employee-metrics__chart{
+  width: 100%;
+  min-height: 320px;
+}
+
+/* -------------------------
    HISTORIAL
 ------------------------- */
 .page--empleado-detalle .empleado-detail-history{
@@ -1096,6 +1170,10 @@ USUARIOS
   .page--empleado-detalle .empleado-detail-grid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .page--empleado-detalle .employee-metrics__stats{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 900px){
@@ -1142,10 +1220,18 @@ USUARIOS
     grid-template-columns: 1fr;
   }
 
+  .page--empleado-detalle .employee-metrics__stats{
+    grid-template-columns: 1fr;
+  }
+
   .page--empleado-detalle .employee-card__body,
   .page--empleado-detalle .employee-table-wrap{
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .page--empleado-detalle .employee-card__body--metrics{
+    padding: 14px;
   }
 
   .page--empleado-detalle .employee-card__header{
@@ -1154,6 +1240,10 @@ USUARIOS
 
   .page--empleado-detalle .employee-qr__btn{
     max-width: 100%;
+  }
+
+  .page--empleado-detalle .employee-metrics__chart{
+    min-height: 250px;
   }
 }
 /* =========================================================
@@ -2029,11 +2119,380 @@ USUARIOS
   border: 1px solid rgba(15,23,42,.10);
 }
 
+.badge--warn{
+  background: rgba(245,158,11,.12);
+  color: #92400e;
+  border: 1px solid rgba(245,158,11,.28);
+}
+
 .badge--danger{
   background: rgba(239,68,68,.10);
   color: #b91c1c;
   border: 1px solid rgba(239,68,68,.22);
 }
+
+.badge--info{
+  background: rgba(59,130,246,.10);
+  color: #1d4ed8;
+  border: 1px solid rgba(59,130,246,.22);
+}
+
+/* Feedback de slot ya capturado en vista de captura */
+.badge--capturada{
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: rgba(16,185,129,.10);
+  color: #047857;
+  border: 1px solid rgba(16,185,129,.22);
+  border-radius: 6px;
+  padding: .2rem .5rem;
+  font-size: .78rem;
+  font-weight: 500;
+}
+
+.captura-registrada{
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.captura-registrada--inline{
+  margin-top: .25rem;
+}
+
+.rechazo-detail{
+  margin-top: .3rem;
+}
+
+.rechazo-detail__toggle{
+  cursor: pointer;
+  font-size: .78rem;
+  color: #b91c1c;
+  user-select: none;
+}
+
+.rechazo-form{
+  margin-top: .25rem;
+}
+
+html[data-theme="dark"] .badge--info{
+  background: rgba(59,130,246,.16);
+  color: #bfdbfe;
+  border-color: rgba(59,130,246,.28);
+}
+
+html[data-theme="dark"] .badge--capturada{
+  background: rgba(16,185,129,.14);
+  color: #6ee7b7;
+  border-color: rgba(16,185,129,.28);
+}
+
+/* =========================================================
+   CAPTURA — tabla compacta multi-slot
+   ========================================================= */
+
+.captura-table th.th-slot,
+.captura-table td.td-slot {
+  text-align: center;
+  min-width: 110px;
+  width: 110px;
+}
+
+.captura-table th.th-slot {
+  font-size: .78rem;
+  font-weight: 900;
+  color: rgba(15,23,42,.55);
+  letter-spacing: .03em;
+}
+
+.captura-name {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: .93rem;
+}
+
+/* Slot ya capturado */
+.slot-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16,185,129,.10);
+  border: 1px solid rgba(16,185,129,.22);
+  border-radius: 10px;
+  padding: .28rem .55rem;
+  font-size: .88rem;
+  font-weight: 800;
+  color: #047857;
+}
+
+.slot-done__qty { line-height: 1; }
+
+.slot-done__rej {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(239,68,68,.6);
+  font-size: .75rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color .15s;
+}
+.slot-done__rej:hover { color: #dc2626; }
+
+/* Input inline de slot libre */
+.slot-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.slot-qty {
+  width: 62px !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  text-align: center;
+  padding: 0 6px !important;
+  border-radius: 10px !important;
+  font-size: .88rem !important;
+}
+
+.btn--slot-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  background: rgba(29,78,216,.10);
+  border: 1px solid rgba(29,78,216,.22);
+  color: #1d4ed8;
+  cursor: pointer;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.btn--slot-save:hover { background: #1d4ed8; color: #fff; }
+.btn--slot-save .icon { width: 14px; height: 14px; }
+
+/* Modal rechazo */
+.cap-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(15,23,42,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.cap-modal {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(15,23,42,.22);
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+}
+
+.cap-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+}
+
+.cap-modal__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.cap-modal__close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: rgba(15,23,42,.45);
+  display: flex;
+  align-items: center;
+}
+.cap-modal__close:hover { color: #ef4444; }
+.cap-modal__close .icon { width: 18px; height: 18px; }
+
+.cap-modal__body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cap-modal__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cap-modal__hint {
+  font-size: .78rem;
+  color: rgba(15,23,42,.45);
+  font-weight: 600;
+}
+
+.cap-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+html[data-theme="dark"] .cap-modal { background: #1e293b; }
+html[data-theme="dark"] .cap-modal__title { color: #f1f5f9; }
+html[data-theme="dark"] .slot-done {
+  background: rgba(16,185,129,.14);
+  border-color: rgba(16,185,129,.28);
+  color: #6ee7b7;
+}
+
+/* =========================================================
+   CAPTURA — progress bar por empleado
+   ========================================================= */
+
+.cap-progress-list {
+  padding: var(--gap) var(--gap-lg) var(--gap-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cap-progress-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.cap-progress-row__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cap-progress-row__name {
+  font-weight: 700;
+  font-size: .9rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cap-progress-row__sub {
+  font-size: .78rem;
+  color: rgba(15,23,42,.48);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cap-progress-row__bar-wrap {
+  flex: 1;
+  min-width: 80px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.08);
+  overflow: hidden;
+}
+
+.cap-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+
+.cap-bar--full { background: linear-gradient(90deg,#10b981,#059669); }
+.cap-bar--mid  { background: linear-gradient(90deg,#3b82f6,#1d4ed8); }
+.cap-bar--low  { background: linear-gradient(90deg,#f59e0b,#b45309); }
+
+.cap-progress-row__count {
+  font-size: .8rem;
+  font-weight: 800;
+  color: rgba(15,23,42,.55);
+  white-space: nowrap;
+}
+
+/* Slot capturado — solo checkmark verde */
+.slot-ok-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(16,185,129,.12);
+  border: 1px solid rgba(16,185,129,.25);
+  color: #059669;
+}
+
+/* =========================================================
+   DASHBOARD ADMIN — row expansion table
+   ========================================================= */
+
+.rexp-table { margin: 0; }
+
+.rexp-row { cursor: default; }
+.rexp-row--area,
+.rexp-row--sub { cursor: pointer; }
+
+.rexp-row--area:hover td { background: rgba(29,78,216,.04); }
+.rexp-row--sub:hover  td { background: rgba(15,23,42,.025); }
+
+.rexp-row--area td { border-top: 1px solid rgba(15,23,42,.06); }
+.rexp-row--slot td { background: rgba(15,23,42,.015); }
+
+.rexp-toggle { width: 2rem; text-align: center; }
+
+.rexp-arrow {
+  display: inline-block;
+  font-size: .65rem;
+  color: rgba(15,23,42,.38);
+  transition: transform .15s;
+  user-select: none;
+}
+.rexp-arrow--sm { font-size: .58rem; }
+
+/* Badges de eficiencia */
+.eff-badge {
+  display: inline-block;
+  padding: .2rem .5rem;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 800;
+}
+.eff-badge--ok   { background: rgba(16,185,129,.12); color: #047857; }
+.eff-badge--warn { background: rgba(245,158,11,.12);  color: #b45309; }
+.eff-badge--fail { background: rgba(239,68,68,.12);   color: #b91c1c; }
+.eff-badge--none { background: rgba(15,23,42,.06);    color: rgba(15,23,42,.45); }
+
+/* Strip pequeño para la columna de slots */
+.slot-strip--sm {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.slot-strip--sm .slot-strip__seg {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .rexp-row--area:hover td { background: rgba(255,255,255,.04); }
+html[data-theme="dark"] .rexp-row--sub:hover  td { background: rgba(255,255,255,.02); }
+html[data-theme="dark"] .rexp-row--slot td        { background: rgba(255,255,255,.015); }
 
 .agenda-employee-row__actions{
   flex-shrink: 0;
@@ -2369,4 +2828,297 @@ USUARIOS
   .emp-results-totals{
     gap: 8px;
   }
+}
+
+/* =========================================================
+   REJECTION BADGE — inline en tabla y card eficiencia
+   ========================================================= */
+
+.dash-rec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: .18rem .5rem;
+  border-radius: 999px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.20);
+  color: #b91c1c;
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.dash-rec-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* =========================================================
+   CAPTURA INLINE — fila del empleado con form inline
+   Fixes para dark mode / light mode coherence
+   ========================================================= */
+
+/* Fila empleado en tabla de captura: no-pointer en TD principal */
+.rexp-row--sub .rexp-toggle,
+.rexp-row--sub td:first-child { cursor: pointer; }
+
+/* Input numérico inline compact */
+.rexp-row--sub .slot-qty {
+  width: 5.5rem !important;
+  min-height: 32px !important;
+  height: 32px !important;
+}
+
+/* Select de hora inline compact */
+.rexp-row--sub select.form-control {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 2px 6px !important;
+  font-size: .82rem !important;
+}
+
+/* Botón guardar inline */
+.rexp-row--sub .btn--slot-save {
+  width: 28px;
+  height: 28px;
+}
+
+/* Fila detalle (rechazos/registros expandida) */
+.rexp-row--slot td {
+  padding-top: .35rem !important;
+  padding-bottom: .45rem !important;
+}
+
+/* Texto de labels de rechazos en detalle */
+.cap-detail-label {
+  font-size: .82rem;
+  color: rgba(15,23,42,.55);
+}
+
+.cap-detail-label strong {
+  color: rgba(15,23,42,.75);
+  font-weight: 700;
+}
+
+/* =========================================================
+   CAPTURA INLINE — select / input / botón (light mode)
+   ========================================================= */
+
+.cap-slot-select {
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 6px !important;
+  font-size: .82rem !important;
+  line-height: 1.1 !important;
+  width: auto !important;
+  vertical-align: middle !important;
+  appearance: auto !important;
+  /* Light mode: fondo blanco, texto oscuro, borde visible */
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15,23,42,.18) !important;
+  border-radius: 10px !important;
+}
+
+.js-form-captura > .cap-slot-select,
+.js-form-captura > .cap-slot-qty,
+.js-form-captura > .cap-slot-btn {
+  align-self: center !important;
+}
+
+.cap-slot-select:focus {
+  border-color: rgba(29,78,216,.45) !important;
+  box-shadow: 0 0 0 3px rgba(29,78,216,.10) !important;
+  outline: none !important;
+}
+
+.cap-slot-qty {
+  width: 5.5rem !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  /* Light mode */
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15,23,42,.18) !important;
+  border-radius: 10px !important;
+}
+
+.cap-slot-qty:focus {
+  border-color: rgba(29,78,216,.45) !important;
+  box-shadow: 0 0 0 3px rgba(29,78,216,.10) !important;
+  outline: none !important;
+}
+
+.cap-slot-qty::placeholder {
+  color: rgba(15,23,42,.38) !important;
+}
+
+/* Estado: slot ya capturado */
+.cap-form--captured .cap-slot-select {
+  background: rgba(16,185,129,.06) !important;
+  border-color: rgba(16,185,129,.28) !important;
+  color: #047857 !important;
+}
+
+.cap-form--captured .cap-slot-qty {
+  background: rgba(15,23,42,.04) !important;
+  color: rgba(15,23,42,.35) !important;
+  border-color: rgba(15,23,42,.10) !important;
+  cursor: not-allowed !important;
+}
+
+.cap-slot-btn:disabled {
+  opacity: .35 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Progress bar track (replaces inline background) */
+.cap-bar-track {
+  width: 80px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15,23,42,.08);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   CAPTURA INLINE — Fix 1: badge slot contrast (light mode)
+   Fix 2: form row vertical alignment
+   ========================================================= */
+
+/* Alinea verticalmente select + input + botón con el nombre */
+.rexp-row--sub td {
+  vertical-align: middle !important;
+  padding-top: .55rem !important;
+  padding-bottom: .55rem !important;
+}
+
+.rexp-row--sub > td:nth-child(3) {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.rexp-row--sub > td:nth-child(3) > form,
+.js-form-captura {
+  align-items: center !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  height: 100% !important;
+}
+
+/* Badge de slot capturado — texto visible en light mode */
+.rexp-row--slot .badge--none {
+  background: #f1f5f9 !important;
+  border: 1px solid rgba(15,23,42,.14) !important;
+  color: #0f172a !important;
+}
+
+/* El check icon dentro del badge */
+.rexp-row--slot .badge--none svg {
+  color: #059669;
+  flex-shrink: 0;
+}
+
+/* La hora (texto inline dentro del badge) */
+.rexp-row--slot .badge--none,
+.rexp-row--slot .badge--none > *:not(.badge):not(button):not(svg) {
+  color: #0f172a !important;
+}
+
+/* Badge de rechazo -N dentro del slot badge */
+.rexp-row--slot .badge--danger {
+  background: rgba(239,68,68,.12) !important;
+  color: #b91c1c !important;
+  border: 1px solid rgba(239,68,68,.22) !important;
+}
+
+/* Botón + rec dentro del badge */
+.rexp-row--slot .btn--ghost {
+  color: rgba(15,23,42,.60) !important;
+  border-color: rgba(15,23,42,.16) !important;
+  background: rgba(15,23,42,.04) !important;
+}
+.rexp-row--slot .btn--ghost:hover {
+  color: #1d4ed8 !important;
+  border-color: rgba(29,78,216,.28) !important;
+  background: rgba(29,78,216,.06) !important;
+}
+
+/* Dark mode overrides */
+html[data-theme="dark"] .rexp-row--slot .badge--none {
+  background: rgba(255,255,255,.06) !important;
+  border-color: rgba(148,163,184,.18) !important;
+  color: rgba(226,232,240,.90) !important;
+}
+
+html[data-theme="dark"] .rexp-row--slot .badge--none svg {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .rexp-row--slot .badge--danger {
+  background: rgba(239,68,68,.14) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239,68,68,.25) !important;
+}
+
+html[data-theme="dark"] .rexp-row--slot .btn--ghost {
+  color: rgba(148,163,184,.80) !important;
+  border-color: rgba(148,163,184,.18) !important;
+  background: rgba(255,255,255,.04) !important;
+}
+
+/* Toast flash para confirmación AJAX */
+.cap-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: .75rem 1.1rem;
+  border-radius: 14px;
+  font-size: .9rem;
+  font-weight: 700;
+  box-shadow: 0 8px 28px rgba(15,23,42,.18);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s, transform .2s;
+}
+
+.cap-toast--show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cap-toast--ok {
+  background: #f0fdf4;
+  border: 1px solid rgba(16,185,129,.30);
+  color: #065f46;
+}
+
+.cap-toast--err {
+  background: #fff1f2;
+  border: 1px solid rgba(239,68,68,.28);
+  color: #9f1239;
+}
+
+html[data-theme="dark"] .cap-toast--ok {
+  background: #064e3b;
+  border-color: rgba(16,185,129,.35);
+  color: #a7f3d0;
+}
+
+html[data-theme="dark"] .cap-toast--err {
+  background: #4c0519;
+  border-color: rgba(239,68,68,.32);
+  color: #fecdd3;
 }

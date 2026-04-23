@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -90,16 +91,18 @@ export class CapturasService {
     }
 
     const existente = await this.prisma.meroCaptura.findFirst({
-      where: {
-        asignacionId: dto.asignacionId,
-        slotHora: dto.slotHora,
-      },
+      where: { asignacionId: dto.asignacionId, slotHora: dto.slotHora },
+      include: { encargado: { select: { id: true, nombre: true } } },
     });
 
+    // Si ya existe una captura para este slot, rechazar con 409
     if (existente) {
-      return this.prisma.meroCaptura.update({
-        where: { id: existente.id },
-        data: { cantidad: dto.cantidad, capturadoPor },
+      throw new ConflictException({
+        message: `Este slot ya fue capturado por ${existente.encargado?.nombre ?? 'otro encargado'}`,
+        capturaId: existente.id,
+        capturadoPor: existente.encargado?.nombre,
+        cantidad: existente.cantidad,
+        slotHora: existente.slotHora,
       });
     }
 
@@ -110,12 +113,17 @@ export class CapturasService {
         cantidad: dto.cantidad,
         capturadoPor,
       },
+      include: { encargado: { select: { id: true, nombre: true } } },
     });
   }
 
   findByAsignacion(asignacionId: number) {
     return this.prisma.meroCaptura.findMany({
       where: { asignacionId },
+      include: {
+        encargado: { select: { id: true, nombre: true } },
+        rechazos: { select: { id: true, cantidad: true, motivo: true } },
+      },
       orderBy: { slotHora: 'asc' },
     });
   }

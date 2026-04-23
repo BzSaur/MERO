@@ -19,10 +19,19 @@
 
             <%
               const nombreCompleto = `${empleado.nombre || ''} ${empleado.apellidos || ''}`.trim();
+              const nombreCompletoMayus = nombreCompleto.toUpperCase();
               const partesNombre = nombreCompleto.split(' ').filter(Boolean);
               const iniciales = partesNombre.length >= 2
                 ? `${partesNombre[0][0] || ''}${partesNombre[1][0] || ''}`.toUpperCase()
                 : (nombreCompleto.slice(0, 2) || 'EM').toUpperCase();
+
+              const metricasEmpleado = empleadoMetricas || {};
+              const graficasEmpleado = empleadoCharts || {
+                labels: [],
+                productividad: [],
+                rechazos: [],
+                eficiencia: [],
+              };
 
               let anos = 0;
               let meses = 0;
@@ -66,7 +75,7 @@
                     <% } %>
                   </div>
 
-                  <h1 class="employee-hero__title"><%= nombreCompleto %></h1>
+                  <h1 class="employee-hero__title"><%= nombreCompletoMayus %></h1>
 
                   <div class="employee-hero__meta">
                     <span class="employee-chip">
@@ -119,7 +128,7 @@
                   <div class="employee-info-list">
                     <div class="employee-info-item">
                       <span class="employee-info-item__label">Nombre completo</span>
-                      <strong class="employee-info-item__value"><%= nombreCompleto %></strong>
+                      <strong class="employee-info-item__value"><%= nombreCompletoMayus %></strong>
                     </div>
 
                     <div class="employee-info-item">
@@ -218,6 +227,55 @@
 
             </div>
 
+            <section class="card employee-card employee-metrics">
+              <div class="card__header employee-card__header employee-card__header--history">
+                <span class="card__title">
+                  <svg class="icon"><use href="#icon-logo"/></svg>
+                  Métricas de desempeño
+                </span>
+
+                <span class="badge badge--none"><%= Number(metricasEmpleado.totalSlots || 0) %> slot<%= Number(metricasEmpleado.totalSlots || 0) !== 1 ? 's' : '' %></span>
+              </div>
+
+              <div class="employee-card__body employee-card__body--metrics">
+                <div class="employee-metrics__stats">
+                  <article class="employee-kpi employee-kpi--prod">
+                    <p class="employee-kpi__label">Productividad neta</p>
+                    <p class="employee-kpi__value"><%= Number(metricasEmpleado.totalNeto || 0).toLocaleString('es-MX') %></p>
+                    <p class="employee-kpi__sub">pzas</p>
+                  </article>
+
+                  <article class="employee-kpi employee-kpi--reject">
+                    <p class="employee-kpi__label">Rechazos</p>
+                    <p class="employee-kpi__value"><%= Number(metricasEmpleado.totalRechazos || 0).toLocaleString('es-MX') %></p>
+                    <p class="employee-kpi__sub">tasa <%= Number(metricasEmpleado.tasaRechazo || 0).toFixed(1) %>%</p>
+                  </article>
+
+                  <article class="employee-kpi employee-kpi--eff">
+                    <p class="employee-kpi__label">Eficiencia promedio</p>
+                    <p class="employee-kpi__value"><%= metricasEmpleado.eficienciaPromedio == null ? '—' : `${Number(metricasEmpleado.eficienciaPromedio).toFixed(1)}%` %></p>
+                    <p class="employee-kpi__sub">por slot con estándar</p>
+                  </article>
+
+                  <article class="employee-kpi employee-kpi--slot">
+                    <p class="employee-kpi__label">Productividad por slot</p>
+                    <p class="employee-kpi__value"><%= Number(metricasEmpleado.productividadPromedioSlot || 0).toFixed(1) %></p>
+                    <p class="employee-kpi__sub">pzas / slot</p>
+                  </article>
+                </div>
+
+                <% if (!graficasEmpleado.labels || !graficasEmpleado.labels.length) { %>
+                  <div class="empty empty--employee">
+                    <p class="empty__text">Aún no hay datos suficientes para graficar este empleado.</p>
+                  </div>
+                <% } else { %>
+                  <div class="employee-metrics__chart-wrap">
+                    <canvas id="employeePerformanceChart" class="employee-metrics__chart" aria-label="Gráfica de productividad, rechazos y eficiencia del empleado"></canvas>
+                  </div>
+                <% } %>
+              </div>
+            </section>
+
             <section class="card card--asignar-act empleado-detail-history">
               <div class="card__header employee-card__header employee-card__header--history">
                 <span class="card__title">
@@ -256,9 +314,9 @@
                             <%= a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }) : '—' %>
                           </td>
 
-                          <td><%= a.areaId || '—' %></td>
-                          <td class="td-hide-mobile"><%= a.subtareaId || '—' %></td>
-                          <td class="td-hide-mobile"><%= a.modeloId || '—' %></td>
+                          <td><%= a.area?.nombre || '—' %></td>
+                          <td class="td-hide-mobile"><%= a.subtarea?.nombre || '—' %></td>
+                          <td class="td-hide-mobile"><%= a.modelo?.nombreSku || '—' %></td>
                           <td class="td-hide-mobile td-mono"><%= a.horaInicio || '—' %></td>
                           <td class="td-hide-mobile td-mono"><%= a.horaFin || '—' %></td>
 
@@ -285,5 +343,115 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    (() => {
+      const payload = <%- JSON.stringify(empleadoCharts || {
+        labels: [],
+        productividad: [],
+        rechazos: [],
+        eficiencia: [],
+      }) %>;
+
+      if (!window.Chart) return;
+      if (!Array.isArray(payload.labels) || !payload.labels.length) return;
+
+      const canvas = document.getElementById('employeePerformanceChart');
+      if (!canvas) return;
+
+      new Chart(canvas, {
+        data: {
+          labels: payload.labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Productividad neta',
+              data: payload.productividad,
+              yAxisID: 'yProductividad',
+              backgroundColor: 'rgba(29,78,216,.72)',
+              borderRadius: 8,
+              maxBarThickness: 34,
+            },
+            {
+              type: 'bar',
+              label: 'Rechazos',
+              data: payload.rechazos,
+              yAxisID: 'yProductividad',
+              backgroundColor: 'rgba(239,68,68,.52)',
+              borderRadius: 8,
+              maxBarThickness: 34,
+            },
+            {
+              type: 'line',
+              label: 'Eficiencia (%)',
+              data: payload.eficiencia,
+              yAxisID: 'yEficiencia',
+              borderColor: 'rgba(13,148,136,1)',
+              backgroundColor: 'rgba(13,148,136,.24)',
+              pointBackgroundColor: 'rgba(13,148,136,1)',
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              tension: 0.28,
+              spanGaps: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const value = context.parsed.y;
+                  if (context.dataset.yAxisID === 'yEficiencia') {
+                    if (value == null) return `${context.dataset.label}: —`;
+                    return `${context.dataset.label}: ${Number(value).toFixed(1)}%`;
+                  }
+                  return `${context.dataset.label}: ${Number(value || 0).toLocaleString('es-MX')} pzas`;
+                },
+              },
+            },
+          },
+          scales: {
+            yProductividad: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Piezas',
+              },
+              grid: {
+                color: 'rgba(15,23,42,.08)',
+              },
+            },
+            yEficiencia: {
+              position: 'right',
+              beginAtZero: true,
+              suggestedMax: 140,
+              grid: {
+                drawOnChartArea: false,
+              },
+              ticks: {
+                callback(value) {
+                  return `${value}%`;
+                },
+              },
+              title: {
+                display: true,
+                text: 'Eficiencia',
+              },
+            },
+          },
+        },
+      });
+    })();
+  </script>
 </body>
 </html>

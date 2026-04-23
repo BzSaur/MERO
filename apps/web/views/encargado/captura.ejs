@@ -20,157 +20,264 @@
             <div class="page-header page-header--auditoria">
               <div>
                 <h1>Registrar Captura</h1>
-                <p class="page-header__sub">Ingresa la producción por slot horario</p>
+                <p class="page-header__sub">Producción por slot horario</p>
               </div>
-
               <a href="/encargado" class="btn btn--back">
                 <svg class="icon"><use href="#icon-back"/></svg>
                 Volver
               </a>
             </div>
 
+            <%- include('../partials/flash') %>
+
             <%
-              const _asignaciones = Array.isArray(asignaciones) ? asignaciones : [];
-              const _slotsDisponibles = Array.isArray(slotsDisponibles) ? slotsDisponibles : [];
+              const TURNO_HORAS = [8,9,10,11,12,13,14,15,16,17,18,19,20];
+
+              const _asignaciones  = Array.isArray(asignaciones)     ? asignaciones     : [];
+              const _capturasMap   = capturasMap || {};
+              const _slots         = Array.isArray(slotsDisponibles) ? slotsDisponibles : [];
+
+              // Default: último slot disponible (el más reciente)
+              const _horaDefault   = _slots.length ? _slots[_slots.length - 1].hora : null;
+
+              // Agrupar asignaciones por subtarea (activas primero, luego terminadas)
+              const bySubtarea = {};
+              const _sorted = [..._asignaciones].sort((a, b) => {
+                if (a.activa === b.activa) return 0;
+                return a.activa ? -1 : 1;
+              });
+              _sorted.forEach(a => {
+                const key   = a.subtareaId || 'sin-subtarea';
+                const label = a.subtarea?.nombre || 'Sin subtarea';
+                if (!bySubtarea[key]) bySubtarea[key] = { label, asignaciones: [] };
+                bySubtarea[key].asignaciones.push(a);
+              });
+
+              let subIdx = 0;
             %>
 
+            <!-- ── CAPTURA (subtarea → empleado inline) ── -->
             <div class="card card--asignar card--asignar-act card--usuarios">
               <div class="card__header card__header--usuarios">
-                <h3><span class="card__title">Nueva captura</span></h3>
-                <span class="badge badge--ok"><%= _asignaciones.length %></span>
+                <h3><span class="card__title">Captura del turno</span></h3>
+                <% const _activas = _asignaciones.filter(a => a.activa).length; %>
+                <span class="badge badge--ok" title="<%= _activas %> activas · <%= _asignaciones.length - _activas %> terminadas">
+                  <%= _activas %> activas
+                  <% if (_asignaciones.length - _activas > 0) { %>
+                    <span style="opacity:.6;font-weight:400;"> · <%= _asignaciones.length - _activas %> terminadas</span>
+                  <% } %>
+                </span>
               </div>
 
               <% if (!_asignaciones.length) { %>
                 <div class="empty empty--asignar">
                   <p class="empty__text">Sin asignaciones activas.</p>
-                  <p class="empty__sub">Primero asigna un usuario a un área para registrar su captura.</p>
+                  <p class="empty__sub">Primero asigna personal en <a href="/encargado/asignar">Gestionar asignaciones</a>.</p>
                 </div>
               <% } else { %>
                 <div class="table-wrap table-wrap--asignar table-wrap--clean">
-                  <table class="table table--asignar table--clean">
+                  <table class="table table--asignar table--clean rexp-table">
                     <thead>
                       <tr>
-                        <th>Usuario</th>
-                        <th>Área</th>
-                        <th>Horario</th>
-                        <th>Cantidad</th>
-                        <th>Capturar</th>
+                        <th style="width:2rem"></th>
+                        <th>Subtarea / Empleado</th>
+                        <th style="width:13rem">Registrar slot</th>
+                        <th style="width:9rem;text-align:right" class="td-hide-mobile">Progreso</th>
                       </tr>
                     </thead>
-
                     <tbody>
-                      <% _asignaciones.forEach((a, idx) => { 
-                           const formId = `capturaForm_${a.id}_${idx}`;
+
+                    <% Object.entries(bySubtarea).forEach(([subtareaKey, grupo]) => {
+                         const sId = 'sub-' + subIdx++;
+                         let totalCaps = 0;
+                         grupo.asignaciones.forEach(a => {
+                           totalCaps += (_capturasMap[a.id] || []).length;
+                         });
+                    %>
+
+                      <!-- FILA SUBTAREA -->
+                      <tr class="rexp-row rexp-row--area" data-target="<%= sId %>" onclick="toggleRexp(this)">
+                        <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
+                        <td>
+                          <strong><%= grupo.label %></strong>
+                          <span class="badge badge--none" style="margin-left:.5rem;font-size:.72rem;"><%= grupo.asignaciones.length %> empleados</span>
+                        </td>
+                        <td></td>
+                        <td class="td-hide-mobile" style="text-align:right">
+                          <span class="cap-progress-row__count"><%= totalCaps %> capturas</span>
+                        </td>
+                      </tr>
+
+                      <% let empIdx = 0; grupo.asignaciones.forEach(a => {
+                           const eId    = sId + '-emp-' + empIdx++;
+                           const caps   = _capturasMap[a.id] || [];
+                           const empCaps  = caps.length;
+                           const empTotal = TURNO_HORAS.length;
+                           const empPct   = empTotal ? Math.round((empCaps/empTotal)*100) : 0;
+                           const barClass = empPct >= 100 ? 'cap-bar--full' : empPct >= 50 ? 'cap-bar--mid' : 'cap-bar--low';
+                           const nombre   = `${a.empleado?.nombre || ''} ${(a.empleado?.apellidos || '').split(' ')[0]}`.trim();
+
+                           // Rechazos totales del empleado
+                           let totalRechazos = 0;
+                           caps.forEach(c => {
+                             if (c.rechazos) totalRechazos += c.rechazos.reduce((s,r) => s + r.cantidad, 0);
+                           });
                       %>
-                        <tr>
-                          <td>
-                            <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
+
+                        <!-- FILA EMPLEADO (inline form) -->
+                        <tr class="rexp-row rexp-row--sub rexp-child--<%= sId %>" style="display:none"
+                            data-target="<%= eId %>">
+                          <td class="rexp-toggle" style="padding-left:1.4rem" onclick="toggleRexp(this.parentElement)">
+                            <span class="rexp-arrow rexp-arrow--sm">▶</span>
                           </td>
-
-                          <td>
-                            <%= a.area?.nombre || '—' %>
+                          <td style="padding-left:1rem" onclick="toggleRexp(this.parentElement)">
+                            <span style="font-weight:700;font-size:.92rem;"><%= nombre %></span>
+                            <% if (!a.activa) { %>
+                              <span class="badge badge--warn" style="margin-left:.4rem;font-size:.68rem;">Terminó</span>
+                            <% } %>
                           </td>
-
-                          <td>
-                            <select
-                              class="form-control"
-                              name="slotHora"
-                              form="<%= formId %>"
-                              required
-                              <%= !_slotsDisponibles.length ? 'disabled' : '' %>
-                            >
-                              <option value="">— Seleccionar —</option>
-                              <% _slotsDisponibles.forEach(s => { %>
-                                <option value="<%= s.hora %>"><%= s.label %></option>
-                              <% }) %>
-                            </select>
-                          </td>
-
-                          <td>
-                            <input
-                              class="form-control"
-                              type="number"
-                              name="cantidad"
-                              form="<%= formId %>"
-                              min="0"
-                              required
-                              placeholder="0"
-                              <%= !_slotsDisponibles.length ? 'disabled' : '' %>
-                            >
-                          </td>
-
-                          <td>
-                            <button
-                              type="submit"
-                              form="<%= formId %>"
-                              class="btn btn--edit btn--sm"
-                              <%= !_slotsDisponibles.length ? 'disabled' : '' %>
-                            >
-                              <svg class="icon"><use href="#icon-check"/></svg>
-                              Capturar
-                            </button>
-
+                          <td onclick="event.stopPropagation()">
+                            <% if (!a.activa) { %>
+                              <span style="font-size:.78rem;color:rgba(15,23,42,.38);">Turno cerrado — solo rechazos</span>
+                            <% } else { %>
+                            <%
+                              const _capturedHours = caps.map(c => c.slotHora);
+                              const _capturedJson  = JSON.stringify(_capturedHours);
+                              // Default: último slot disponible; si ya capturado, el otro disponible
+                              let _selectDefault = _horaDefault;
+                              if (_horaDefault !== null && _capturedHours.includes(_horaDefault)) {
+                                const libre = _slots.find(s => !_capturedHours.includes(s.hora));
+                                if (libre) _selectDefault = libre.hora;
+                              }
+                            %>
                             <form
-                              id="<%= formId %>"
                               method="POST"
                               action="/encargado/captura"
                               class="js-form-captura"
-                              style="display:none;"
+                              data-captured="<%= _capturedJson %>"
+                              style="display:flex;align-items:center;gap:5px;flex-wrap:nowrap;"
                             >
                               <input type="hidden" name="asignacionId" value="<%= a.id %>">
+                              <% if (_slots.length === 0) { %>
+                                <span style="font-size:.78rem;color:rgba(15,23,42,.38);">Sin slots disponibles</span>
+                              <% } else { %>
+                              <select class="form-control cap-slot-select" name="slotHora" size="1" aria-label="Seleccionar hora de slot">
+                                <% _slots.forEach(s => {
+                                     const isCap = _capturedHours.includes(s.hora);
+                                %>
+                                  <option
+                                    value="<%= s.hora %>"
+                                    <%= s.hora === _selectDefault ? 'selected' : '' %>
+                                    <%= isCap ? 'data-captured="1"' : '' %>
+                                  ><%= s.hora %>:00<%= isCap ? ' ✓' : '' %></option>
+                                <% }) %>
+                              </select>
+                              <% } %>
+                              <input
+                                class="form-control slot-qty cap-slot-qty"
+                                type="number"
+                                name="cantidad"
+                                min="0"
+                                placeholder="pzas"
+                                required
+                              >
+                              <button type="submit" class="btn btn--slot-save cap-slot-btn" title="Guardar">
+                                <svg class="icon"><use href="#icon-check"/></svg>
+                              </button>
                             </form>
+                            <% } %>
+                          </td>
+                          <td class="td-hide-mobile" onclick="toggleRexp(this.parentElement)">
+                            <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+                              <div class="cap-bar-track">
+                                <div class="cap-bar <%= barClass %>" style="width:<%= Math.max(empPct,2) %>%;height:100%"></div>
+                              </div>
+                              <span class="cap-progress-row__count"><%= empCaps %>/<%= empTotal %></span>
+                            </div>
                           </td>
                         </tr>
-                      <% }) %>
-                    </tbody>
-                  </table>
-                </div>
 
-                <% if (!_slotsDisponibles.length) { %>
-                  <div class="empty empty--asignar" style="padding-top: 0;">
-                    <p class="empty__sub">
-                      En este momento no hay slots disponibles para captura.
-                    </p>
-                  </div>
-                <% } %>
-              <% } %>
-            </div>
-
-            <div class="card card--asignar card--asignar-act card--usuarios">
-              <div class="card__header card__header--usuarios card__header--captura-act">
-                <div class="card__header-top">
-                  <h3><span class="card__title">Asignaciones activas</span></h3>
-                  <span class="badge badge--ok"><%= _asignaciones.length %></span>
-                </div>
-
-                <a href="/encargado/asignar" class="btn btn--success btn--sm btn--captura-manage">
-                  Gestionar asignaciones
-                </a>
-              </div>
-
-              <% if (!_asignaciones.length) { %>
-                <div class="empty empty--asignar">
-                  <p class="empty__text">Sin asignaciones activas.</p>
-                </div>
-              <% } else { %>
-                <div class="table-wrap table-wrap--asignar table-wrap--clean">
-                  <table class="table table--asignar table--clean">
-                    <thead>
-                      <tr>
-                        <th>Usuario</th>
-                        <th>Área</th>
-                        <th class="td-hide-mobile">Subtarea</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      <% _asignaciones.forEach(a => { %>
-                        <tr>
-                          <td><%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %></td>
-                          <td><%= a.area?.nombre || '—' %></td>
-                          <td class="td-hide-mobile"><%= a.subtarea?.nombre || '—' %></td>
+                        <!-- FILA DETALLE EMPLEADO (expandida) -->
+                        <tr class="rexp-row rexp-row--slot rexp-child--<%= eId %>" style="display:none">
+                          <td></td>
+                          <td colspan="3" style="padding-left:2.6rem;padding-top:.4rem;padding-bottom:.5rem;">
+                            <div style="display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;">
+                              <span class="cap-detail-label">
+                                <strong>Rechazos:</strong> <%= totalRechazos %>
+                              </span>
+                              <span class="cap-detail-label">
+                                <strong>Registros capturados:</strong> <%= empCaps %>
+                              </span>
+                              <% if (empCaps > 0) { %>
+                                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;width:100%;">
+                                  <% caps.forEach(cap => {
+                                    const _rechazos = cap.rechazos || [];
+                                    const _totalRec = _rechazos.reduce((s,r) => s + r.cantidad, 0);
+                                    const _neto     = cap.cantidad - _totalRec;
+                                  %>
+                                    <span
+                                      class="badge badge--none"
+                                      style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"
+                                      title="Slot <%= cap.slotHora %>:00 — <%= cap.cantidad %> pzas<%= _totalRec ? ' · ' + _totalRec + ' rechazos' : '' %>"
+                                    >
+                                      <svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>
+                                      <%= cap.slotHora %>:00
+                                      <% if (_totalRec > 0) { %>
+                                        <span class="badge badge--danger" style="font-size:.68rem;padding:0 4px;">-<%= _totalRec %></span>
+                                      <% } %>
+                                      <button type="button"
+                                        class="btn btn--ghost"
+                                        style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"
+                                        onclick="toggleRechazo('<%= cap.id %>')">
+                                        + rec
+                                      </button>
+                                    </span>
+                                    <!-- Form de rechazo -->
+                                    <form
+                                      id="rec-form-<%= cap.id %>"
+                                      method="POST"
+                                      action="/encargado/rechazos"
+                                      class="js-form-rechazo"
+                                      style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"
+                                    >
+                                      <input type="hidden" name="capturaId" value="<%= cap.id %>">
+                                      <span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot <%= cap.slotHora %>:00</span>
+                                      <input
+                                        class="form-control slot-qty"
+                                        type="number"
+                                        name="cantidad"
+                                        min="1"
+                                        max="<%= _neto %>"
+                                        placeholder="Cant."
+                                        style="width:5rem;"
+                                        required
+                                      >
+                                      <input
+                                        class="form-control"
+                                        type="text"
+                                        name="motivo"
+                                        placeholder="Motivo (opcional)"
+                                        style="flex:1;min-width:8rem;"
+                                      >
+                                      <button type="submit" class="btn btn--slot-save" title="Guardar rechazo">
+                                        <svg class="icon"><use href="#icon-check"/></svg>
+                                      </button>
+                                      <button type="button" class="btn btn--ghost"
+                                        style="font-size:.72rem;padding:2px 8px;height:auto;"
+                                        onclick="toggleRechazo('<%= cap.id %>')">
+                                        Cancelar
+                                      </button>
+                                    </form>
+                                  <% }) %>
+                                </div>
+                              <% } %>
+                            </div>
+                          </td>
                         </tr>
+
                       <% }) %>
+                    <% }) %>
+
                     </tbody>
                   </table>
                 </div>
@@ -184,57 +291,301 @@
   </div>
 
   <div id="sidebarOverlay"></div>
-
+  <div id="cap-toast" class="cap-toast" role="status" aria-live="polite"></div>
   <script src="/js/main.js"></script>
-  <script src="/js/alerts.js" defer></script>
 
   <script>
+    /* ── expand/collapse ── */
+    function toggleRexp(row) {
+      const target = row.dataset.target;
+      if (!target) return;
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      const arrow    = row.querySelector('.rexp-arrow');
+      const isOpen   = row.classList.contains('rexp-row--open');
+      if (isOpen) {
+        collapseRexp(target);
+        row.classList.remove('rexp-row--open');
+        if (arrow) arrow.textContent = '▶';
+      } else {
+        children.forEach(c => { c.style.display = ''; });
+        row.classList.add('rexp-row--open');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('rexp-row--open');
+        const a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        const sub = c.dataset.target;
+        if (sub) collapseRexp(sub);
+      });
+    }
+
+    function toggleRechazo(capturaId) {
+      const form = document.getElementById('rec-form-' + capturaId);
+      if (!form) return;
+      const visible = form.style.display !== 'none';
+      form.style.display = visible ? 'none' : 'flex';
+    }
+
+    /* ── toast ── */
+    let _toastTimer = null;
+    function showToast(msg, type) {
+      const el = document.getElementById('cap-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.className = 'cap-toast cap-toast--' + type + ' cap-toast--show';
+      clearTimeout(_toastTimer);
+      _toastTimer = setTimeout(() => {
+        el.classList.remove('cap-toast--show');
+      }, 3000);
+    }
+
     (() => {
-      const SwalRef = window.Swal;
-      const KEY_CAPTURA_OK = 'mero_captura_ok';
+      const Swal = window.Swal;
 
-      function showPendingAlerts() {
-        if (!SwalRef) return;
-
-        const capturaOk = sessionStorage.getItem(KEY_CAPTURA_OK);
-
-        if (capturaOk === '1') {
-          sessionStorage.removeItem(KEY_CAPTURA_OK);
-
-          SwalRef.fire({
-            icon: 'success',
-            title: 'Captura realizada exitosamente',
-            confirmButtonText: 'Aceptar'
-          });
+      /* ── slot state ── */
+      function updateSlotState(form) {
+        const captured = JSON.parse(form.dataset.captured || '[]');
+        const sel  = form.querySelector('.cap-slot-select');
+        const qty  = form.querySelector('.cap-slot-qty');
+        const btn  = form.querySelector('.cap-slot-btn');
+        if (!sel || !qty || !btn) return;
+        const hora = Number(sel.value);
+        const isCaptured = captured.includes(hora);
+        qty.disabled = isCaptured;
+        btn.disabled = isCaptured;
+        qty.value    = '';
+        if (isCaptured) {
+          qty.placeholder = 'Ya capturado';
+          form.classList.add('cap-form--captured');
+        } else {
+          qty.placeholder = 'pzas';
+          form.classList.remove('cap-form--captured');
         }
       }
 
-      document.addEventListener('DOMContentLoaded', showPendingAlerts);
+      /* ── build badge HTML for a newly captured slot ── */
+      function buildSlotBadge(capturaId, slotHora) {
+        return `
+          <span class="badge badge--none"
+            style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"
+            title="Slot ${slotHora}:00">
+            <svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>
+            ${slotHora}:00
+            <button type="button"
+              class="btn btn--ghost"
+              style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"
+              onclick="toggleRechazo('${capturaId}')">
+              + rec
+            </button>
+          </span>
+          <form
+            id="rec-form-${capturaId}"
+            class="js-form-rechazo"
+            style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"
+            data-captura-id="${capturaId}"
+            data-slot-hora="${slotHora}"
+          >
+            <input type="hidden" name="capturaId" value="${capturaId}">
+            <span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot ${slotHora}:00</span>
+            <input class="form-control slot-qty" type="number" name="cantidad" min="1" placeholder="Cant." style="width:5rem;" required>
+            <input class="form-control" type="text" name="motivo" placeholder="Motivo (opcional)" style="flex:1;min-width:8rem;">
+            <button type="submit" class="btn btn--slot-save" title="Guardar rechazo">
+              <svg class="icon"><use href="#icon-check"/></svg>
+            </button>
+            <button type="button" class="btn btn--ghost"
+              style="font-size:.72rem;padding:2px 8px;height:auto;"
+              onclick="toggleRechazo('${capturaId}')">
+              Cancelar
+            </button>
+          </form>`;
+      }
 
-      document.querySelectorAll('.js-form-captura').forEach((form) => {
-        form.addEventListener('submit', (e) => {
-          const formId = form.id;
-          const slot = document.querySelector(`[name="slotHora"][form="${formId}"]`);
-          const cantidad = document.querySelector(`[name="cantidad"][form="${formId}"]`);
+      /* ── captura AJAX ── */
+      document.querySelectorAll('.js-form-captura').forEach(form => {
+        updateSlotState(form);
 
-          if (!slot?.value || !cantidad?.value) {
-            e.preventDefault();
+        const sel = form.querySelector('.cap-slot-select');
+        if (sel) sel.addEventListener('change', () => updateSlotState(form));
 
-            if (SwalRef) {
-              SwalRef.fire({
-                icon: 'warning',
-                title: 'Faltan datos',
-                text: 'Selecciona un horario y captura la cantidad antes de guardar.',
-                confirmButtonText: 'Aceptar'
-              });
-            }
-
+        form.addEventListener('submit', async e => {
+          e.preventDefault();
+          const qty = form.querySelector('[name="cantidad"]');
+          if (qty?.disabled) return;
+          if (!qty?.value || Number(qty.value) < 0) {
+            if (Swal) Swal.fire({ icon: 'warning', title: 'Ingresa una cantidad válida', confirmButtonText: 'Aceptar' });
             return;
           }
 
-          sessionStorage.setItem(KEY_CAPTURA_OK, '1');
+          const btn = form.querySelector('.cap-slot-btn');
+          if (btn) btn.disabled = true;
+
+          try {
+            const payload = new URLSearchParams(new FormData(form)).toString();
+            const resp = await fetch('/encargado/captura/ajax', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: payload,
+            });
+            const json = await resp.json();
+
+            if (!json.ok) {
+              showToast(json.message || 'Error al registrar', 'err');
+              if (btn) btn.disabled = false;
+              return;
+            }
+
+            /* ── update captured set ── */
+            const slotHora = Number(sel ? sel.value : form.querySelector('[name="slotHora"]').value);
+            const captured = JSON.parse(form.dataset.captured || '[]');
+            captured.push(slotHora);
+            form.dataset.captured = JSON.stringify(captured);
+            updateSlotState(form);
+
+            /* ── update progress bar ── */
+            const empRow = form.closest('tr.rexp-row--sub');
+            if (empRow) {
+              const barEl  = empRow.querySelector('.cap-bar');
+              const countEl = empRow.querySelector('.cap-progress-row__count');
+              if (countEl) {
+                const parts = countEl.textContent.split('/');
+                const newCaps = (parseInt(parts[0]) || 0) + 1;
+                const total   = parseInt(parts[1]) || 12;
+                const pct     = Math.round((newCaps / total) * 100);
+                countEl.textContent = `${newCaps}/${total}`;
+                if (barEl) {
+                  barEl.style.width = Math.max(pct, 2) + '%';
+                  barEl.className = 'cap-bar ' + (pct >= 100 ? 'cap-bar--full' : pct >= 50 ? 'cap-bar--mid' : 'cap-bar--low');
+                }
+              }
+            }
+
+            /* ── inject badge in detail row ── */
+            const eId = empRow?.dataset?.target;
+            if (eId && json.captura) {
+              const detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
+              if (detailRow) {
+                const outerFlex = detailRow.querySelector('td > div');
+                if (outerFlex) {
+                  /* find or create the badges sub-container */
+                  let badgeContainer = outerFlex.querySelector('div[style*="gap:.5rem"]');
+                  if (!badgeContainer) {
+                    badgeContainer = document.createElement('div');
+                    badgeContainer.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;width:100%;';
+                    outerFlex.appendChild(badgeContainer);
+                  }
+                  const frag = document.createElement('div');
+                  frag.innerHTML = buildSlotBadge(json.captura.id, slotHora);
+                  while (frag.firstChild) badgeContainer.appendChild(frag.firstChild);
+                  /* wire new rechazo form */
+                  const newRecForm = document.getElementById('rec-form-' + json.captura.id);
+                  if (newRecForm) wireRechazoForm(newRecForm);
+                }
+              }
+            }
+
+            /* ── update "Registros capturados" label in detail row ── */
+            if (eId) {
+              const detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
+              if (detailRow) {
+                const labels = detailRow.querySelectorAll('.cap-detail-label');
+                labels.forEach(lbl => {
+                  if (lbl.textContent.includes('Registros capturados')) {
+                    const strong = lbl.querySelector('strong');
+                    if (strong) {
+                      const cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
+                      lbl.innerHTML = '<strong>Registros capturados:</strong> ' + (cur + 1);
+                    }
+                  }
+                });
+              }
+            }
+
+            /* ── update option label in select ── */
+            if (sel) {
+              const opt = sel.querySelector(`option[value="${slotHora}"]`);
+              if (opt && !opt.textContent.includes('✓')) {
+                opt.textContent = opt.textContent.replace(':00', ':00 ✓');
+                opt.dataset.captured = '1';
+              }
+            }
+
+            showToast('Captura registrada ✓', 'ok');
+          } catch (err) {
+            showToast('Error de conexión', 'err');
+            if (btn) btn.disabled = false;
+          }
         });
       });
+
+      /* ── rechazo AJAX ── */
+      function wireRechazoForm(form) {
+        form.addEventListener('submit', async e => {
+          e.preventDefault();
+          const qty = form.querySelector('[name="cantidad"]');
+          if (!qty?.value || Number(qty.value) < 1) {
+            if (Swal) Swal.fire({ icon: 'warning', title: 'Ingresa una cantidad de rechazo válida', confirmButtonText: 'Aceptar' });
+            return;
+          }
+
+          const submitBtn = form.querySelector('button[type="submit"]');
+          if (submitBtn) submitBtn.disabled = true;
+
+          try {
+            const payload = new URLSearchParams(new FormData(form)).toString();
+            const resp = await fetch('/encargado/rechazos/ajax', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: payload,
+            });
+            const json = await resp.json();
+
+            if (!json.ok) {
+              showToast(json.message || 'Error al registrar rechazo', 'err');
+              if (submitBtn) submitBtn.disabled = false;
+              return;
+            }
+
+            const capturaId = form.querySelector('[name="capturaId"]')?.value;
+            const cantidad  = Number(qty.value);
+
+            /* update -N badge in slot badge */
+            const slotBadge = form.previousElementSibling;
+            if (slotBadge) {
+              let rejBadge = slotBadge.querySelector('.badge--danger');
+              if (rejBadge) {
+                const cur = parseInt(rejBadge.textContent.replace('-', '')) || 0;
+                rejBadge.textContent = '-' + (cur + cantidad);
+              } else {
+                const recSpan = document.createElement('span');
+                recSpan.className = 'badge badge--danger';
+                recSpan.style.cssText = 'font-size:.68rem;padding:0 4px;';
+                recSpan.textContent = '-' + cantidad;
+                const recBtn = slotBadge.querySelector('button');
+                if (recBtn) slotBadge.insertBefore(recSpan, recBtn);
+              }
+            }
+
+            /* hide form, reset */
+            form.style.display = 'none';
+            qty.value = '';
+            const motivoInput = form.querySelector('[name="motivo"]');
+            if (motivoInput) motivoInput.value = '';
+            if (submitBtn) submitBtn.disabled = false;
+
+            showToast('Rechazo registrado', 'ok');
+          } catch (err) {
+            showToast('Error de conexión', 'err');
+            if (submitBtn) submitBtn.disabled = false;
+          }
+        });
+      }
+
+      document.querySelectorAll('.js-form-rechazo').forEach(wireRechazoForm);
     })();
   </script>
 </body>

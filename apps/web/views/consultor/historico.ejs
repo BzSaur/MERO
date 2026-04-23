@@ -22,8 +22,6 @@
                 <h1>Histórico</h1>
                 <h2><p class="page-header__sub">Consulta de eficiencia por rango de fechas</p></h2>
               </div>
-
-              <!-- mismo estilo que "Volver/Hoy" -->
               <a href="/consultor" class="btn btn--back">
                 <svg class="icon"><use href="#icon-back"/></svg>
                 Hoy
@@ -37,36 +35,17 @@
               <div class="card__header">
                 <h3><span class="card__title">Filtros</span></h3>
               </div>
-
               <form method="GET" action="/consultor/historico">
-                <!-- aplica el formato de filtros -->
                 <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
                   <div class="users-controls__left">
-
                     <div class="form-group users-controls__field">
                       <label class="form-label">Desde</label>
-                      <input
-                        class="form-control"
-                        type="date"
-                        name="desde"
-                        value="<%= filtros.desde || '' %>"
-                        required
-                        max="<%= new Date().toISOString().slice(0,10) %>"
-                      >
+                      <input class="form-control" type="date" name="desde" value="<%= filtros.desde || '' %>" required max="<%= new Date().toISOString().slice(0,10) %>">
                     </div>
-
                     <div class="form-group users-controls__field">
                       <label class="form-label">Hasta</label>
-                      <input
-                        class="form-control"
-                        type="date"
-                        name="hasta"
-                        value="<%= filtros.hasta || '' %>"
-                        required
-                        max="<%= new Date().toISOString().slice(0,10) %>"
-                      >
+                      <input class="form-control" type="date" name="hasta" value="<%= filtros.hasta || '' %>" required max="<%= new Date().toISOString().slice(0,10) %>">
                     </div>
-
                     <div class="form-group users-controls__field users-controls__field--wide">
                       <label class="form-label">Área</label>
                       <select class="form-control" name="areaId">
@@ -76,7 +55,6 @@
                         <% }) %>
                       </select>
                     </div>
-
                     <div class="form-group users-controls__field users-controls__field--wide">
                       <label class="form-label">Subtarea</label>
                       <select class="form-control" name="subtareaId">
@@ -86,119 +64,238 @@
                         <% }) %>
                       </select>
                     </div>
-
                     <div class="form-group users-controls__field users-controls__field--wide">
                       <label class="form-label">Modelo</label>
                       <select class="form-control" name="modeloId">
                         <option value="">Todos</option>
                         <% (modelos || []).forEach(m => { %>
-                          <option
-                            value="<%= m.id %>"
-                            <%= String(filtros.modeloId || '') === String(m.id) ? 'selected' : '' %>>
+                          <option value="<%= m.id %>" <%= String(filtros.modeloId || '') === String(m.id) ? 'selected' : '' %>>
                             <%= m.nombreSku || m.nombre || m.id %>
                           </option>
                         <% }) %>
                       </select>
                     </div>
-
                     <div class="form-group users-controls__actions">
-                      <!-- Botón Buscar -->
                       <button type="submit" class="btn btn--edit">
                         <svg class="icon"><use href="#icon-filter"/></svg>
                         Buscar
                       </button>
-
-                      <!-- Botón Limpiar ya estilizado en CSS -->
-                      <a href="/consultor/historico" class="btn btn--ghost">
-                        Limpiar
-                      </a>
+                      <a href="/consultor/historico" class="btn btn--ghost">Limpiar</a>
                     </div>
-
                   </div>
                 </div>
               </form>
             </div>
 
-            <!-- Resumen -->
             <% if (capturas.length > 0) { %>
               <%
+                function effClass(v) {
+                  if (v == null || !Number.isFinite(Number(v))) return 'none';
+                  const n = Number(v);
+                  if (n >= 90) return 'ok';
+                  if (n >= 70) return 'warn';
+                  return 'fail';
+                }
+                function fmtEff(v) {
+                  if (v == null || !Number.isFinite(Number(v))) return '—';
+                  return Number(v).toFixed(1) + '%';
+                }
+                function avgArr(arr) {
+                  const valid = arr.filter(x => x != null && Number.isFinite(Number(x)));
+                  return valid.length ? valid.reduce((s,x) => s + Number(x), 0) / valid.length : null;
+                }
+
                 let sumEff = 0, countEff = 0, sumReal = 0;
                 capturas.forEach(c => {
                   if (c.eficiencia != null) { sumEff += Number(c.eficiencia); countEff++; }
                   if (c.cantidadReal != null) sumReal += Number(c.cantidadReal);
                 });
                 const avgEff = countEff ? (sumEff / countEff) : null;
+
+                // ─── Construir árbol: área → subtarea → empleado → [capturas] ───
+                const tree = {};
+                capturas.forEach(c => {
+                  const area = c.areaNombre || '—';
+                  const sub  = c.subtareaNombre || '—';
+                  const emp  = c.empleadoNombre || '—';
+                  if (!tree[area]) tree[area] = {};
+                  if (!tree[area][sub]) tree[area][sub] = {};
+                  if (!tree[area][sub][emp]) tree[area][sub][emp] = [];
+                  tree[area][sub][emp].push(c);
+                });
+
+                // Para las gráficas: área → fecha → [eficiencias]
+                const chartData = {};
+                capturas.forEach(c => {
+                  const area = c.areaNombre || '—';
+                  const fecha = c.fecha || '—';
+                  if (!chartData[area]) chartData[area] = {};
+                  if (!chartData[area][fecha]) chartData[area][fecha] = [];
+                  if (c.eficiencia != null) chartData[area][fecha].push(Number(c.eficiencia));
+                });
               %>
 
+              <!-- Resumen -->
               <div class="historico-stats" style="margin-bottom:var(--gap-lg)">
                 <div class="stat-card stat-card--gradient stat-card--blue">
                   <div class="stat-card__label">Eficiencia promedio</div>
                   <div class="stat-card__value"><%= fmtEff(avgEff) %></div>
                 </div>
-
                 <div class="stat-card stat-card--gradient stat-card--green">
                   <div class="stat-card__label">Total producido</div>
                   <div class="stat-card__value"><%= sumReal.toLocaleString('es-MX') %></div>
                   <div class="stat-card__sub">unidades</div>
                 </div>
-
                 <div class="stat-card stat-card--gradient stat-card--indigo">
                   <div class="stat-card__label">Registros</div>
                   <div class="stat-card__value"><%= capturas.length %></div>
                 </div>
               </div>
-            <% } %>
 
-            <!-- Resultados -->
-            <div class="card card--asignar card--asignar-act">
-              <div class="card__header card__header--usuarios">
-                <h3><span class="card__title">Resultados</span> </h3>
-                <span class="badge badge--ok"><%= capturas.length %></span>
-              </div>
-
-              <% if (!capturas.length) { %>
-                <div class="empty empty--asignar">
-                  <p class="empty__text">Sin registros para el período seleccionado.</p>
+              <!-- ── GRÁFICAS POR ÁREA ── -->
+              <% Object.entries(chartData).forEach(([area, fechasMap], chartIdx) => {
+                   const fechas = Object.keys(fechasMap).sort();
+                   const promedios = fechas.map(f => {
+                     const vals = fechasMap[f];
+                     return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length * 10) / 10 : 0;
+                   });
+                   const canvasId = 'chart-' + chartIdx;
+              %>
+              <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Eficiencia — <%= area %></span></h3>
+                  <span class="badge badge--none" style="font-size:.78rem;"><%= fechas.length %> día<%= fechas.length !== 1 ? 's' : '' %></span>
                 </div>
-              <% } else { %>
-                <div class="table-wrap table-wrap--asignar table-wrap--blue">
-                  <table class="table table--asignar table--blue">
+                <div style="padding:var(--gap) var(--gap-lg) var(--gap-lg);">
+                  <canvas id="<%= canvasId %>" height="90"
+                    data-labels="<%= JSON.stringify(fechas) %>"
+                    data-values="<%= JSON.stringify(promedios) %>">
+                  </canvas>
+                </div>
+              </div>
+              <% }) %>
+
+              <!-- ── ÁRBOL EXPANDIBLE ── -->
+              <div class="card card--asignar card--asignar-act card--usuarios">
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Detalle</span></h3>
+                  <span class="badge badge--ok"><%= capturas.length %></span>
+                </div>
+                <div class="table-wrap table-wrap--asignar table-wrap--clean">
+                  <table class="table table--asignar table--clean rexp-table">
                     <thead>
                       <tr>
-                        <th>Fecha</th>
-                        <th>Slot</th>
-                        <th>Área</th>
-                        <th class="td-hide-mobile">Subtarea</th>
-                        <th class="td-hide-mobile">Modelo</th>
-                        <th class="td-hide-mobile">Real</th>
-                        <th class="td-hide-mobile">Estándar</th>
-                        <th>Eficiencia</th>
+                        <th style="width:2rem"></th>
+                        <th>Área / Subtarea / Empleado</th>
+                        <th style="width:7rem;text-align:right">Eficiencia</th>
+                        <th style="width:8rem" class="td-hide-mobile">Producción</th>
                       </tr>
                     </thead>
-
                     <tbody>
-                      <% capturas.forEach(c => { %>
-                        <tr>
-                          <td class="td-mono"><%= c.fecha || '—' %></td>
-                          <td class="td-mono"><%= c.slotHora != null ? c.slotHora + ':00' : '—' %></td>
-                          <td><%= c.areaNombre || c.area?.nombre || '—' %></td>
-                          <td class="td-hide-mobile"><%= c.subtareaNombre || c.subtarea?.nombre || '—' %></td>
-                          <td class="td-hide-mobile"><%= c.modeloNombre || c.modelo?.nombre || '—' %></td>
-                          <td class="td-mono td-hide-mobile"><%= c.cantidadReal %></td>
-                          <td class="td-mono td-hide-mobile"><%= c.cantidadEstandar ?? '—' %></td>
-                          <td>
-                            <span class="eff-value <%= effClass(c.eficiencia) %>">
-                              <%= fmtEff(c.eficiencia) %>
-                            </span>
+                    <%
+                      let areaIdx = 0;
+                      Object.entries(tree).forEach(([area, subs]) => {
+                        const allAreaCaps = Object.values(subs).flatMap(empMap => Object.values(empMap).flat());
+                        const areaAvg = avgArr(allAreaCaps.map(c => c.eficiencia));
+                        const areaReal = allAreaCaps.reduce((s,c) => s + (c.cantidadReal || 0), 0);
+                        const aId = 'hist-area-' + areaIdx++;
+                    %>
+                      <!-- FILA ÁREA -->
+                      <tr class="rexp-row rexp-row--area" data-target="<%= aId %>" onclick="toggleRexp(this)">
+                        <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
+                        <td><strong><%= area %></strong></td>
+                        <td style="text-align:right">
+                          <span class="eff-badge eff-badge--<%= effClass(areaAvg) %>"><%= fmtEff(areaAvg) %></span>
+                        </td>
+                        <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
+                          <%= areaReal.toLocaleString('es-MX') %> pzas
+                        </td>
+                      </tr>
+
+                      <% let subIdx2 = 0; Object.entries(subs).forEach(([sub, empMap]) => {
+                           const allSubCaps = Object.values(empMap).flat();
+                           const subAvg = avgArr(allSubCaps.map(c => c.eficiencia));
+                           const subReal = allSubCaps.reduce((s,c) => s + (c.cantidadReal || 0), 0);
+                           const sId = aId + '-sub-' + subIdx2++;
+                      %>
+                        <!-- FILA SUBTAREA -->
+                        <tr class="rexp-row rexp-row--sub rexp-child--<%= aId %>" style="display:none"
+                            data-target="<%= sId %>" onclick="toggleRexp(this)">
+                          <td class="rexp-toggle" style="padding-left:1.8rem">
+                            <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                          </td>
+                          <td style="padding-left:1.4rem;color:rgba(15,23,42,.72);font-size:.9rem"><%= sub %></td>
+                          <td style="text-align:right">
+                            <span class="eff-badge eff-badge--<%= effClass(subAvg) %>" style="font-size:.78rem"><%= fmtEff(subAvg) %></span>
+                          </td>
+                          <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
+                            <%= subReal.toLocaleString('es-MX') %> pzas
                           </td>
                         </tr>
+
+                        <% let empIdx2 = 0; Object.entries(empMap).forEach(([emp, rows]) => {
+                             const empAvg = avgArr(rows.map(r => r.eficiencia));
+                             const empReal = rows.reduce((s,r) => s + (r.cantidadReal || 0), 0);
+                             const eId = sId + '-emp-' + empIdx2++;
+                        %>
+                          <!-- FILA EMPLEADO -->
+                          <tr class="rexp-row rexp-row--sub rexp-child--<%= sId %>" style="display:none"
+                              data-target="<%= eId %>" onclick="toggleRexp(this)">
+                            <td class="rexp-toggle" style="padding-left:3rem">
+                              <span class="rexp-arrow rexp-arrow--sm">▶</span>
+                            </td>
+                            <td style="padding-left:2.6rem;font-size:.88rem;font-weight:700"><%= emp %></td>
+                            <td style="text-align:right">
+                              <span class="eff-badge eff-badge--<%= effClass(empAvg) %>" style="font-size:.75rem"><%= fmtEff(empAvg) %></span>
+                            </td>
+                            <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
+                              <%= empReal.toLocaleString('es-MX') %> pzas
+                            </td>
+                          </tr>
+
+                          <!-- FILAS DE SLOTS -->
+                          <% rows.sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'') || (a.slotHora||0)-(b.slotHora||0)).forEach(r => { %>
+                            <tr class="rexp-row rexp-row--slot rexp-child--<%= eId %>" style="display:none">
+                              <td></td>
+                              <td style="padding-left:4rem;font-size:.82rem;color:rgba(15,23,42,.55)">
+                                <%= r.fecha %> · <%= r.slotHora %>:00
+                                <% if (r.modeloNombre && r.modeloNombre !== '—') { %>
+                                  <span style="margin-left:.4rem;opacity:.6"><%= r.modeloNombre %></span>
+                                <% } %>
+                              </td>
+                              <td style="text-align:right">
+                                <span class="eff-badge eff-badge--<%= effClass(r.eficiencia) %>" style="font-size:.72rem">
+                                  <%= fmtEff(r.eficiencia) %>
+                                </span>
+                              </td>
+                              <td class="td-hide-mobile" style="font-size:.78rem;color:rgba(15,23,42,.45)">
+                                <%= r.cantidadReal ?? '—' %> / std <%= r.cantidadEstandar ?? '—' %>
+                                <% if (r.cantidadRechazada > 0) { %>
+                                  · <span style="color:#ef4444">-<%= r.cantidadRechazada %> rec</span>
+                                <% } %>
+                              </td>
+                            </tr>
+                          <% }) %>
+
+                        <% }) %>
                       <% }) %>
+                    <% }) %>
                     </tbody>
                   </table>
                 </div>
-              <% } %>
+              </div>
 
-            </div>
+            <% } else { %>
+              <div class="card card--asignar card--asignar-act">
+                <div class="card__header card__header--usuarios">
+                  <h3><span class="card__title">Resultados</span></h3>
+                  <span class="badge badge--ok">0</span>
+                </div>
+                <div class="empty empty--asignar">
+                  <p class="empty__text">Sin registros para el período seleccionado.</p>
+                </div>
+              </div>
+            <% } %>
 
           </div>
         </div>
@@ -208,9 +305,93 @@
 
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- Refuerzo JS para bloquear fechas futuras incluso si cambian el HTML -->
   <script>
+    // ── Row expansion ──
+    function toggleRexp(row) {
+      const target = row.dataset.target;
+      if (!target) return;
+      const children = document.querySelectorAll('.rexp-child--' + target);
+      const arrow    = row.querySelector('.rexp-arrow');
+      const isOpen   = row.classList.contains('rexp-row--open');
+      if (isOpen) {
+        collapseRexp(target);
+        row.classList.remove('rexp-row--open');
+        if (arrow) arrow.textContent = '▶';
+      } else {
+        children.forEach(c => { c.style.display = ''; });
+        row.classList.add('rexp-row--open');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
+        c.style.display = 'none';
+        c.classList.remove('rexp-row--open');
+        const a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        const sub = c.dataset.target;
+        if (sub) collapseRexp(sub);
+      });
+    }
+
+    // ── Charts ──
+    function effColor(val) {
+      if (val == null) return 'rgba(148,163,184,.4)';
+      if (val >= 90) return 'rgba(34,197,94,.75)';
+      if (val >= 70) return 'rgba(234,179,8,.75)';
+      return 'rgba(239,68,68,.75)';
+    }
+
+    document.querySelectorAll('canvas[data-labels]').forEach(canvas => {
+      const labels = JSON.parse(canvas.dataset.labels);
+      const values = JSON.parse(canvas.dataset.values);
+      const colors = values.map(effColor);
+
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Eficiencia (%)',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + '%' : '—'
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 120,
+              ticks: {
+                callback: v => v + '%',
+                stepSize: 20,
+                font: { size: 11 }
+              },
+              grid: { color: 'rgba(15,23,42,.06)' }
+            },
+            x: {
+              ticks: { font: { size: 11 } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    });
+
+    // Block future dates
     (function () {
       const today = new Date().toISOString().slice(0,10);
       const desde = document.querySelector('input[name="desde"]');
