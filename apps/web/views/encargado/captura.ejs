@@ -555,7 +555,7 @@
 
             /* update -N badge in slot badge */
             const slotBadge = form.previousElementSibling;
-            if (slotBadge) {
+            if (slotBadge && slotBadge.classList.contains('badge')) {
               let rejBadge = slotBadge.querySelector('.badge--danger');
               if (rejBadge) {
                 const cur = parseInt(rejBadge.textContent.replace('-', '')) || 0;
@@ -568,6 +568,18 @@
                 const recBtn = slotBadge.querySelector('button');
                 if (recBtn) slotBadge.insertBefore(recSpan, recBtn);
               }
+            }
+
+            /* update "Rechazos: X" label in detail row */
+            const empRow = form.closest('tr.rexp-row--slot');
+            if (empRow) {
+              const labels = empRow.querySelectorAll('.cap-detail-label');
+              labels.forEach(lbl => {
+                if (lbl.textContent.includes('Rechazos:')) {
+                  const cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
+                  lbl.innerHTML = '<strong>Rechazos:</strong> ' + (cur + cantidad);
+                }
+              });
             }
 
             /* hide form, reset */

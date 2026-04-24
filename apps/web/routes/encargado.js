@@ -118,17 +118,24 @@ async function renderDashboard(req, res, next) {
       ? `/asignaciones/activas?areaId=${scope.areaId}`
       : '/asignaciones/activas';
 
-    const [metRes, asnRes] = await Promise.all([
+    const asignacionesHoyUrl = scope.isScoped
+      ? `/asignaciones/hoy?areaId=${scope.areaId}`
+      : '/asignaciones/hoy';
+
+    const [metRes, asnRes, hoyRes] = await Promise.all([
       client.get(metricasUrl),
       client.get(asignacionesUrl),
+      client.get(asignacionesHoyUrl),
     ]);
 
     const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
+    const todasHoy = Array.isArray(hoyRes.data) ? hoyRes.data : [];
 
-    // Cargar capturas (con rechazos) para mostrar indicadores en dashboard
+    // Cargar capturas (con rechazos) de TODAS las asignaciones del día
+    // para que los rechazos aparezcan aunque la asignación ya no esté activa
     const capturasMap = {};
     await Promise.all(
-      asignaciones.map(async (a) => {
+      todasHoy.map(async (a) => {
         try {
           const r = await client.get(`/capturas/asignacion/${a.id}`);
           capturasMap[a.id] = Array.isArray(r.data) ? r.data : [];
@@ -142,6 +149,7 @@ async function renderDashboard(req, res, next) {
       title: 'Panel Encargado',
       metricas: metRes.data,
       asignaciones,
+      todasHoy,
       capturasMap,
       hoy,
     });
@@ -317,14 +325,7 @@ router.post('/asignar/scan', async (req, res) => {
       return res.redirect('/encargado/asignar');
     }
 
-    const payload = {
-      uuidQr,
-      areaId,
-      subtareaId,
-      modeloId,
-    };
-
-    await client.post('/asignaciones/scan', payload);
+    await client.post('/asignaciones/scan', { uuidQr, areaId, subtareaId, modeloId });
     req.flash('success', 'Asignación registrada');
     res.redirect('/encargado/asignar');
   } catch (err) {
@@ -335,7 +336,69 @@ router.post('/asignar/scan', async (req, res) => {
 });
 
 /* ───────────────────────────────────────────────
- * Asignar actividad indirecta por QR
+ * Scan unificado — detecta directo vs indirecto
+ * ─────────────────────────────────────────────── */
+router.post('/asignar/scan-unified', async (req, res) => {
+  try {
+    const client = apiClient(req.session.user.token);
+    const scope = getUserAreaScope(req);
+
+    const uuidQr = (req.body.uuidQr || '').trim();
+    const tipo = req.body.tipo; // 'DIRECTA' | 'INDIRECTA'
+    let areaId = toInt(req.body.areaId);
+
+    if (scope.isScoped) areaId = scope.areaId;
+
+    if (!uuidQr || !areaId) {
+      req.flash('error', 'Completa todos los campos requeridos');
+      return res.redirect('/encargado/asignar');
+    }
+
+    if (tipo === 'INDIRECTA') {
+      const actividadIndirectaId = toInt(req.body.actividadIndirectaId);
+      if (!actividadIndirectaId) {
+        req.flash('error', 'Selecciona una actividad');
+        return res.redirect('/encargado/asignar');
+      }
+      await client.post('/asignaciones/scan-indirecta', { uuidQr, actividadIndirectaId, areaId });
+      req.flash('success', 'Actividad indirecta registrada');
+      return res.redirect('/encargado/asignar');
+    }
+
+    // DIRECTA
+    const subtareaId = toInt(req.body.subtareaId);
+    const modeloId = toInt(req.body.modeloId);
+
+    if (!subtareaId || !modeloId) {
+      req.flash('error', 'Completa todos los campos requeridos');
+      return res.redirect('/encargado/asignar');
+    }
+
+    const { data: subtareas } = await client.get('/catalogos/subtareas');
+    const subtarea = (subtareas || []).find((s) => Number(s.id) === Number(subtareaId));
+
+    if (!subtarea) {
+      req.flash('error', 'La subtarea seleccionada no existe');
+      return res.redirect('/encargado/asignar');
+    }
+
+    if (Number(subtarea.areaId) !== Number(areaId)) {
+      req.flash('error', 'La subtarea no pertenece al área seleccionada');
+      return res.redirect('/encargado/asignar');
+    }
+
+    await client.post('/asignaciones/scan', { uuidQr, areaId, subtareaId, modeloId });
+    req.flash('success', 'Asignación registrada');
+    res.redirect('/encargado/asignar');
+  } catch (err) {
+    const raw = err.response?.data?.message || 'Error al registrar asignación';
+    req.flash('error', Array.isArray(raw) ? raw.join(', ') : raw);
+    res.redirect('/encargado/asignar');
+  }
+});
+
+/* ───────────────────────────────────────────────
+ * Asignar actividad indirecta por QR (legacy — mantenido por compatibilidad)
  * ─────────────────────────────────────────────── */
 router.post('/asignar/scan-indirecta', async (req, res) => {
   try {
@@ -344,18 +407,15 @@ router.post('/asignar/scan-indirecta', async (req, res) => {
 
     const uuidQr = (req.body.uuidQr || '').trim();
     const actividadIndirectaId = toInt(req.body.actividadIndirectaId);
+    let areaId = toInt(req.body.areaId);
+    if (scope.isScoped) areaId = scope.areaId;
 
-    if (!uuidQr || !actividadIndirectaId) {
-      req.flash('error', 'Selecciona una actividad indirecta y escanea el QR');
+    if (!uuidQr || !actividadIndirectaId || !areaId) {
+      req.flash('error', 'Selecciona actividad, área y escanea el QR');
       return res.redirect('/encargado/asignar');
     }
 
-    await client.post('/asignaciones/scan-indirecta', {
-      uuidQr,
-      actividadIndirectaId,
-      areaId: scope.areaId ?? undefined,
-    });
-
+    await client.post('/asignaciones/scan-indirecta', { uuidQr, actividadIndirectaId, areaId });
     req.flash('success', 'Actividad indirecta registrada');
     res.redirect('/encargado/asignar');
   } catch (err) {

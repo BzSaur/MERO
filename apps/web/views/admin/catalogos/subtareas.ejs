@@ -27,6 +27,7 @@
                 <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Áreas</a>
                 <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
                 <a href="/admin/catalogos/estandares" class="btn btn--ghost btn--sm">Estándares</a>
+                <a href="/admin/catalogos/actividades-indirectas" class="btn btn--ghost btn--sm">Indirectas</a>
               </div>
             </div>
 
@@ -37,10 +38,17 @@
                 <h3><span class="card__title">Nueva subtarea</span></h3>
               </div>
 
-              <form method="POST" action="/admin/catalogos/subtareas">
-                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+              <form method="POST" action="/admin/catalogos/subtareas" id="formSubtarea">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg); flex-wrap:wrap; gap:var(--gap);">
 
-                  <div class="form-group users-controls__field">
+                  <div class="form-group" style="flex:1 1 100%; display:flex; align-items:center; gap:.5rem; padding-bottom:.25rem; border-bottom:1px solid var(--border);">
+                    <label style="display:flex; align-items:center; gap:.5rem; cursor:pointer; font-size:.875rem;">
+                      <input type="checkbox" id="esIndirecta" name="esIndirecta" style="accent-color:var(--accent); width:1rem; height:1rem;">
+                      <span>Es actividad indirecta <span style="color:var(--ink-dim); font-weight:400;">(sin estándar productivo — no requiere área)</span></span>
+                    </label>
+                  </div>
+
+                  <div class="form-group users-controls__field" id="fieldArea">
                     <label class="form-label" for="areaId">Área</label>
                     <select class="form-control" id="areaId" name="areaId" required>
                       <option value="">— Seleccionar —</option>
@@ -52,7 +60,7 @@
 
                   <div class="form-group users-controls__field">
                     <label class="form-label" for="nombre">Nombre</label>
-                    <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Test Visual">
+                    <input class="form-control" type="text" id="nombre" name="nombre" required placeholder="Ej: Limpieza de línea">
                   </div>
 
                   <div class="form-group users-controls__field users-controls__field--wide">
@@ -63,11 +71,29 @@
                   <div class="form-group users-controls__actions">
                     <button type="submit" class="btn btn--create btn--sm">
                       <svg class="icon"><use href="#icon-plus"/></svg>
-                      Crear subtarea
+                      <span id="btnSubtareaLabel">Crear subtarea</span>
                     </button>
                   </div>
                 </div>
               </form>
+              <script>
+                (function() {
+                  const chk = document.getElementById('esIndirecta');
+                  const fieldArea = document.getElementById('fieldArea');
+                  const selectArea = document.getElementById('areaId');
+                  const btnLabel = document.getElementById('btnSubtareaLabel');
+
+                  function toggle() {
+                    const ind = chk.checked;
+                    fieldArea.style.display = ind ? 'none' : '';
+                    selectArea.required = !ind;
+                    btnLabel.textContent = ind ? 'Crear actividad indirecta' : 'Crear subtarea';
+                  }
+
+                  chk.addEventListener('change', toggle);
+                  toggle();
+                })();
+              </script>
             </div>
 
             <div class="card card--asignar card--asignar-act">

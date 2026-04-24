@@ -1,7 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { IsArray, IsDateString, IsInt, IsNumber, Min } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEstandarDto } from './dto/create-estandar.dto';
 import { UpdateEstandarDto } from './dto/update-estandar.dto';
+
+export class BulkUpsertEstandarDto {
+  @IsInt()
+  subtareaId: number;
+
+  @IsArray()
+  @IsInt({ each: true })
+  modeloIds: number[];
+
+  @IsNumber()
+  @Min(0)
+  piezasPorHora: number;
+
+  @IsDateString()
+  vigenteDesde: string;
+}
 
 @Injectable()
 export class EstandaresService {
@@ -75,6 +92,35 @@ export class EstandaresService {
     return this.prisma.meroEstandar.delete({
       where: { id },
     });
+  }
+
+  async bulkUpsert(dto: BulkUpsertEstandarDto) {
+    const subtareaId = Number(dto.subtareaId);
+    const piezasPorHora = Number(dto.piezasPorHora);
+    const vigenteDesde = this.toDateOnly(dto.vigenteDesde);
+    const modeloIds = dto.modeloIds.map(Number);
+
+    const results = await Promise.all(
+      modeloIds.map(async (modeloId) => {
+        const existing = await this.prisma.meroEstandar.findFirst({
+          where: { subtareaId, modeloId },
+          orderBy: { vigenteDesde: 'desc' },
+        });
+
+        if (existing) {
+          return this.prisma.meroEstandar.update({
+            where: { id: existing.id },
+            data: { piezasPorHora, vigenteDesde },
+          });
+        }
+
+        return this.prisma.meroEstandar.create({
+          data: { subtareaId, modeloId, piezasPorHora, vigenteDesde },
+        });
+      }),
+    );
+
+    return { count: results.length, results };
   }
 
   async findVigente(subtareaId: number, modeloId: number) {

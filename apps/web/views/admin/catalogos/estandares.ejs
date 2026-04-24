@@ -27,6 +27,7 @@
                 <a href="/admin/catalogos/areas" class="btn btn--ghost btn--sm">Áreas</a>
                 <a href="/admin/catalogos/subtareas" class="btn btn--ghost btn--sm">Subtareas</a>
                 <a href="/admin/catalogos/modelos" class="btn btn--ghost btn--sm">Modelos</a>
+                <a href="/admin/catalogos/actividades-indirectas" class="btn btn--ghost btn--sm">Indirectas</a>
               </div>
             </div>
 
@@ -37,8 +38,8 @@
                 <h3><span class="card__title">Nuevo estándar</span></h3>
               </div>
 
-              <form method="POST" action="/admin/catalogos/estandares">
-                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
+              <form method="POST" action="/admin/catalogos/estandares" id="formEstandar">
+                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg); flex-wrap:wrap; gap:var(--gap);">
 
                   <div class="form-group users-controls__field users-controls__field--wide">
                     <label class="form-label" for="subtareaId">Subtarea</label>
@@ -52,14 +53,20 @@
                     </select>
                   </div>
 
-                  <div class="form-group users-controls__field">
-                    <label class="form-label" for="modeloId">Modelo</label>
-                    <select class="form-control" id="modeloId" name="modeloId" required>
-                      <option value="">— Seleccionar —</option>
+                  <div class="form-group" style="flex:1 1 100%;">
+                    <label class="form-label">
+                      Modelos
+                      <span style="font-weight:400; color:var(--ink-dim); font-size:.78rem;">(selecciona uno o varios — mismo estándar para todos)</span>
+                    </label>
+                    <div id="modelosCheckboxes" style="display:flex; flex-wrap:wrap; gap:.5rem .75rem; padding:.5rem 0;">
                       <% modelos.forEach(m => { %>
-                        <option value="<%= m.id %>"><%= m.nombreSku %></option>
+                        <label style="display:flex; align-items:center; gap:.35rem; cursor:pointer; font-size:.875rem; padding:.2rem .5rem; border-radius:4px; border:1px solid var(--border); background:var(--surface);">
+                          <input type="checkbox" name="modeloIds" value="<%= m.id %>" style="accent-color:var(--accent);">
+                          <%= m.nombreSku %>
+                        </label>
                       <% }) %>
-                    </select>
+                    </div>
+                    <p id="modelosError" style="display:none; color:var(--danger); font-size:.8rem; margin-top:.25rem;">Selecciona al menos un modelo.</p>
                   </div>
 
                   <div class="form-group users-controls__field">
@@ -82,7 +89,6 @@
                       const hoy = new Date();
                       const hoyStr = `${hoy.getFullYear()}-${pad2(hoy.getMonth() + 1)}-${pad2(hoy.getDate())}`;
                     %>
-
                     <input
                       class="form-control"
                       type="date"
@@ -93,15 +99,26 @@
                     >
                   </div>
 
-                  <div class="form-group users-controls__actions">
+                  <div class="form-group users-controls__actions" style="align-self:flex-end;">
                     <button type="submit" class="btn btn--create btn--sm">
                       <svg class="icon"><use href="#icon-plus"/></svg>
-                      Crear estándar
+                      Guardar estándar
                     </button>
                   </div>
 
                 </div>
               </form>
+              <script>
+                document.getElementById('formEstandar').addEventListener('submit', function(e) {
+                  const checked = this.querySelectorAll('input[name="modeloIds"]:checked');
+                  if (!checked.length) {
+                    e.preventDefault();
+                    document.getElementById('modelosError').style.display = 'block';
+                  } else {
+                    document.getElementById('modelosError').style.display = 'none';
+                  }
+                });
+              </script>
             </div>
 
             <div class="card card--asignar card--asignar-act">

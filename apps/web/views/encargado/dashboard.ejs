@@ -50,9 +50,10 @@
 
               const avgEff = countEff ? (sumEff / countEff) : null;
 
-              // Totales de rechazos para stat-cards
+              // Totales de rechazos para stat-cards — usar todas las asignaciones del día
+              const _todasHoy = todasHoy || asignaciones;
               let totalRechazosHoy = 0, totalOkConRechazo = 0;
-              asignaciones.forEach(function(a) {
+              _todasHoy.forEach(function(a) {
                 const caps = _capturasMap[a.id] || [];
                 caps.forEach(function(c) {
                   const recs = c.rechazos || [];
@@ -115,7 +116,7 @@
 
                 // Mapa de rechazos por asignacionId para la card de eficiencia
                 const _rechByAsig = {};
-                asignaciones.forEach(function(a) {
+                _todasHoy.forEach(function(a) {
                   const caps = _capturasMap[a.id] || [];
                   let totalRec = 0, okConRec = 0;
                   caps.forEach(function(c) {
@@ -217,7 +218,7 @@
               // Mapa de rechazos disponible fuera del bloque de métricas
               if (typeof _rechByAsig === 'undefined') {
                 var _rechByAsig = {};
-                asignaciones.forEach(function(a) {
+                _todasHoy.forEach(function(a) {
                   const caps = _capturasMap[a.id] || [];
                   let totalRec = 0, okConRec = 0;
                   caps.forEach(function(c) {

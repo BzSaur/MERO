@@ -35,7 +35,10 @@
                 <h3><span class="card__title">Escanear QR</span></h3>
               </div>
 
-              <form method="POST" action="/encargado/asignar/scan" id="formAsignar">
+              <form method="POST" action="/encargado/asignar/scan-unified" id="formAsignar">
+                <input type="hidden" id="tipoAsignacion" name="tipo" value="DIRECTA">
+                <input type="hidden" id="actividadIndirectaId" name="actividadIndirectaId" value="">
+
                 <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
                   <div class="users-controls__left">
 
@@ -74,16 +77,41 @@
                     </div>
 
                     <div class="form-group users-controls__field users-controls__field--wide">
-                      <label class="form-label" for="subtareaId">Subtarea</label>
-                      <select class="form-control" id="subtareaId" name="subtareaId" required>
-                        <option value="">— Seleccionar subtarea —</option>
-                        <% (subtareas || []).forEach(s => { %>
-                          <option value="<%= s.id %>" data-area="<%= s.areaId %>"><%= s.nombre %></option>
-                        <% }) %>
+                      <label class="form-label" for="subtareaSelect">
+                        Subtarea / Actividad
+                      </label>
+                      <select class="form-control" id="subtareaSelect" required>
+                        <option value="">— Seleccionar —</option>
+                        <% if ((subtareas || []).length > 0) { %>
+                          <optgroup label="Subtareas directas">
+                            <% (subtareas || []).forEach(s => { %>
+                              <option
+                                value="directa-<%= s.id %>"
+                                data-tipo="DIRECTA"
+                                data-subtarea-id="<%= s.id %>"
+                                data-area="<%= s.areaId %>">
+                                <%= s.nombre %>
+                              </option>
+                            <% }) %>
+                          </optgroup>
+                        <% } %>
+                        <% if ((actividadesIndirectas || []).length > 0) { %>
+                          <optgroup label="Actividades indirectas">
+                            <% (actividadesIndirectas || []).forEach(a => { %>
+                              <option
+                                value="indirecta-<%= a.id %>"
+                                data-tipo="INDIRECTA"
+                                data-actividad-id="<%= a.id %>">
+                                <%= a.nombre %>
+                              </option>
+                            <% }) %>
+                          </optgroup>
+                        <% } %>
                       </select>
+                      <input type="hidden" id="subtareaId" name="subtareaId" value="">
                     </div>
 
-                    <div class="form-group users-controls__field users-controls__field--wide">
+                    <div class="form-group users-controls__field users-controls__field--wide" id="fieldModelo">
                       <label class="form-label" for="modeloId">Modelo</label>
                       <select class="form-control" id="modeloId" name="modeloId" required>
                         <option value="">— Seleccionar modelo —</option>
@@ -94,9 +122,9 @@
                     </div>
 
                     <div class="form-group users-controls__actions">
-                      <button type="submit" class="btn btn--edit">
+                      <button type="submit" class="btn btn--edit" id="btnAsignar">
                         <svg class="icon"><use href="#icon-qr"/></svg>
-                        Asignar
+                        <span id="btnAsignarLabel">Asignar</span>
                       </button>
 
                       <button type="button" class="btn btn--ghost" id="btnScanCam">
@@ -108,52 +136,6 @@
                 </div>
               </form>
             </div>
-
-            <% if ((actividadesIndirectas || []).length > 0) { %>
-            <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
-              <div class="card__header">
-                <h3><span class="card__title">Actividad indirecta</span></h3>
-                <span class="badge badge--muted">Sin estándar productivo</span>
-              </div>
-
-              <form method="POST" action="/encargado/asignar/scan-indirecta" id="formIndirecta">
-                <div class="form-row users-controls users-controls--light" style="margin:0; padding: var(--gap) var(--gap-lg);">
-                  <div class="users-controls__left">
-
-                    <div class="form-group users-controls__field">
-                      <label class="form-label" for="uuidQrIndirecta">UUID del empleado</label>
-                      <input
-                        class="form-control mono"
-                        type="text"
-                        id="uuidQrIndirecta"
-                        name="uuidQr"
-                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                        required
-                      >
-                    </div>
-
-                    <div class="form-group users-controls__field users-controls__field--wide">
-                      <label class="form-label" for="actividadIndirectaId">Actividad</label>
-                      <select class="form-control" id="actividadIndirectaId" name="actividadIndirectaId" required>
-                        <option value="">— Seleccionar actividad —</option>
-                        <% (actividadesIndirectas || []).forEach(a => { %>
-                          <option value="<%= a.id %>"><%= a.nombre %></option>
-                        <% }) %>
-                      </select>
-                    </div>
-
-                    <div class="form-group users-controls__actions">
-                      <button type="submit" class="btn btn--ghost btn--indirecta">
-                        <svg class="icon"><use href="#icon-qr"/></svg>
-                        Registrar indirecta
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              </form>
-            </div>
-            <% } %>
 
             <div id="qrModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); place-items:center; z-index:9999;">
               <div style="background:#fff; padding:16px; border-radius:12px; width:min(640px, 92vw);">
@@ -181,7 +163,7 @@
                     <thead>
                       <tr>
                         <th>Empleado</th>
-                        <th>Área</th>
+                        <th>Área / Actividad</th>
                         <th>Desde</th>
                         <th class="td-actions">Acciones</th>
                       </tr>
@@ -197,10 +179,9 @@
                             <% } %>
                           </td>
                           <td>
-                            <% if (a.tipo === 'INDIRECTA') { %>
-                              <%= a.actividadIndirecta?.nombre || '—' %>
-                            <% } else { %>
-                              <%= a.area?.nombre || '—' %>
+                            <%= a.area?.nombre || '—' %>
+                            <% if (a.tipo === 'INDIRECTA' && a.actividadIndirecta) { %>
+                              <br><span style="font-size:.78rem; color:var(--ink-dim);"><%= a.actividadIndirecta.nombre %></span>
                             <% } %>
                           </td>
                           <td class="td-mono">
@@ -257,25 +238,63 @@
   <script src="/js/main.js"></script>
 
   <script>
-    const areaSel = document.getElementById('areaId');
-    const subSel  = document.getElementById('subtareaId');
+    (function () {
+      const areaSel       = document.getElementById('areaId');
+      const subSel        = document.getElementById('subtareaSelect');
+      const hidSubtareaId = document.getElementById('subtareaId');
+      const hidTipo       = document.getElementById('tipoAsignacion');
+      const hidActId      = document.getElementById('actividadIndirectaId');
+      const fieldModelo   = document.getElementById('fieldModelo');
+      const modeloSel     = document.getElementById('modeloId');
+      const btnLabel      = document.getElementById('btnAsignarLabel');
 
-    function filterSubtareas() {
-      if (!areaSel || !subSel) return;
+      function filterOpciones() {
+        if (!subSel) return;
+        const area = areaSel ? areaSel.value : '';
+        subSel.value = '';
+        hidSubtareaId.value = '';
+        hidTipo.value = 'DIRECTA';
+        hidActId.value = '';
 
-      const area = areaSel.value;
-      subSel.value = '';
+        [...subSel.options].forEach((opt) => {
+          if (!opt.value) return;
+          if (opt.dataset.tipo === 'DIRECTA') {
+            // ocultar directas que no pertenecen al área seleccionada
+            opt.hidden = !!area && opt.dataset.area !== area;
+          }
+          // indirectas siempre visibles — aplican a cualquier área
+        });
 
-      [...subSel.options].forEach((opt, i) => {
-        if (i === 0) return;
-        opt.hidden = !!area && opt.dataset.area !== area;
-      });
-    }
+        updateModelo();
+      }
 
-    if (areaSel && subSel) {
-      areaSel.addEventListener('change', filterSubtareas);
-      filterSubtareas();
-    }
+      function updateModelo() {
+        const opt = subSel ? subSel.options[subSel.selectedIndex] : null;
+        const tipo = opt ? opt.dataset.tipo : 'DIRECTA';
+
+        if (tipo === 'INDIRECTA') {
+          hidTipo.value = 'INDIRECTA';
+          hidActId.value = opt.dataset.actividadId || '';
+          hidSubtareaId.value = '';
+          fieldModelo.style.display = 'none';
+          modeloSel.required = false;
+          modeloSel.value = '';
+          if (btnLabel) btnLabel.textContent = 'Registrar actividad';
+        } else {
+          hidTipo.value = 'DIRECTA';
+          hidActId.value = '';
+          hidSubtareaId.value = opt ? (opt.dataset.subtareaId || '') : '';
+          fieldModelo.style.display = '';
+          modeloSel.required = true;
+          if (btnLabel) btnLabel.textContent = 'Asignar';
+        }
+      }
+
+      if (areaSel) areaSel.addEventListener('change', filterOpciones);
+      if (subSel)  subSel.addEventListener('change', updateModelo);
+
+      filterOpciones();
+    })();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>

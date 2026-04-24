@@ -858,6 +858,17 @@ router.get('/catalogos/subtareas', async (req, res, next) => {
 
 router.post('/catalogos/subtareas', async (req, res) => {
   try {
+    const esIndirecta = req.body.esIndirecta === 'on';
+
+    if (esIndirecta) {
+      await api(req.session.user.token).post('/catalogos/actividades-indirectas', {
+        nombre: req.body.nombre,
+        descripcion: req.body.descripcion || undefined,
+      });
+      req.flash('success', 'Actividad indirecta creada');
+      return res.redirect('/admin/catalogos/subtareas');
+    }
+
     await api(req.session.user.token).post('/catalogos/subtareas', {
       nombre: req.body.nombre,
       descripcion: req.body.descripcion,
@@ -866,7 +877,7 @@ router.post('/catalogos/subtareas', async (req, res) => {
     req.flash('success', 'Subtarea creada');
     res.redirect('/admin/catalogos/subtareas');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error al crear subtarea'));
+    req.flash('error', getErrorMessage(err, 'Error al crear'));
     res.redirect('/admin/catalogos/subtareas');
   }
 });
@@ -971,17 +982,27 @@ router.get('/catalogos/estandares', async (req, res, next) => {
 
 router.post('/catalogos/estandares', async (req, res) => {
   try {
-    await api(req.session.user.token).post('/catalogos/estandares', {
-      subtareaId: req.body.subtareaId ? Number(req.body.subtareaId) : undefined,
-      modeloId: req.body.modeloId ? Number(req.body.modeloId) : undefined,
-      piezasPorHora: req.body.piezasPorHora ? Number(req.body.piezasPorHora) : undefined,
+    const raw = req.body.modeloIds;
+    const modeloIds = Array.isArray(raw)
+      ? raw.map(Number).filter(Boolean)
+      : raw ? [Number(raw)] : [];
+
+    if (!modeloIds.length) {
+      req.flash('error', 'Selecciona al menos un modelo');
+      return res.redirect('/admin/catalogos/estandares');
+    }
+
+    await api(req.session.user.token).post('/catalogos/estandares/bulk', {
+      subtareaId: Number(req.body.subtareaId),
+      modeloIds,
+      piezasPorHora: Number(req.body.piezasPorHora),
       vigenteDesde: toIsoDateStart(req.body.vigenteDesde),
     });
 
-    req.flash('success', 'Estándar creado');
+    req.flash('success', `${modeloIds.length === 1 ? 'Estándar guardado' : `${modeloIds.length} estándares guardados`}`);
     res.redirect('/admin/catalogos/estandares');
   } catch (err) {
-    req.flash('error', getErrorMessage(err, 'Error al crear estándar'));
+    req.flash('error', getErrorMessage(err, 'Error al guardar estándar'));
     res.redirect('/admin/catalogos/estandares');
   }
 });

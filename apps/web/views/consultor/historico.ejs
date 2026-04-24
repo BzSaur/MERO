@@ -105,10 +105,11 @@
                   return valid.length ? valid.reduce((s,x) => s + Number(x), 0) / valid.length : null;
                 }
 
-                let sumEff = 0, countEff = 0, sumReal = 0;
+                let sumEff = 0, countEff = 0, sumReal = 0, sumRec = 0;
                 capturas.forEach(c => {
                   if (c.eficiencia != null) { sumEff += Number(c.eficiencia); countEff++; }
                   if (c.cantidadReal != null) sumReal += Number(c.cantidadReal);
+                  if (c.cantidadRechazada != null) sumRec += Number(c.cantidadRechazada);
                 });
                 const avgEff = countEff ? (sumEff / countEff) : null;
 
@@ -124,14 +125,15 @@
                   tree[area][sub][emp].push(c);
                 });
 
-                // Para las gráficas: área → fecha → [eficiencias]
+                // Para las gráficas: área → fecha → { piezas, rechazos }
                 const chartData = {};
                 capturas.forEach(c => {
                   const area = c.areaNombre || '—';
                   const fecha = c.fecha || '—';
                   if (!chartData[area]) chartData[area] = {};
-                  if (!chartData[area][fecha]) chartData[area][fecha] = [];
-                  if (c.eficiencia != null) chartData[area][fecha].push(Number(c.eficiencia));
+                  if (!chartData[area][fecha]) chartData[area][fecha] = { piezas: 0, rechazos: 0 };
+                  chartData[area][fecha].piezas  += Number(c.cantidadNeta  ?? c.cantidadReal ?? 0);
+                  chartData[area][fecha].rechazos += Number(c.cantidadRechazada ?? 0);
                 });
               %>
 
@@ -144,7 +146,12 @@
                 <div class="stat-card stat-card--gradient stat-card--green">
                   <div class="stat-card__label">Total producido</div>
                   <div class="stat-card__value"><%= sumReal.toLocaleString('es-MX') %></div>
-                  <div class="stat-card__sub">unidades</div>
+                  <div class="stat-card__sub">unidades brutas</div>
+                </div>
+                <div class="stat-card stat-card--gradient stat-card--orange">
+                  <div class="stat-card__label">Rechazos</div>
+                  <div class="stat-card__value"><%= sumRec.toLocaleString('es-MX') %></div>
+                  <div class="stat-card__sub"><%= sumReal > 0 ? ((sumRec/sumReal)*100).toFixed(1) : '0.0' %>% tasa</div>
                 </div>
                 <div class="stat-card stat-card--gradient stat-card--indigo">
                   <div class="stat-card__label">Registros</div>
@@ -155,21 +162,20 @@
               <!-- ── GRÁFICAS POR ÁREA ── -->
               <% Object.entries(chartData).forEach(([area, fechasMap], chartIdx) => {
                    const fechas = Object.keys(fechasMap).sort();
-                   const promedios = fechas.map(f => {
-                     const vals = fechasMap[f];
-                     return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length * 10) / 10 : 0;
-                   });
+                   const piezasPorDia   = fechas.map(f => fechasMap[f].piezas);
+                   const rechazPorDia   = fechas.map(f => fechasMap[f].rechazos);
                    const canvasId = 'chart-' + chartIdx;
               %>
               <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
                 <div class="card__header card__header--usuarios">
-                  <h3><span class="card__title">Eficiencia — <%= area %></span></h3>
+                  <h3><span class="card__title">Producción por día — <%= area %></span></h3>
                   <span class="badge badge--none" style="font-size:.78rem;"><%= fechas.length %> día<%= fechas.length !== 1 ? 's' : '' %></span>
                 </div>
                 <div style="padding:var(--gap) var(--gap-lg) var(--gap-lg);">
                   <canvas id="<%= canvasId %>" height="90"
                     data-labels="<%= JSON.stringify(fechas) %>"
-                    data-values="<%= JSON.stringify(promedios) %>">
+                    data-piezas="<%= JSON.stringify(piezasPorDia) %>"
+                    data-rechazos="<%= JSON.stringify(rechazPorDia) %>">
                   </canvas>
                 </div>
               </div>
@@ -200,6 +206,7 @@
                         const areaReal = allAreaCaps.reduce((s,c) => s + (c.cantidadReal || 0), 0);
                         const aId = 'hist-area-' + areaIdx++;
                     %>
+                      <% const areaRec = allAreaCaps.reduce((s,c) => s + (c.cantidadRechazada || 0), 0); %>
                       <!-- FILA ÁREA -->
                       <tr class="rexp-row rexp-row--area" data-target="<%= aId %>" onclick="toggleRexp(this)">
                         <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
@@ -209,6 +216,9 @@
                         </td>
                         <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
                           <%= areaReal.toLocaleString('es-MX') %> pzas
+                          <% if (areaRec > 0) { %>
+                            · <span style="color:#ef4444">-<%= areaRec.toLocaleString('es-MX') %> rec</span>
+                          <% } %>
                         </td>
                       </tr>
 
@@ -218,6 +228,7 @@
                            const subReal = allSubCaps.reduce((s,c) => s + (c.cantidadReal || 0), 0);
                            const sId = aId + '-sub-' + subIdx2++;
                       %>
+                        <% const subRec = allSubCaps.reduce((s,c) => s + (c.cantidadRechazada || 0), 0); %>
                         <!-- FILA SUBTAREA -->
                         <tr class="rexp-row rexp-row--sub rexp-child--<%= aId %>" style="display:none"
                             data-target="<%= sId %>" onclick="toggleRexp(this)">
@@ -230,12 +241,16 @@
                           </td>
                           <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
                             <%= subReal.toLocaleString('es-MX') %> pzas
+                            <% if (subRec > 0) { %>
+                              · <span style="color:#ef4444">-<%= subRec.toLocaleString('es-MX') %> rec</span>
+                            <% } %>
                           </td>
                         </tr>
 
                         <% let empIdx2 = 0; Object.entries(empMap).forEach(([emp, rows]) => {
-                             const empAvg = avgArr(rows.map(r => r.eficiencia));
+                             const empAvg  = avgArr(rows.map(r => r.eficiencia));
                              const empReal = rows.reduce((s,r) => s + (r.cantidadReal || 0), 0);
+                             const empRec  = rows.reduce((s,r) => s + (r.cantidadRechazada || 0), 0);
                              const eId = sId + '-emp-' + empIdx2++;
                         %>
                           <!-- FILA EMPLEADO -->
@@ -250,6 +265,9 @@
                             </td>
                             <td class="td-hide-mobile" style="font-size:.82rem;color:rgba(15,23,42,.50);">
                               <%= empReal.toLocaleString('es-MX') %> pzas
+                              <% if (empRec > 0) { %>
+                                · <span style="color:#ef4444">-<%= empRec.toLocaleString('es-MX') %> rec</span>
+                              <% } %>
                             </td>
                           </tr>
 
@@ -337,49 +355,48 @@
     }
 
     // ── Charts ──
-    function effColor(val) {
-      if (val == null) return 'rgba(148,163,184,.4)';
-      if (val >= 90) return 'rgba(34,197,94,.75)';
-      if (val >= 70) return 'rgba(234,179,8,.75)';
-      return 'rgba(239,68,68,.75)';
-    }
-
     document.querySelectorAll('canvas[data-labels]').forEach(canvas => {
-      const labels = JSON.parse(canvas.dataset.labels);
-      const values = JSON.parse(canvas.dataset.values);
-      const colors = values.map(effColor);
+      const labels   = JSON.parse(canvas.dataset.labels);
+      const piezas   = JSON.parse(canvas.dataset.piezas);
+      const rechazos = JSON.parse(canvas.dataset.rechazos);
 
       new Chart(canvas, {
         type: 'bar',
         data: {
           labels,
-          datasets: [{
-            label: 'Eficiencia (%)',
-            data: values,
-            backgroundColor: colors,
-            borderRadius: 6,
-            borderSkipped: false,
-          }]
+          datasets: [
+            {
+              label: 'Piezas netas',
+              data: piezas,
+              backgroundColor: 'rgba(99,102,241,.75)',
+              borderRadius: 4,
+              borderSkipped: false,
+              order: 1,
+            },
+            {
+              label: 'Rechazos',
+              data: rechazos,
+              backgroundColor: 'rgba(239,68,68,.65)',
+              borderRadius: 4,
+              borderSkipped: false,
+              order: 2,
+            }
+          ]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { display: false },
+            legend: { display: true, position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } },
             tooltip: {
               callbacks: {
-                label: ctx => ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) + '%' : '—'
+                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString('es-MX') ?? '—'} pzas`
               }
             }
           },
           scales: {
             y: {
-              min: 0,
-              max: 120,
-              ticks: {
-                callback: v => v + '%',
-                stepSize: 20,
-                font: { size: 11 }
-              },
+              beginAtZero: true,
+              ticks: { font: { size: 11 } },
               grid: { color: 'rgba(15,23,42,.06)' }
             },
             x: {

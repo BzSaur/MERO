@@ -13,7 +13,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { EstandaresService } from './estandares.service';
+import { EstandaresService, BulkUpsertEstandarDto } from './estandares.service';
 import { CreateEstandarDto } from './dto/create-estandar.dto';
 import { UpdateEstandarDto } from './dto/update-estandar.dto';
 
@@ -26,6 +26,12 @@ export class EstandaresController {
   @Roles('ADMIN')
   create(@Body() dto: CreateEstandarDto) {
     return this.service.create(dto);
+  }
+
+  @Post('bulk')
+  @Roles('ADMIN')
+  bulkUpsert(@Body() dto: BulkUpsertEstandarDto) {
+    return this.service.bulkUpsert(dto);
   }
 
   @Get()

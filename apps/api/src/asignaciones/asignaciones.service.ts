@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { IsInt, IsOptional, IsUUID } from 'class-validator';
+import { IsInt, IsUUID } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmpleadosService } from '../empleados/empleados.service';
 import { ScanQrDto } from './dto/scan-qr.dto';
@@ -15,9 +15,8 @@ export class ScanIndirectaDto {
   @IsInt()
   actividadIndirectaId: number;
 
-  @IsOptional()
   @IsInt()
-  areaId?: number;
+  areaId: number;
 }
 
 /**
@@ -160,6 +159,7 @@ export class AsignacionesService {
         area: true,
         subtarea: true,
         modelo: true,
+        actividadIndirecta: true,
       },
       orderBy: { createdAt: 'desc' },
     });

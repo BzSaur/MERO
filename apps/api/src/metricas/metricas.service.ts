@@ -36,7 +36,10 @@ export class MetricasService {
         area: true,
         subtarea: true,
         modelo: true,
-        capturas: { orderBy: { slotHora: 'asc' } },
+        capturas: {
+          include: { rechazos: true },
+          orderBy: { slotHora: 'asc' },
+        },
       },
     });
 
@@ -87,9 +90,12 @@ export class MetricasService {
 
       // 4) por hora (capturas)
       for (const captura of asignacion.capturas) {
+        const totalRechazados = (captura.rechazos ?? []).reduce((s, r) => s + r.cantidad, 0);
+        const cantidadNeta = captura.cantidad - totalRechazados;
+
         const eficiencia =
           estandarAplicado > 0
-            ? Math.round((captura.cantidad / estandarAplicado) * 100 * 100) / 100
+            ? Math.round((cantidadNeta / estandarAplicado) * 100 * 100) / 100
             : 0;
 
         metricas.push({
@@ -100,12 +106,10 @@ export class MetricasService {
           modelo: asignacion.modelo?.nombreSku ?? '—',
           slotHora: captura.slotHora,
           cantidad: captura.cantidad,
-
-          // 👇 antes era el base; ahora es el aplicado (con 0.60 si NUEVO)
+          cantidadRechazada: totalRechazados,
+          cantidadNeta,
           estandar: estandarAplicado,
           eficienciaPct: eficiencia,
-
-          // 👇 extras (no rompen front si no los usa)
           estandarBase,
           factorAplicado,
           diasAntiguedad,

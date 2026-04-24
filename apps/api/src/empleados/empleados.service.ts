@@ -283,7 +283,6 @@ export class EmpleadosService {
       where: { id },
       include: {
         asignaciones: {
-          take: 10,
           orderBy: { fecha: 'desc' },
           include: {
             area: { select: { nombre: true } },
