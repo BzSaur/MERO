@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       button.disabled = true;
       const originalText = button.innerHTML;
-      button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+      button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
       setTimeout(function () {
         button.disabled = false;

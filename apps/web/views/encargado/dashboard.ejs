@@ -19,7 +19,7 @@
 
             <div class="page-header">
               <div>
-                <h1>Panel Encargado</h1>
+                <h1>Panel Encargados</h1>
                 <h2>
                   <p class="page-header__sub" style="display:flex; align-items:center; gap:.5rem;">
                     <span><%= hoy %></span>
@@ -160,7 +160,7 @@
                       : null;
                     // Rechazos de la subárea (sumar por asignacionId que pertenezcan a esta subtarea)
                     let subareaRec = 0, subareaOkConRec = 0;
-                    asignaciones.forEach(function(a) {
+                    _todasHoy.forEach(function(a) {
                       const aSubNombre = a.subtarea?.nombre || '';
                       if (aSubNombre === subarea) {
                         const rdata = _rechByAsig[a.id] || {};
@@ -290,7 +290,7 @@
                          const dSId    = 'dash-sub-' + dSIdx++;
                          // Rechazos de la subtarea
                          let subTotalRec = 0, subOkConRec = 0;
-                         asignaciones.forEach(a => {
+                         _todasHoy.forEach(a => {
                            if ((a.subtarea?.nombre || '') === sub) {
                              const rd = _rechByAsig[a.id] || {};
                              subTotalRec += rd.totalRec || 0;
@@ -328,7 +328,7 @@
                            const empSlots = empRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
                            const dEId     = dSId + '-emp-' + dEIdx++;
                            // Buscar asignación de este empleado en esta subtarea
-                           const _asnEmp = asignaciones.find(a =>
+                           const _asnEmp = _todasHoy.find(a =>
                              (a.subtarea?.nombre || '') === sub &&
                              (`${a.empleado?.nombre || ''} ${(a.empleado?.apellidos || '').split(' ')[0]}`.trim() === emp ||
                               (a.empleado?.nombre || '') === emp)
