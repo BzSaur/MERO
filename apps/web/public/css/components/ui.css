@@ -2443,6 +2443,8 @@ html[data-theme="dark"] .slot-done {
 
 .rexp-table { margin: 0; }
 
+tr.rexp-hidden { display: none !important; }
+
 .rexp-row { cursor: default; }
 .rexp-row--area,
 .rexp-row--sub { cursor: pointer; }
