@@ -591,7 +591,9 @@ El navegador NO hereda colores del <select> padre en las <option>
 ============================================================ */
 
 html[data-theme="dark"] .form-control option,
-html[data-theme="dark"] .form-select option {
+html[data-theme="dark"] .form-select option,
+html[data-theme="dark"] .form-control optgroup,
+html[data-theme="dark"] .form-select optgroup {
   background-color: #0f172a !important;   /* --dm-surface */
   color: rgba(226,232,240,.92) !important; /* --dm-ink */
 }
@@ -950,6 +952,12 @@ html[data-theme="dark"] .table--blue .badge--ok{
   background: rgba(59,130,246,.16) !important;
   color: rgba(219,234,254,.95) !important;
   border: 1px solid rgba(59,130,246,.24) !important;
+}
+
+html[data-theme="dark"] .table--asignar .badge--muted{
+  background: rgba(148,163,184,.16) !important;
+  color: rgba(226,232,240,.88) !important;
+  border: 1px solid rgba(148,163,184,.28) !important;
 }
 
 html[data-theme="dark"] .table--asignar .badge--warn,

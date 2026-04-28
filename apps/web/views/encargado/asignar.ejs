@@ -28,7 +28,24 @@
                 Volver
               </a>
             </div>
-            <%- include('../partials/flash') %>
+            <% if (flash.error && flash.error.length) { %>
+              <ul class="flash-list">
+                <% flash.error.forEach(msg => { %><li class="flash flash--error"><%= msg %></li><% }) %>
+              </ul>
+            <% } %>
+            <% if (flash.success && flash.success.length) { %>
+              <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Cambios guardados',
+                    text: '<%= flash.success[0] %>',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#4f46e5'
+                  });
+                });
+              </script>
+            <% } %>
 
             <div class="card card--asignar" style="margin-bottom:var(--gap-lg)">
               <div class="card__header">
@@ -175,7 +192,7 @@
                           <td>
                             <%= a.empleado?.nombre %> <%= a.empleado?.apellidos || '' %>
                             <% if (a.tipo === 'INDIRECTA') { %>
-                              <span class="badge badge--muted" style="margin-left:.3rem; font-size:.72rem;">Indirecta</span>
+                              <span class="badge" style="margin-left:.3rem; font-size:.72rem; background:rgba(234,88,12,.13); color:#c2410c; border:1px solid rgba(234,88,12,.28);">Indirecta</span>
                             <% } %>
                           </td>
                           <td>

@@ -298,6 +298,18 @@
   color: rgba(30,58,138,.95) !important;
 }
 
+:root:not([data-theme="dark"]) .table--asignar .badge--ok{
+  background: rgba(29,78,216,.12);
+  color: rgba(30,58,138,.95);
+  border-color: rgba(29,78,216,.22);
+}
+
+:root:not([data-theme="dark"]) .table--asignar .badge--muted{
+  background: rgba(100,116,139,.10);
+  color: rgba(51,65,85,.85);
+  border-color: rgba(100,116,139,.22);
+}
+
 :root:not([data-theme="dark"]) .page--usuarios .badge--warn{
   background: rgba(245,158,11,.18) !important;
   color: rgba(124,45,18,.95) !important;
