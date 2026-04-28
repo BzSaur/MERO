@@ -380,6 +380,12 @@
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
   <script>
+    // Init: convierte style="display:none" a clase para evitar override de CSS mobile
+    document.querySelectorAll('[class*="rexp-child--"]').forEach(function(r) {
+      r.classList.add('rexp-hidden');
+      r.style.display = '';
+    });
+
     function toggleRexp(row) {
       const target = row.dataset.target;
       if (!target) return;
@@ -389,13 +395,11 @@
       const isOpen   = row.classList.contains('rexp-row--open');
 
       if (isOpen) {
-        // Cerrar: ocultar hijos directos y todos sus descendientes
         collapseAll(target);
         row.classList.remove('rexp-row--open');
         if (arrow) arrow.textContent = '▶';
       } else {
-        // Abrir: mostrar hijos directos únicamente
-        children.forEach(c => { c.style.display = ''; });
+        children.forEach(c => { c.classList.remove('rexp-hidden'); });
         row.classList.add('rexp-row--open');
         if (arrow) arrow.textContent = '▼';
       }
@@ -404,11 +408,10 @@
     function collapseAll(target) {
       const children = document.querySelectorAll('.rexp-child--' + target);
       children.forEach(c => {
-        c.style.display = 'none';
+        c.classList.add('rexp-hidden');
         c.classList.remove('rexp-row--open');
         const arrow = c.querySelector('.rexp-arrow');
         if (arrow) arrow.textContent = '▶';
-        // Colapsar recursivamente sus hijos
         const subTarget = c.dataset.target;
         if (subTarget) collapseAll(subTarget);
       });

@@ -491,6 +491,11 @@
   table:not(.table--stack) tr{
     display: table-row !important;
   }
+  /* Excepción: filas rexp colapsadas deben permanecer ocultas */
+  .table:not(.table--stack) tr.rexp-hidden,
+  table:not(.table--stack) tr.rexp-hidden{
+    display: none !important;
+  }
   .table:not(.table--stack) th,
   .table:not(.table--stack) td,
   table:not(.table--stack) th,

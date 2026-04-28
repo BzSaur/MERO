@@ -327,6 +327,11 @@
 
   <script>
     // ── Row expansion ──
+    document.querySelectorAll('[class*="rexp-child--"]').forEach(function(r) {
+      r.classList.add('rexp-hidden');
+      r.style.display = '';
+    });
+
     function toggleRexp(row) {
       const target = row.dataset.target;
       if (!target) return;
@@ -338,14 +343,14 @@
         row.classList.remove('rexp-row--open');
         if (arrow) arrow.textContent = '▶';
       } else {
-        children.forEach(c => { c.style.display = ''; });
+        children.forEach(c => { c.classList.remove('rexp-hidden'); });
         row.classList.add('rexp-row--open');
         if (arrow) arrow.textContent = '▼';
       }
     }
     function collapseRexp(target) {
       document.querySelectorAll('.rexp-child--' + target).forEach(c => {
-        c.style.display = 'none';
+        c.classList.add('rexp-hidden');
         c.classList.remove('rexp-row--open');
         const a = c.querySelector('.rexp-arrow');
         if (a) a.textContent = '▶';
@@ -416,6 +421,7 @@
       if (desde) desde.max = today;
       if (hasta) hasta.max = today;
     })();
+
   </script>
 </body>
 </html>
