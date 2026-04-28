@@ -402,6 +402,29 @@ html[data-theme="dark"] .page--areas .users-controls--light{
   border: 0 !important;
 }
 
+/* Dropdown filtro modelos (estandares) */
+html[data-theme="dark"] #modeloDropdownPanel {
+  background: #1e293b !important;
+  border-color: rgba(148,163,184,.22) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.45) !important;
+}
+html[data-theme="dark"] #modeloDropdownPanel .dropdown-opt {
+  color: var(--dm-ink) !important;
+}
+html[data-theme="dark"] #modeloDropdownPanel .dropdown-opt:hover {
+  background: rgba(148,163,184,.12) !important;
+}
+
+/* Checkboxes de modelos en estandares */
+html[data-theme="dark"] #modelosCheckboxes label {
+  background: rgba(148,163,184,.08) !important;
+  border-color: rgba(148,163,184,.22) !important;
+  color: var(--dm-ink) !important;
+}
+html[data-theme="dark"] #modelosCheckboxes label:hover {
+  background: rgba(148,163,184,.15) !important;
+}
+
 /* Inputs / select */
 html[data-theme="dark"] .page--areas .form-label{
   color: var(--dm-ink-soft) !important;
