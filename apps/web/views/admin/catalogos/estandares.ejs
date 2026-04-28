@@ -66,7 +66,6 @@
                         </label>
                       <% }) %>
                     </div>
-                    <p id="modelosError" style="display:none; color:var(--danger); font-size:.8rem; margin-top:.25rem;">Selecciona al menos un modelo.</p>
                   </div>
 
                   <div class="form-group users-controls__field">
@@ -113,18 +112,59 @@
                   const checked = this.querySelectorAll('input[name="modeloIds"]:checked');
                   if (!checked.length) {
                     e.preventDefault();
-                    document.getElementById('modelosError').style.display = 'block';
-                  } else {
-                    document.getElementById('modelosError').style.display = 'none';
+                    Swal.fire({
+                      icon: 'warning',
+                      title: 'Sin modelo',
+                      text: 'Selecciona al menos un modelo antes de guardar.',
+                      confirmButtonText: 'Entendido',
+                      confirmButtonColor: 'var(--accent, #4f46e5)'
+                    });
                   }
                 });
               </script>
             </div>
 
             <div class="card card--asignar card--asignar-act">
-              <div class="card__header card__header--usuarios">
-                <h3><span class="card__title">Estándares registrados</span></h3>
-                <span class="badge badge--ok"><%= estandares.length %></span>
+              <div class="card__header card__header--usuarios" style="flex-direction:column; align-items:stretch; gap:.6rem;">
+                <div style="display:flex; align-items:center; gap:.5rem;">
+                  <h3><span class="card__title">Estándares registrados</span></h3>
+                  <span class="badge badge--ok" id="badgeCount"><%= estandares.length %></span>
+                </div>
+                <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+                  <input
+                    id="filterNombre"
+                    type="text"
+                    placeholder="Filtrar por nombre…"
+                    class="form-control form-control--sm"
+                    style="flex:1 1 140px; min-width:0;"
+                  >
+
+                  <!-- Custom multi-select dropdown for modelo -->
+                  <div id="modeloDropdownWrap" style="position:relative; flex:1 1 140px; min-width:0;">
+                    <button
+                      type="button"
+                      id="modeloDropdownBtn"
+                      class="form-control form-control--sm"
+                      style="width:100%; text-align:left; cursor:pointer; display:flex; justify-content:space-between; align-items:center; white-space:nowrap; overflow:hidden;"
+                      aria-expanded="false"
+                    >
+                      <span id="modeloDropdownLabel" style="overflow:hidden; text-overflow:ellipsis;">Todos los modelos</span>
+                      <svg style="width:12px;height:12px;flex-shrink:0;margin-left:.4rem;" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                    </button>
+
+                    <div
+                      id="modeloDropdownPanel"
+                      style="display:none; position:fixed; z-index:9999; background:var(--surface,#fff); border:1px solid var(--border,#e2e8f0); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.15); min-width:210px; max-height:280px; overflow-y:auto; padding:.4rem 0;"
+                    >
+                      <% modelos.forEach(m => { %>
+                        <label style="display:flex; align-items:center; gap:.5rem; padding:.35rem .85rem; cursor:pointer; font-size:.85rem; white-space:nowrap;" class="dropdown-opt">
+                          <input type="checkbox" class="modelo-filter-cb" value="<%= m.nombreSku.toLowerCase() %>" style="accent-color:var(--accent);">
+                          <%= m.nombreSku %>
+                        </label>
+                      <% }) %>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <% if (!estandares.length) { %>
@@ -133,7 +173,7 @@
                 </div>
               <% } else { %>
                 <div class="table-wrap table-wrap--asignar table-wrap--clean">
-                  <table class="table table--asignar table--clean">
+                  <table id="tablaEstandares" class="table table--asignar table--clean">
                     <thead>
                       <tr>
                         <th>Subtarea</th>
@@ -151,7 +191,7 @@
                         const subt = `${e.subtarea?.area?.nombre || 'Sin área'} / ${e.subtarea?.nombre || ''}`.trim();
                         const mod = e.modelo?.nombreSku || '—';
                       %>
-                        <tr>
+                        <tr data-nombre="<%= subt.toLowerCase() %>" data-modelo="<%= mod.toLowerCase() %>">
                           <td>
                             <span style="font-size:.78rem; color:var(--ink-dim)">
                               <%= e.subtarea?.area?.nombre || 'Sin área' %> /
@@ -212,5 +252,82 @@
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
   <script src="/js/alerts.js" defer></script>
+  <script>
+    (function () {
+      const filterNombre   = document.getElementById('filterNombre');
+      const badge          = document.getElementById('badgeCount');
+      const dropBtn        = document.getElementById('modeloDropdownBtn');
+      const dropPanel      = document.getElementById('modeloDropdownPanel');
+      const dropLabel      = document.getElementById('modeloDropdownLabel');
+      const checkboxes     = document.querySelectorAll('.modelo-filter-cb');
+
+      // Toggle panel — position fixed under button
+      dropBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const open = dropPanel.style.display === 'block';
+        if (!open) {
+          const rect = dropBtn.getBoundingClientRect();
+          dropPanel.style.top  = (rect.bottom + 4) + 'px';
+          dropPanel.style.left = 'auto';
+          dropPanel.style.right = (window.innerWidth - rect.right) + 'px';
+        }
+        dropPanel.style.display = open ? 'none' : 'block';
+        dropBtn.setAttribute('aria-expanded', String(!open));
+      });
+
+      // Close on outside click
+      document.addEventListener('click', function (e) {
+        if (!document.getElementById('modeloDropdownWrap').contains(e.target)) {
+          dropPanel.style.display = 'none';
+          dropBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Hover highlight
+      document.querySelectorAll('.dropdown-opt').forEach(function (lbl) {
+        lbl.addEventListener('mouseenter', function () { lbl.style.background = 'var(--surface-hover, #f3f4f6)'; });
+        lbl.addEventListener('mouseleave', function () { lbl.style.background = ''; });
+      });
+
+      function getSelectedModelos() {
+        return Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+      }
+
+      function updateLabel(selected) {
+        if (!selected.length) {
+          dropLabel.textContent = 'Todos los modelos';
+        } else if (selected.length === 1) {
+          dropLabel.textContent = checkboxes[Array.from(checkboxes).findIndex(cb => cb.value === selected[0])].closest('label').textContent.trim();
+        } else {
+          dropLabel.textContent = selected.length + ' modelos';
+        }
+      }
+
+      function applyFilters() {
+        const nombre   = filterNombre.value.toLowerCase().trim();
+        const selected = getSelectedModelos();
+        const rows     = document.querySelectorAll('#tablaEstandares tbody tr');
+        let visible    = 0;
+
+        rows.forEach(function (row) {
+          const matchNombre = !nombre   || row.dataset.nombre.includes(nombre);
+          const matchModelo = !selected.length || selected.includes(row.dataset.modelo);
+          const show = matchNombre && matchModelo;
+          row.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+
+        if (badge) badge.textContent = visible;
+      }
+
+      filterNombre.addEventListener('input', applyFilters);
+      checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          updateLabel(getSelectedModelos());
+          applyFilters();
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
