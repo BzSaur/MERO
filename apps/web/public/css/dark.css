@@ -402,6 +402,14 @@ html[data-theme="dark"] .page--areas .users-controls--light{
   border: 0 !important;
 }
 
+/* Checkbox esIndirecta en subtareas */
+html[data-theme="dark"] #esIndirecta + span {
+  color: var(--dm-ink) !important;
+}
+html[data-theme="dark"] #esIndirecta + span span {
+  color: var(--dm-ink-dim) !important;
+}
+
 /* Dropdown filtro modelos (estandares) */
 html[data-theme="dark"] #modeloDropdownPanel {
   background: #1e293b !important;
