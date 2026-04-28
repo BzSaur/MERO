@@ -2003,3 +2003,46 @@ html[data-theme="dark"] .page--encargado .card--metrics-slot .eff-value.fail { c
 html[data-theme="dark"] .stat-card--gradient.stat-card--orange {
   background: linear-gradient(135deg, #92400e, #451a03) !important;
 }
+
+/* ============================================================
+   EMPLEADO DETALLE — KPI cards y chart dark mode
+   ============================================================ */
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi{
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid var(--dm-border-2) !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi__label{
+  color: rgba(148,163,184,.88) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi__value{
+  color: rgba(241,245,249,.96) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi__sub{
+  color: rgba(148,163,184,.82) !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi--prod .employee-kpi__value{
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi--reject .employee-kpi__value{
+  color: #fca5a5 !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi--eff .employee-kpi__value{
+  color: #5eead4 !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-kpi--slot .employee-kpi__value{
+  color: #7dd3fc !important;
+}
+
+html[data-theme="dark"] .page--empleado-detalle .employee-metrics__chart-wrap{
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid var(--dm-border-2) !important;
+}

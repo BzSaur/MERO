@@ -359,6 +359,16 @@
       const canvas = document.getElementById('employeePerformanceChart');
       if (!canvas) return;
 
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      const gridColor   = isDark ? 'rgba(255,255,255,.18)' : 'rgba(15,23,42,.14)';
+      const inkColor    = isDark ? 'rgba(226,232,240,.88)' : 'rgba(15,23,42,.82)';
+      const inkSoft     = isDark ? 'rgba(148,163,184,.85)' : 'rgba(15,23,42,.65)';
+
+      const colorProd   = isDark ? 'rgba(96,165,250,.85)'  : 'rgba(29,78,216,.85)';
+      const colorRej    = isDark ? 'rgba(239,68,68,.75)'   : 'rgba(239,68,68,.75)';
+      const colorEff    = isDark ? '#2dd4bf'               : '#0d9488';
+      const colorEffBg  = isDark ? 'rgba(45,212,191,.20)'  : 'rgba(13,148,136,.20)';
+
       new Chart(canvas, {
         data: {
           labels: payload.labels,
@@ -368,7 +378,7 @@
               label: 'Productividad neta',
               data: payload.productividad,
               yAxisID: 'yProductividad',
-              backgroundColor: 'rgba(29,78,216,.72)',
+              backgroundColor: colorProd,
               borderRadius: 8,
               maxBarThickness: 34,
             },
@@ -377,7 +387,7 @@
               label: 'Rechazos',
               data: payload.rechazos,
               yAxisID: 'yProductividad',
-              backgroundColor: 'rgba(239,68,68,.52)',
+              backgroundColor: colorRej,
               borderRadius: 8,
               maxBarThickness: 34,
             },
@@ -386,11 +396,12 @@
               label: 'Eficiencia (%)',
               data: payload.eficiencia,
               yAxisID: 'yEficiencia',
-              borderColor: 'rgba(13,148,136,1)',
-              backgroundColor: 'rgba(13,148,136,.24)',
-              pointBackgroundColor: 'rgba(13,148,136,1)',
-              pointRadius: 3,
-              pointHoverRadius: 5,
+              borderColor: colorEff,
+              backgroundColor: colorEffBg,
+              pointBackgroundColor: colorEff,
+              borderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
               tension: 0.28,
               spanGaps: true,
             },
@@ -406,6 +417,7 @@
           plugins: {
             legend: {
               position: 'bottom',
+              labels: { color: inkColor },
             },
             tooltip: {
               callbacks: {
@@ -426,27 +438,29 @@
               title: {
                 display: true,
                 text: 'Piezas',
+                color: inkSoft,
               },
-              grid: {
-                color: 'rgba(15,23,42,.08)',
-              },
+              grid: { color: gridColor },
+              ticks: { color: inkColor },
             },
             yEficiencia: {
               position: 'right',
               beginAtZero: true,
               suggestedMax: 140,
-              grid: {
-                drawOnChartArea: false,
-              },
+              grid: { drawOnChartArea: false },
               ticks: {
-                callback(value) {
-                  return `${value}%`;
-                },
+                color: inkColor,
+                callback(value) { return `${value}%`; },
               },
               title: {
                 display: true,
                 text: 'Eficiencia',
+                color: inkSoft,
               },
+            },
+            x: {
+              ticks: { color: inkColor },
+              grid: { color: isDark ? gridColor : 'rgba(15,23,42,.06)' },
             },
           },
         },
