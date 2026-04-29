@@ -2441,9 +2441,13 @@ html[data-theme="dark"] .slot-done {
    DASHBOARD ADMIN — row expansion table
    ========================================================= */
 
-.rexp-table { margin: 0; }
+.rexp-table { margin: 0; width: 100%; }
 
 tr.rexp-hidden { display: none !important; }
+
+/* Evita que el slot-strip desborde el card redondeado */
+.card .rexp-table,
+.card-body .rexp-table { overflow: hidden; }
 
 .rexp-row { cursor: default; }
 .rexp-row--area,
@@ -2482,14 +2486,24 @@ tr.rexp-hidden { display: none !important; }
 /* Strip pequeño para la columna de slots */
 .slot-strip--sm {
   display: flex;
+  flex-wrap: wrap;
   gap: 3px;
   align-items: center;
+  max-width: 220px;
 }
 .slot-strip--sm .slot-strip__seg {
-  width: 14px;
-  height: 10px;
-  border-radius: 3px;
+  width: 12px;
+  height: 9px;
+  border-radius: 2px;
   flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .slot-strip--sm .slot-strip__seg {
+    width: 10px;
+    height: 8px;
+  }
+  .slot-strip--sm { max-width: 160px; }
 }
 
 html[data-theme="dark"] .rexp-row--area:hover td { background: rgba(255,255,255,.04); }

@@ -301,32 +301,52 @@
       r.style.display = '';
     });
 
+    function getParentKey(row) {
+      var match = row.className.match(/rexp-child--([\w-]+)/);
+      return match ? match[1] : null;
+    }
+
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+        c.classList.add('rexp-hidden');
+        c.classList.remove('rexp-row--open');
+        var a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        if (c.dataset.target) collapseRexp(c.dataset.target);
+      });
+    }
+
+    function collapseSiblings(row) {
+      var parentKey = getParentKey(row);
+      var siblings = parentKey
+        ? document.querySelectorAll('.rexp-child--' + parentKey + '.rexp-row--open')
+        : document.querySelectorAll('.rexp-row--area.rexp-row--open');
+      siblings.forEach(function(s) {
+        if (s === row) return;
+        collapseRexp(s.dataset.target);
+        s.classList.remove('rexp-row--open');
+        var a = s.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+      });
+    }
+
     function toggleRexp(row) {
-      const target = row.dataset.target;
+      var target = row.dataset.target;
       if (!target) return;
-      const children = document.querySelectorAll('.rexp-child--' + target);
-      const arrow    = row.querySelector('.rexp-arrow');
-      const isOpen   = row.classList.contains('rexp-row--open');
+      var arrow  = row.querySelector('.rexp-arrow');
+      var isOpen = row.classList.contains('rexp-row--open');
       if (isOpen) {
         collapseRexp(target);
         row.classList.remove('rexp-row--open');
         if (arrow) arrow.textContent = '▶';
       } else {
-        children.forEach(c => { c.classList.remove('rexp-hidden'); });
+        collapseSiblings(row);
+        document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+          c.classList.remove('rexp-hidden');
+        });
         row.classList.add('rexp-row--open');
         if (arrow) arrow.textContent = '▼';
       }
-    }
-
-    function collapseRexp(target) {
-      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
-        c.classList.add('rexp-hidden');
-        c.classList.remove('rexp-row--open');
-        const a = c.querySelector('.rexp-arrow');
-        if (a) a.textContent = '▶';
-        const sub = c.dataset.target;
-        if (sub) collapseRexp(sub);
-      });
     }
 
     function toggleRechazo(capturaId) {
@@ -349,18 +369,18 @@
       }, 3000);
     }
 
-    (() => {
-      const Swal = window.Swal;
+    (function() {
+      var Swal = window.Swal;
 
       /* ── slot state ── */
       function updateSlotState(form) {
-        const captured = JSON.parse(form.dataset.captured || '[]');
-        const sel  = form.querySelector('.cap-slot-select');
-        const qty  = form.querySelector('.cap-slot-qty');
-        const btn  = form.querySelector('.cap-slot-btn');
+        var captured = JSON.parse(form.dataset.captured || '[]');
+        var sel = form.querySelector('.cap-slot-select');
+        var qty = form.querySelector('.cap-slot-qty');
+        var btn = form.querySelector('.cap-slot-btn');
         if (!sel || !qty || !btn) return;
-        const hora = Number(sel.value);
-        const isCaptured = captured.includes(hora);
+        var hora = Number(sel.value);
+        var isCaptured = captured.indexOf(hora) !== -1;
         qty.disabled = isCaptured;
         btn.disabled = isCaptured;
         qty.value    = '';
@@ -375,93 +395,79 @@
 
       /* ── build badge HTML for a newly captured slot ── */
       function buildSlotBadge(capturaId, slotHora) {
-        return `
-          <span class="badge badge--none"
-            style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"
-            title="Slot ${slotHora}:00">
-            <svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>
-            ${slotHora}:00
-            <button type="button"
-              class="btn btn--ghost"
-              style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"
-              onclick="toggleRechazo('${capturaId}')">
-              + rec
-            </button>
-          </span>
-          <form
-            id="rec-form-${capturaId}"
-            class="js-form-rechazo"
-            style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"
-            data-captura-id="${capturaId}"
-            data-slot-hora="${slotHora}"
-          >
-            <input type="hidden" name="capturaId" value="${capturaId}">
-            <span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot ${slotHora}:00</span>
-            <input class="form-control slot-qty" type="number" name="cantidad" min="1" placeholder="Cant." style="width:5rem;" required>
-            <input class="form-control" type="text" name="motivo" placeholder="Motivo (opcional)" style="flex:1;min-width:8rem;">
-            <button type="submit" class="btn btn--slot-save" title="Guardar rechazo">
-              <svg class="icon"><use href="#icon-check"/></svg>
-            </button>
-            <button type="button" class="btn btn--ghost"
-              style="font-size:.72rem;padding:2px 8px;height:auto;"
-              onclick="toggleRechazo('${capturaId}')">
-              Cancelar
-            </button>
-          </form>`;
+        return '<span class="badge badge--none"' +
+          ' style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"' +
+          ' title="Slot ' + slotHora + ':00">' +
+          '<svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>' +
+          slotHora + ':00' +
+          '<button type="button" class="btn btn--ghost"' +
+          ' style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"' +
+          ' onclick="toggleRechazo(\'' + capturaId + '\')">+ rec</button>' +
+          '</span>' +
+          '<form id="rec-form-' + capturaId + '" class="js-form-rechazo"' +
+          ' style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"' +
+          ' data-captura-id="' + capturaId + '" data-slot-hora="' + slotHora + '">' +
+          '<input type="hidden" name="capturaId" value="' + capturaId + '">' +
+          '<span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot ' + slotHora + ':00</span>' +
+          '<input class="form-control slot-qty" type="number" name="cantidad" min="1" placeholder="Cant." style="width:5rem;" required>' +
+          '<input class="form-control" type="text" name="motivo" placeholder="Motivo (opcional)" style="flex:1;min-width:8rem;">' +
+          '<button type="submit" class="btn btn--slot-save" title="Guardar rechazo">' +
+          '<svg class="icon"><use href="#icon-check"/></svg></button>' +
+          '<button type="button" class="btn btn--ghost"' +
+          ' style="font-size:.72rem;padding:2px 8px;height:auto;"' +
+          ' onclick="toggleRechazo(\'' + capturaId + '\')">Cancelar</button>' +
+          '</form>';
       }
 
       /* ── captura AJAX ── */
-      document.querySelectorAll('.js-form-captura').forEach(form => {
+      document.querySelectorAll('.js-form-captura').forEach(function(form) {
         updateSlotState(form);
 
-        const sel = form.querySelector('.cap-slot-select');
-        if (sel) sel.addEventListener('change', () => updateSlotState(form));
+        var sel = form.querySelector('.cap-slot-select');
+        if (sel) sel.addEventListener('change', function() { updateSlotState(form); });
 
-        form.addEventListener('submit', async e => {
+        form.addEventListener('submit', function(e) {
           e.preventDefault();
-          const qty = form.querySelector('[name="cantidad"]');
-          if (qty?.disabled) return;
-          if (!qty?.value || Number(qty.value) < 0) {
+          var qty = form.querySelector('[name="cantidad"]');
+          if (qty && qty.disabled) return;
+          if (!qty || !qty.value || Number(qty.value) < 0) {
             if (Swal) Swal.fire({ icon: 'warning', title: 'Ingresa una cantidad válida', confirmButtonText: 'Aceptar' });
             return;
           }
 
-          const btn = form.querySelector('.cap-slot-btn');
+          var btn = form.querySelector('.cap-slot-btn');
           if (btn) btn.disabled = true;
 
-          try {
-            const payload = new URLSearchParams(new FormData(form)).toString();
-            const resp = await fetch('/encargado/captura/ajax', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: payload,
-            });
-            const json = await resp.json();
-
+          var payload = new URLSearchParams(new FormData(form)).toString();
+          fetch('/encargado/captura/ajax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload,
+          })
+          .then(function(resp) { return resp.json(); })
+          .then(function(json) {
             if (!json.ok) {
               showToast(json.message || 'Error al registrar', 'err');
               if (btn) btn.disabled = false;
               return;
             }
 
-            /* ── update captured set ── */
-            const slotHora = Number(sel ? sel.value : form.querySelector('[name="slotHora"]').value);
-            const captured = JSON.parse(form.dataset.captured || '[]');
+            var slotHora = Number(sel ? sel.value : form.querySelector('[name="slotHora"]').value);
+            var captured = JSON.parse(form.dataset.captured || '[]');
             captured.push(slotHora);
             form.dataset.captured = JSON.stringify(captured);
             updateSlotState(form);
 
-            /* ── update progress bar ── */
-            const empRow = form.closest('tr.rexp-row--sub');
+            var empRow = form.closest('tr.rexp-row--sub');
             if (empRow) {
-              const barEl  = empRow.querySelector('.cap-bar');
-              const countEl = empRow.querySelector('.cap-progress-row__count');
+              var barEl   = empRow.querySelector('.cap-bar');
+              var countEl = empRow.querySelector('.cap-progress-row__count');
               if (countEl) {
-                const parts = countEl.textContent.split('/');
-                const newCaps = (parseInt(parts[0]) || 0) + 1;
-                const total   = parseInt(parts[1]) || 12;
-                const pct     = Math.round((newCaps / total) * 100);
-                countEl.textContent = `${newCaps}/${total}`;
+                var parts   = countEl.textContent.split('/');
+                var newCaps = (parseInt(parts[0]) || 0) + 1;
+                var total   = parseInt(parts[1]) || 12;
+                var pct     = Math.round((newCaps / total) * 100);
+                countEl.textContent = newCaps + '/' + total;
                 if (barEl) {
                   barEl.style.width = Math.max(pct, 2) + '%';
                   barEl.className = 'cap-bar ' + (pct >= 100 ? 'cap-bar--full' : pct >= 50 ? 'cap-bar--mid' : 'cap-bar--low');
@@ -469,141 +475,132 @@
               }
             }
 
-            /* ── inject badge in detail row ── */
-            const eId = empRow?.dataset?.target;
+            var eId = empRow && empRow.dataset && empRow.dataset.target;
             if (eId && json.captura) {
-              const detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
+              var detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
               if (detailRow) {
-                const outerFlex = detailRow.querySelector('td > div');
+                var outerFlex = detailRow.querySelector('td > div');
                 if (outerFlex) {
-                  /* find or create the badges sub-container */
-                  let badgeContainer = outerFlex.querySelector('div[style*="gap:.5rem"]');
+                  var badgeContainer = outerFlex.querySelector('div[style*="gap:.5rem"]');
                   if (!badgeContainer) {
                     badgeContainer = document.createElement('div');
                     badgeContainer.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;width:100%;';
                     outerFlex.appendChild(badgeContainer);
                   }
-                  const frag = document.createElement('div');
+                  var frag = document.createElement('div');
                   frag.innerHTML = buildSlotBadge(json.captura.id, slotHora);
                   while (frag.firstChild) badgeContainer.appendChild(frag.firstChild);
-                  /* wire new rechazo form */
-                  const newRecForm = document.getElementById('rec-form-' + json.captura.id);
+                  var newRecForm = document.getElementById('rec-form-' + json.captura.id);
                   if (newRecForm) wireRechazoForm(newRecForm);
                 }
               }
             }
 
-            /* ── update "Registros capturados" label in detail row ── */
             if (eId) {
-              const detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
-              if (detailRow) {
-                const labels = detailRow.querySelectorAll('.cap-detail-label');
-                labels.forEach(lbl => {
-                  if (lbl.textContent.includes('Registros capturados')) {
-                    const strong = lbl.querySelector('strong');
-                    if (strong) {
-                      const cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
-                      lbl.innerHTML = '<strong>Registros capturados:</strong> ' + (cur + 1);
-                    }
+              var detailRow2 = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
+              if (detailRow2) {
+                var labels = detailRow2.querySelectorAll('.cap-detail-label');
+                labels.forEach(function(lbl) {
+                  if (lbl.textContent.indexOf('Registros capturados') !== -1) {
+                    var cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
+                    lbl.innerHTML = '<strong>Registros capturados:</strong> ' + (cur + 1);
                   }
                 });
               }
             }
 
-            /* ── update option label in select ── */
             if (sel) {
-              const opt = sel.querySelector(`option[value="${slotHora}"]`);
-              if (opt && !opt.textContent.includes('✓')) {
+              var opt = sel.querySelector('option[value="' + slotHora + '"]');
+              if (opt && opt.textContent.indexOf('✓') === -1) {
                 opt.textContent = opt.textContent.replace(':00', ':00 ✓');
                 opt.dataset.captured = '1';
               }
             }
 
             showToast('Captura registrada ✓', 'ok');
-          } catch (err) {
+          })
+          .catch(function() {
             showToast('Error de conexión', 'err');
             if (btn) btn.disabled = false;
-          }
+          });
         });
       });
 
       /* ── rechazo AJAX ── */
       function wireRechazoForm(form) {
-        form.addEventListener('submit', async e => {
+        form.addEventListener('submit', function(e) {
           e.preventDefault();
-          const qty = form.querySelector('[name="cantidad"]');
-          if (!qty?.value || Number(qty.value) < 1) {
+          var qty = form.querySelector('[name="cantidad"]');
+          if (!qty || !qty.value || Number(qty.value) < 1) {
             if (Swal) Swal.fire({ icon: 'warning', title: 'Ingresa una cantidad de rechazo válida', confirmButtonText: 'Aceptar' });
             return;
           }
 
-          const submitBtn = form.querySelector('button[type="submit"]');
+          var submitBtn = form.querySelector('button[type="submit"]');
           if (submitBtn) submitBtn.disabled = true;
 
-          try {
-            const payload = new URLSearchParams(new FormData(form)).toString();
-            const resp = await fetch('/encargado/rechazos/ajax', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: payload,
-            });
-            const json = await resp.json();
-
+          var payload = new URLSearchParams(new FormData(form)).toString();
+          fetch('/encargado/rechazos/ajax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload,
+          })
+          .then(function(resp) { return resp.json(); })
+          .then(function(json) {
             if (!json.ok) {
               showToast(json.message || 'Error al registrar rechazo', 'err');
               if (submitBtn) submitBtn.disabled = false;
               return;
             }
 
-            const capturaId = form.querySelector('[name="capturaId"]')?.value;
-            const cantidad  = Number(qty.value);
+            var capturaIdEl = form.querySelector('[name="capturaId"]');
+            var capturaId   = capturaIdEl ? capturaIdEl.value : null;
+            var cantidad    = Number(qty.value);
 
-            /* update -N badge in slot badge */
-            const slotBadge = form.previousElementSibling;
+            var slotBadge = form.previousElementSibling;
             if (slotBadge && slotBadge.classList.contains('badge')) {
-              let rejBadge = slotBadge.querySelector('.badge--danger');
+              var rejBadge = slotBadge.querySelector('.badge--danger');
               if (rejBadge) {
-                const cur = parseInt(rejBadge.textContent.replace('-', '')) || 0;
+                var cur = parseInt(rejBadge.textContent.replace('-', '')) || 0;
                 rejBadge.textContent = '-' + (cur + cantidad);
               } else {
-                const recSpan = document.createElement('span');
+                var recSpan = document.createElement('span');
                 recSpan.className = 'badge badge--danger';
                 recSpan.style.cssText = 'font-size:.68rem;padding:0 4px;';
                 recSpan.textContent = '-' + cantidad;
-                const recBtn = slotBadge.querySelector('button');
+                var recBtn = slotBadge.querySelector('button');
                 if (recBtn) slotBadge.insertBefore(recSpan, recBtn);
               }
             }
 
-            /* update "Rechazos: X" label in detail row */
-            const empRow = form.closest('tr.rexp-row--slot');
+            var empRow = form.closest('tr.rexp-row--slot');
             if (empRow) {
-              const labels = empRow.querySelectorAll('.cap-detail-label');
-              labels.forEach(lbl => {
-                if (lbl.textContent.includes('Rechazos:')) {
-                  const cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
+              var labels = empRow.querySelectorAll('.cap-detail-label');
+              labels.forEach(function(lbl) {
+                if (lbl.textContent.indexOf('Rechazos:') !== -1) {
+                  var cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
                   lbl.innerHTML = '<strong>Rechazos:</strong> ' + (cur + cantidad);
                 }
               });
             }
 
-            /* hide form, reset */
             form.style.display = 'none';
             qty.value = '';
-            const motivoInput = form.querySelector('[name="motivo"]');
+            var motivoInput = form.querySelector('[name="motivo"]');
             if (motivoInput) motivoInput.value = '';
             if (submitBtn) submitBtn.disabled = false;
 
             showToast('Rechazo registrado', 'ok');
-          } catch (err) {
+          })
+          .catch(function() {
             showToast('Error de conexión', 'err');
             if (submitBtn) submitBtn.disabled = false;
-          }
+          });
         });
       }
 
       document.querySelectorAll('.js-form-rechazo').forEach(wireRechazoForm);
-    })();
+    }());
   </script>
 </body>
 </html>

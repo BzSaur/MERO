@@ -169,14 +169,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // Crear el elemento indicador
     const ptr = document.createElement('div');
     ptr.id = 'ptr-indicator';
-    ptr.innerHTML = `
-      <div class="ptr-inner">
-        <svg class="ptr-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="ptr-text">Jala para recargar</span>
-      </div>`;
+    ptr.innerHTML = '<div class="ptr-inner">' +
+      '<svg class="ptr-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"' +
+      ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>' +
+      '<span class="ptr-text">Jala para recargar</span>' +
+      '</div>';
     document.body.prepend(ptr);
 
     let ptrStartY    = 0;
@@ -189,9 +188,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const ratio   = Math.min(clamped / THRESHOLD, 1);
       const ready   = clamped >= THRESHOLD;
 
-      ptr.style.transform = `translateY(${clamped}px)`;
+      ptr.style.transform = 'translateY(' + clamped + 'px)';
       ptr.style.opacity   = Math.min(ratio * 1.4, 1);
-      ptr.querySelector('.ptr-icon').style.transform = `rotate(${ratio * 220}deg)`;
+      ptr.querySelector('.ptr-icon').style.transform = 'rotate(' + (ratio * 220) + 'deg)';
       ptr.querySelector('.ptr-text').textContent = ready ? '¡Suelta para recargar!' : 'Jala para recargar';
       ptr.classList.toggle('ptr-ready', ready);
     }
@@ -203,16 +202,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (reload) {
         ptr.classList.add('ptr-loading');
-        ptr.style.transform  = `translateY(${THRESHOLD}px)`;
+        ptr.style.transform  = 'translateY(' + THRESHOLD + 'px)';
         ptr.style.opacity    = '1';
         ptr.querySelector('.ptr-text').textContent = 'Recargando…';
         ptr.querySelector('.ptr-icon').style.animation = 'ptr-spin 0.7s linear infinite';
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(function() { window.location.reload(); }, 500);
       } else {
         ptr.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         ptr.style.transform  = 'translateY(0)';
         ptr.style.opacity    = '0';
-        setTimeout(() => { ptr.style.transition = ''; }, 320);
+        setTimeout(function() { ptr.style.transition = ''; }, 320);
       }
     }
 
@@ -343,8 +342,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // ============================================================
   document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
     setTimeout(function () {
-      if (window.bootstrap?.Alert) {
-        const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      if (window.bootstrap && window.bootstrap.Alert) {
+        var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
         if (bsAlert) bsAlert.close();
       }
     }, 5000);
@@ -366,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // TOOLTIPS
   // ============================================================
   const tooltipList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-  if (tooltipList.length > 0 && window.bootstrap?.Tooltip) {
+  if (tooltipList.length > 0 && window.bootstrap && window.bootstrap.Tooltip) {
     Array.from(tooltipList).forEach(function (el) {
       new bootstrap.Tooltip(el);
     });
@@ -440,24 +439,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 /* ============================================================*/
-(() => {
-  const toggle = document.getElementById('themeToggle');
+(function() {
+  var toggle = document.getElementById('themeToggle');
   if (!toggle) return;
 
-  const KEY = 'mero_theme';
-  const apply = (mode) => {
+  var KEY = 'mero_theme';
+  function applyTheme(mode) {
     document.documentElement.dataset.theme = mode;
-  };
+  }
 
-  const saved = localStorage.getItem(KEY);
+  var saved = localStorage.getItem(KEY);
   if (saved) {
-    apply(saved);
+    applyTheme(saved);
     toggle.checked = saved === 'dark';
   }
 
-  toggle.addEventListener('change', () => {
-    const mode = toggle.checked ? 'dark' : 'light';
-    apply(mode);
+  toggle.addEventListener('change', function() {
+    var mode = toggle.checked ? 'dark' : 'light';
+    applyTheme(mode);
     localStorage.setItem(KEY, mode);
   });
-})();
+}());

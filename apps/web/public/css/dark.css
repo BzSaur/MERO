@@ -424,13 +424,20 @@ html[data-theme="dark"] #modeloDropdownPanel .dropdown-opt:hover {
 }
 
 /* Checkboxes de modelos en estandares */
-html[data-theme="dark"] #modelosCheckboxes label {
-  background: rgba(148,163,184,.08) !important;
-  border-color: rgba(148,163,184,.22) !important;
-  color: var(--dm-ink) !important;
+html[data-theme="dark"] #modelosCheckboxes label,
+html[data-theme="dark"] .modelo-check-label {
+  background: rgba(148,163,184,.10) !important;
+  border-color: rgba(148,163,184,.28) !important;
+  color: rgba(226,232,240,.92) !important;
 }
-html[data-theme="dark"] #modelosCheckboxes label:hover {
-  background: rgba(148,163,184,.15) !important;
+html[data-theme="dark"] #modelosCheckboxes label:hover,
+html[data-theme="dark"] .modelo-check-label:hover {
+  background: rgba(148,163,184,.18) !important;
+}
+
+/* Hint text en form-label de estandares */
+html[data-theme="dark"] .page--areas .form-label span {
+  color: rgba(148,163,184,.75) !important;
 }
 
 /* Inputs / select */

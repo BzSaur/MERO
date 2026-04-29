@@ -56,11 +56,11 @@
                   <div class="form-group" style="flex:1 1 100%;">
                     <label class="form-label">
                       Modelos
-                      <span style="font-weight:400; color:var(--ink-dim); font-size:.78rem;">(selecciona uno o varios — mismo estándar para todos)</span>
+                      <span style="font-weight:400; color:rgba(15,23,42,.55); font-size:.78rem;">(selecciona uno o varios — mismo estándar para todos)</span>
                     </label>
                     <div id="modelosCheckboxes" style="display:flex; flex-wrap:wrap; gap:.5rem .75rem; padding:.5rem 0;">
                       <% modelos.forEach(m => { %>
-                        <label style="display:flex; align-items:center; gap:.35rem; cursor:pointer; font-size:.875rem; padding:.2rem .5rem; border-radius:4px; border:1px solid var(--border); background:var(--surface);">
+                        <label class="modelo-check-label" style="display:flex; align-items:center; gap:.35rem; cursor:pointer; font-size:.875rem; padding:.2rem .5rem; border-radius:4px; border:1px solid rgba(15,23,42,.15); background:#fff; color:#0f172a;">
                           <input type="checkbox" name="modeloIds" value="<%= m.id %>" style="accent-color:var(--accent);">
                           <%= m.nombreSku %>
                         </label>

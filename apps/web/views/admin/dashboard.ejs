@@ -380,41 +380,61 @@
   <div id="sidebarOverlay"></div>
   <script src="/js/main.js"></script>
   <script>
-    // Init: convierte style="display:none" a clase para evitar override de CSS mobile
     document.querySelectorAll('[class*="rexp-child--"]').forEach(function(r) {
       r.classList.add('rexp-hidden');
       r.style.display = '';
     });
 
-    function toggleRexp(row) {
-      const target = row.dataset.target;
-      if (!target) return;
+    function getParentKey(row) {
+      var match = row.className.match(/rexp-child--([\w-]+)/);
+      return match ? match[1] : null;
+    }
 
-      const children = document.querySelectorAll('.rexp-child--' + target);
-      const arrow    = row.querySelector('.rexp-arrow');
-      const isOpen   = row.classList.contains('rexp-row--open');
+    function collapseAll(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+        c.classList.add('rexp-hidden');
+        c.classList.remove('rexp-row--open');
+        var a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        if (c.dataset.target) collapseAll(c.dataset.target);
+      });
+    }
+
+    function collapseSiblings(row) {
+      var parentKey = getParentKey(row);
+      var siblings;
+      if (parentKey) {
+        siblings = document.querySelectorAll('.rexp-child--' + parentKey + '.rexp-row--open');
+      } else {
+        siblings = document.querySelectorAll('.rexp-row--area.rexp-row--open');
+      }
+      siblings.forEach(function(s) {
+        if (s === row) return;
+        collapseAll(s.dataset.target);
+        s.classList.remove('rexp-row--open');
+        var a = s.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+      });
+    }
+
+    function toggleRexp(row) {
+      var target = row.dataset.target;
+      if (!target) return;
+      var arrow  = row.querySelector('.rexp-arrow');
+      var isOpen = row.classList.contains('rexp-row--open');
 
       if (isOpen) {
         collapseAll(target);
         row.classList.remove('rexp-row--open');
         if (arrow) arrow.textContent = '▶';
       } else {
-        children.forEach(c => { c.classList.remove('rexp-hidden'); });
+        collapseSiblings(row);
+        document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+          c.classList.remove('rexp-hidden');
+        });
         row.classList.add('rexp-row--open');
         if (arrow) arrow.textContent = '▼';
       }
-    }
-
-    function collapseAll(target) {
-      const children = document.querySelectorAll('.rexp-child--' + target);
-      children.forEach(c => {
-        c.classList.add('rexp-hidden');
-        c.classList.remove('rexp-row--open');
-        const arrow = c.querySelector('.rexp-arrow');
-        if (arrow) arrow.textContent = '▶';
-        const subTarget = c.dataset.target;
-        if (subTarget) collapseAll(subTarget);
-      });
     }
   </script>
 </body>

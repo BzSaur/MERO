@@ -332,31 +332,52 @@
       r.style.display = '';
     });
 
+    function getParentKey(row) {
+      var match = row.className.match(/rexp-child--([\w-]+)/);
+      return match ? match[1] : null;
+    }
+
+    function collapseRexp(target) {
+      document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+        c.classList.add('rexp-hidden');
+        c.classList.remove('rexp-row--open');
+        var a = c.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+        if (c.dataset.target) collapseRexp(c.dataset.target);
+      });
+    }
+
+    function collapseSiblings(row) {
+      var parentKey = getParentKey(row);
+      var siblings = parentKey
+        ? document.querySelectorAll('.rexp-child--' + parentKey + '.rexp-row--open')
+        : document.querySelectorAll('.rexp-row--area.rexp-row--open');
+      siblings.forEach(function(s) {
+        if (s === row) return;
+        collapseRexp(s.dataset.target);
+        s.classList.remove('rexp-row--open');
+        var a = s.querySelector('.rexp-arrow');
+        if (a) a.textContent = '▶';
+      });
+    }
+
     function toggleRexp(row) {
-      const target = row.dataset.target;
+      var target = row.dataset.target;
       if (!target) return;
-      const children = document.querySelectorAll('.rexp-child--' + target);
-      const arrow    = row.querySelector('.rexp-arrow');
-      const isOpen   = row.classList.contains('rexp-row--open');
+      var arrow  = row.querySelector('.rexp-arrow');
+      var isOpen = row.classList.contains('rexp-row--open');
       if (isOpen) {
         collapseRexp(target);
         row.classList.remove('rexp-row--open');
         if (arrow) arrow.textContent = '▶';
       } else {
-        children.forEach(c => { c.classList.remove('rexp-hidden'); });
+        collapseSiblings(row);
+        document.querySelectorAll('.rexp-child--' + target).forEach(function(c) {
+          c.classList.remove('rexp-hidden');
+        });
         row.classList.add('rexp-row--open');
         if (arrow) arrow.textContent = '▼';
       }
-    }
-    function collapseRexp(target) {
-      document.querySelectorAll('.rexp-child--' + target).forEach(c => {
-        c.classList.add('rexp-hidden');
-        c.classList.remove('rexp-row--open');
-        const a = c.querySelector('.rexp-arrow');
-        if (a) a.textContent = '▶';
-        const sub = c.dataset.target;
-        if (sub) collapseRexp(sub);
-      });
     }
 
     // ── Charts ──
@@ -394,7 +415,7 @@
             legend: { display: true, position: 'top', labels: { font: { size: 11 }, boxWidth: 12 } },
             tooltip: {
               callbacks: {
-                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString('es-MX') ?? '—'} pzas`
+                label: function(ctx) { var v = ctx.parsed && ctx.parsed.y != null ? ctx.parsed.y.toLocaleString('es-MX') : '—'; return ctx.dataset.label + ': ' + v + ' pzas'; }
               }
             }
           },
