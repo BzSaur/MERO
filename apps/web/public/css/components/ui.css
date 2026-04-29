@@ -2446,8 +2446,7 @@ html[data-theme="dark"] .slot-done {
 tr.rexp-hidden { display: none !important; }
 
 /* Evita que el slot-strip desborde el card redondeado */
-.card .rexp-table,
-.card-body .rexp-table { overflow: hidden; }
+.card--rexp-wrap { overflow: hidden; }
 
 .rexp-row { cursor: default; }
 .rexp-row--area,
@@ -2486,24 +2485,63 @@ tr.rexp-hidden { display: none !important; }
 /* Strip pequeño para la columna de slots */
 .slot-strip--sm {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;         /* wrappea — en tabla se overridea abajo */
   gap: 3px;
-  align-items: center;
-  max-width: 220px;
+  align-items: flex-start;
+  max-width: 200px;
+  overflow: hidden;
 }
 .slot-strip--sm .slot-strip__seg {
-  width: 12px;
-  height: 9px;
+  width: 11px;
+  height: 8px;
   border-radius: 2px;
   flex-shrink: 0;
 }
 
+/* En tabla rexp: fila única horizontal, sin wrap, 13 slots máx */
+.rexp-table .slot-strip--sm {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  width: 170px;   /* 13 × 11px + 12 × 2px gap = 167px */
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.rexp-table .slot-strip--sm .slot-strip__seg {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Columna nombre: no empuja columnas fijas */
+.rexp-table td:nth-child(2) {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1100px) {
-  .slot-strip--sm .slot-strip__seg {
-    width: 10px;
+  .rexp-table .slot-strip--sm {
+    width: 130px;  /* 13 × 8px + 12 × 2px = 128px */
+    gap: 2px;
+  }
+  .rexp-table .slot-strip--sm .slot-strip__seg {
+    width: 8px;
     height: 8px;
   }
-  .slot-strip--sm { max-width: 160px; }
+}
+
+@media (max-width: 720px) {
+  .rexp-table .slot-strip--sm {
+    width: 104px;  /* 13 × 6px + 12 × 2px = 102px */
+  }
+  .rexp-table .slot-strip--sm .slot-strip__seg {
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+  }
 }
 
 html[data-theme="dark"] .rexp-row--area:hover td { background: rgba(255,255,255,.04); }

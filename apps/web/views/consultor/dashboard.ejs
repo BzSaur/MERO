@@ -301,7 +301,7 @@
                   return valid.length ? valid.reduce((s,x) => s + Number(x), 0) / valid.length : null;
                 }
               %>
-              <div class="card card--asignar card--asignar-act card--usuarios">
+              <div class="card card--asignar card--asignar-act card--usuarios card--rexp-wrap">
                 <div class="card__header card__header--usuarios">
                   <h3><span class="card__title">Detalle por área</span></h3>
                   <span class="badge badge--ok"><%= metricas.length %></span>
@@ -313,7 +313,7 @@
                         <th style="width:2rem"></th>
                         <th>Área / Subtarea / Empleado</th>
                         <th style="width:7rem;text-align:right">Eficiencia</th>
-                        <th style="width:8rem" class="td-hide-mobile">Slots hoy</th>
+                        <th style="width:11rem" class="td-hide-mobile">Slots hoy</th>
                       </tr>
                     </thead>
                     <tbody>
