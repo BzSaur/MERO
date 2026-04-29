@@ -210,7 +210,16 @@
                       <% let areaIdx = 0; Object.entries(tree).forEach(([area, subs]) => {
                            const allRecs = Object.values(subs).flatMap(em => Object.values(em).flat());
                            const areaAvg = avgArr(allRecs.map(m => m.eficienciaPct ?? m.eficiencia ?? null));
-                           const allSlots = allRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                           // 1 dot por hora — promedio de eficiencia de esa hora entre todos los empleados
+                           const _areaHoraMap = {};
+                           allRecs.forEach(m => {
+                             const h = m.slotHora; const e = m.eficienciaPct ?? m.eficiencia;
+                             if (h == null) return;
+                             if (!_areaHoraMap[h]) _areaHoraMap[h] = { sum:0, count:0 };
+                             if (e != null) { _areaHoraMap[h].sum += Number(e); _areaHoraMap[h].count++; }
+                           });
+                           const allSlots = Object.keys(_areaHoraMap).map(Number).sort((a,b)=>a-b)
+                             .map(h => ({ slotHora: h, _avg: _areaHoraMap[h].count ? _areaHoraMap[h].sum/_areaHoraMap[h].count : null }));
                            const aId = 'area-' + areaIdx++;
                            // Rechazos del área
                            let areaTotalRec = 0, areaOkConRec = 0;
@@ -240,8 +249,8 @@
                           <td class="td-hide-mobile">
                             <div class="slot-strip slot-strip--sm">
                               <% allSlots.forEach(s => { %>
-                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(s.eficienciaPct ?? s.eficiencia) %>"
-                                  title="<%= s.slotHora %>:00 — <%= fmtEff(s.eficienciaPct ?? s.eficiencia) %>"></div>
+                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(s._avg) %>"
+                                  title="<%= s.slotHora %>:00 — <%= fmtEff(s._avg) %>"></div>
                               <% }) %>
                             </div>
                           </td>
@@ -251,7 +260,15 @@
                         <% let subIdx = 0; Object.entries(subs).forEach(([sub, empMap]) => {
                              const subRecs = Object.values(empMap).flat();
                              const subAvg  = avgArr(subRecs.map(r => r.eficienciaPct ?? r.eficiencia ?? null));
-                             const subSlots = subRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0));
+                             const _subHoraMap = {};
+                             subRecs.forEach(m => {
+                               const h = m.slotHora; const e = m.eficienciaPct ?? m.eficiencia;
+                               if (h == null) return;
+                               if (!_subHoraMap[h]) _subHoraMap[h] = { sum:0, count:0 };
+                               if (e != null) { _subHoraMap[h].sum += Number(e); _subHoraMap[h].count++; }
+                             });
+                             const subSlots = Object.keys(_subHoraMap).map(Number).sort((a,b)=>a-b)
+                               .map(h => ({ slotHora: h, _avg: _subHoraMap[h].count ? _subHoraMap[h].sum/_subHoraMap[h].count : null }));
                              const sId = aId + '-sub-' + subIdx++;
                              let subTotalRec = 0, subOkConRec = 0;
                              (asignaciones || []).forEach(a => {
@@ -282,8 +299,8 @@
                             <td class="td-hide-mobile">
                               <div class="slot-strip slot-strip--sm">
                                 <% subSlots.forEach(s => { %>
-                                  <div class="slot-strip__seg slot-strip__seg--<%= effClass(s.eficienciaPct ?? s.eficiencia) %>"
-                                    title="<%= s.slotHora %>:00 — <%= fmtEff(s.eficienciaPct ?? s.eficiencia) %>"></div>
+                                  <div class="slot-strip__seg slot-strip__seg--<%= effClass(s._avg) %>"
+                                    title="<%= s.slotHora %>:00 — <%= fmtEff(s._avg) %>"></div>
                                 <% }) %>
                               </div>
                             </td>

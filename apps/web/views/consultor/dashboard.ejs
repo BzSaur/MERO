@@ -207,16 +207,22 @@
 
                 <div class="metrics-strip-body">
                   <% Object.entries(byArea).forEach(([area, slots]) => {
-                       let areaSum = 0, areaCount = 0;
-
+                       // Agrupar por hora y promediar — 1 dot por hora
+                       const horaMap = {};
                        slots.forEach(s => {
-                         const e = getEff(s);
-                         if (e != null) {
-                           areaSum += e;
-                           areaCount++;
-                         }
+                         const sh = getSlotHora(s);
+                         const e  = getEff(s);
+                         if (sh == null) return;
+                         if (!horaMap[sh]) horaMap[sh] = { sum: 0, count: 0 };
+                         if (e != null) { horaMap[sh].sum += e; horaMap[sh].count++; }
                        });
+                       const horasOrdenadas = Object.keys(horaMap).map(Number).sort((a,b) => a-b);
 
+                       let areaSum = 0, areaCount = 0;
+                       horasOrdenadas.forEach(h => {
+                         const d = horaMap[h];
+                         if (d.count) { areaSum += d.sum / d.count; areaCount++; }
+                       });
                        const areaAvg = areaCount ? (areaSum / areaCount) : null;
                   %>
                     <div class="slot-area">
@@ -226,21 +232,19 @@
                       </div>
 
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.forEach(s => {
-                             const sh = getSlotHora(s);
-                             const r  = getReal(s);
-                             const st = getStd(s);
-                             const e  = getEff(s);
+                        <% horasOrdenadas.forEach(h => {
+                             const d   = horaMap[h];
+                             const avg = d.count ? d.sum / d.count : null;
                         %>
                           <div
-                            class="slot-strip__seg slot-strip__seg--<%= slotClass(e) %>"
-                            title="<%= sh %>h — real: <%= (r == null ? '—' : r) %> / est: <%= (st == null ? '—' : st) %> — <%= fmtEff(e) %>"></div>
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(avg) %>"
+                            title="<%= h %>h — <%= fmtEff(avg) %>"></div>
                         <% }) %>
                       </div>
 
                       <div class="slot-area__hours">
-                        <% slots.forEach(s => { %>
-                          <span class="slot-area__hour"><%= getSlotHora(s) %>h</span>
+                        <% horasOrdenadas.forEach(h => { %>
+                          <span class="slot-area__hour"><%= h %>h</span>
                         <% }) %>
                       </div>
                     </div>
@@ -320,8 +324,16 @@
                     <% let hAIdx = 0; Object.entries(hoyTree).forEach(([area, subs]) => {
                          const allCaps = Object.values(subs).flatMap(em => Object.values(em).flat());
                          const aAvg = avgHoy(allCaps.map(m => getEff(m)));
-                         const allSlots = allCaps.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0));
                          const hAId = 'hoy-area-' + hAIdx++;
+                         // 1 dot por hora — promedio entre empleados
+                         const _aHM = {};
+                         allCaps.forEach(m => {
+                           const h = getSlotHora(m); const e = getEff(m);
+                           if (h == null) return;
+                           if (!_aHM[h]) _aHM[h] = { sum:0, count:0 };
+                           if (e != null) { _aHM[h].sum += Number(e); _aHM[h].count++; }
+                         });
+                         const aHoras = Object.keys(_aHM).map(Number).sort((a,b)=>a-b);
                     %>
                       <tr class="rexp-row rexp-row--area" data-target="<%= hAId %>" onclick="toggleRexp(this)">
                         <td class="rexp-toggle"><span class="rexp-arrow">▶</span></td>
@@ -331,9 +343,9 @@
                         </td>
                         <td class="td-hide-mobile">
                           <div class="slot-strip slot-strip--sm">
-                            <% allSlots.forEach(s => { %>
-                              <div class="slot-strip__seg slot-strip__seg--<%= effClass(getEff(s)) %>"
-                                title="<%= getSlotHora(s) %>:00 — <%= fmtEff(getEff(s)) %>"></div>
+                            <% aHoras.forEach(h => { const avg = _aHM[h].count ? _aHM[h].sum/_aHM[h].count : null; %>
+                              <div class="slot-strip__seg slot-strip__seg--<%= effClass(avg) %>"
+                                title="<%= h %>:00 — <%= fmtEff(avg) %>"></div>
                             <% }) %>
                           </div>
                         </td>
@@ -343,6 +355,14 @@
                            const subCaps = Object.values(empMap).flat();
                            const sAvg = avgHoy(subCaps.map(m => getEff(m)));
                            const hSId = hAId + '-sub-' + hSIdx++;
+                           const _sHM = {};
+                           subCaps.forEach(m => {
+                             const h = getSlotHora(m); const e = getEff(m);
+                             if (h == null) return;
+                             if (!_sHM[h]) _sHM[h] = { sum:0, count:0 };
+                             if (e != null) { _sHM[h].sum += Number(e); _sHM[h].count++; }
+                           });
+                           const sHoras = Object.keys(_sHM).map(Number).sort((a,b)=>a-b);
                       %>
                         <tr class="rexp-row rexp-row--sub rexp-child--<%= hAId %>" style="display:none"
                             data-target="<%= hSId %>" onclick="toggleRexp(this)">
@@ -355,9 +375,9 @@
                           </td>
                           <td class="td-hide-mobile">
                             <div class="slot-strip slot-strip--sm">
-                              <% subCaps.sort((a,b) => (getSlotHora(a)??0)-(getSlotHora(b)??0)).forEach(s => { %>
-                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(getEff(s)) %>"
-                                  title="<%= getSlotHora(s) %>:00 — <%= fmtEff(getEff(s)) %>"></div>
+                              <% sHoras.forEach(h => { const avg = _sHM[h].count ? _sHM[h].sum/_sHM[h].count : null; %>
+                                <div class="slot-strip__seg slot-strip__seg--<%= effClass(avg) %>"
+                                  title="<%= h %>:00 — <%= fmtEff(avg) %>"></div>
                               <% }) %>
                             </div>
                           </td>

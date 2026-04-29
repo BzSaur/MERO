@@ -151,21 +151,35 @@
 
                 <div class="card__body--metrics-slot">
                   <% Object.entries(bySubarea).forEach(function(entry) {
-                    const subarea = entry[0];
-                    const slots = entry[1];
-                    // Promedio de eficiencia de la subárea
-                    const validSlots = slots.filter(function(s) { return s._eff != null; });
-                    const subareaAvg = validSlots.length
-                      ? validSlots.reduce(function(sum, s) { return sum + Number(s._eff); }, 0) / validSlots.length
-                      : null;
-                    // Rechazos de la subárea (sumar por asignacionId que pertenezcan a esta subtarea)
-                    let subareaRec = 0, subareaOkConRec = 0;
+                    var subarea = entry[0];
+                    var slots   = entry[1];
+
+                    // Agrupar por hora, promediar — 1 dot por hora
+                    var horaMap = {};
+                    slots.forEach(function(s) {
+                      var h = s.slotHora;
+                      var e = s._eff;
+                      if (h == null) return;
+                      if (!horaMap[h]) horaMap[h] = { sum: 0, count: 0 };
+                      if (e != null) { horaMap[h].sum += Number(e); horaMap[h].count++; }
+                    });
+                    var horasOrdenadas = Object.keys(horaMap).map(Number).sort(function(a,b){ return a-b; });
+
+                    var subareaSum = 0, subareaCount = 0;
+                    horasOrdenadas.forEach(function(h) {
+                      var d = horaMap[h];
+                      if (d.count) { subareaSum += d.sum / d.count; subareaCount++; }
+                    });
+                    var subareaAvg = subareaCount ? subareaSum / subareaCount : null;
+
+                    // Rechazos
+                    var subareaRec = 0, subareaOkConRec = 0;
                     asignaciones.forEach(function(a) {
-                      const aSubNombre = a.subtarea?.nombre || '';
+                      var aSubNombre = (a.subtarea && a.subtarea.nombre) || '';
                       if (aSubNombre === subarea) {
-                        const rdata = _rechByAsig[a.id] || {};
-                        subareaRec += rdata.totalRec || 0;
-                        subareaOkConRec += rdata.okConRec || 0;
+                        var rdata = _rechByAsig[a.id] || {};
+                        subareaRec      += rdata.totalRec    || 0;
+                        subareaOkConRec += rdata.okConRec    || 0;
                       }
                     });
                   %>
@@ -179,17 +193,18 @@
                               <%= subareaRec %> rec<% if (subareaOkConRec > 0) { %> · <%= subareaOkConRec %> OK<% } %>
                             </span>
                           <% } %>
-                          <span class="eff-value <%= effClass(subareaAvg) %>">
-                            <%= fmtEff(subareaAvg) %>
-                          </span>
+                          <span class="eff-value <%= effClass(subareaAvg) %>"><%= fmtEff(subareaAvg) %></span>
                         </div>
                       </div>
 
                       <div class="slot-strip slot-strip--lg">
-                        <% slots.slice().sort(function(a,b){ return (a.slotHora??0)-(b.slotHora??0); }).forEach(function(s) { %>
+                        <% horasOrdenadas.forEach(function(h) {
+                             var d   = horaMap[h];
+                             var avg = d.count ? d.sum / d.count : null;
+                        %>
                           <div
-                            class="slot-strip__seg slot-strip__seg--<%= slotClass(s ? s._eff : null) %>"
-                            title="<%= (s && s.slotHora != null ? s.slotHora + ':00' : 'Sin hora') %> — <%= fmtEff(s ? s._eff : null) %>">
+                            class="slot-strip__seg slot-strip__seg--<%= slotClass(avg) %>"
+                            title="<%= h %>:00 — <%= fmtEff(avg) %>">
                           </div>
                         <% }) %>
                       </div>
@@ -315,10 +330,20 @@
                         </td>
                         <td class="td-hide-mobile">
                           <div class="slot-strip slot-strip--sm">
-                            <% subRecs.slice().sort((a,b) => (a.slotHora??0)-(b.slotHora??0)).forEach(s => { %>
-                              <div class="slot-strip__seg slot-strip__seg--<%= slotClass(s._eff) %>"
-                                title="<%= s.slotHora %>:00 — <%= fmtEff(s._eff) %>"></div>
-                            <% }) %>
+                            <%
+                              const _subHM = {};
+                              subRecs.forEach(function(m) {
+                                const h = m.slotHora; const e = m._eff;
+                                if (h == null) return;
+                                if (!_subHM[h]) _subHM[h] = { sum:0, count:0 };
+                                if (e != null) { _subHM[h].sum += Number(e); _subHM[h].count++; }
+                              });
+                              Object.keys(_subHM).map(Number).sort((a,b)=>a-b).forEach(h => {
+                                const avg = _subHM[h].count ? _subHM[h].sum/_subHM[h].count : null;
+                            %>
+                              <div class="slot-strip__seg slot-strip__seg--<%= slotClass(avg) %>"
+                                title="<%= h %>:00 — <%= fmtEff(avg) %>"></div>
+                            <% }); %>
                           </div>
                         </td>
                       </tr>
