@@ -7,6 +7,7 @@ const flash   = require('connect-flash');
 const path    = require('path');
 
 const app = express();
+app.disable('x-powered-by');
 
 const defaultSessionMaxAgeMinutes = 10;
 const sessionMaxAgeMinutes = Number(process.env.WEB_SESSION_MAX_AGE_MINUTES);

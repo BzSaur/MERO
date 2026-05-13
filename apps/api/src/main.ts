@@ -7,6 +7,13 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
+  const httpAdapter = app.getHttpAdapter().getInstance();
+  httpAdapter.disable('x-powered-by');
+  httpAdapter.use((_req: any, res: any, next: any) => {
+    res.removeHeader('x-powered-by');
+    next();
+  });
+
   app.useLogger(app.get(Logger));
 
   const config = app.get(ConfigService);
