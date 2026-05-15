@@ -38,3 +38,6 @@ logs/
 # Coverage
 coverage/
 QR/
+
+#pdf
+/pdf
