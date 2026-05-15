@@ -252,12 +252,13 @@ router.get('/asignar', async (req, res, next) => {
       ? client.get(`/asignaciones/activas?areaId=${scope.areaId}`)
       : client.get('/asignaciones/activas');
 
-    const [asnRes, areasRes, subRes, modRes, actIndRes] = await Promise.all([
+    const [asnRes, areasRes, subRes, modRes, actIndRes, empRes] = await Promise.all([
       asignacionesPromise,
       client.get('/catalogos/areas'),
       client.get('/catalogos/subtareas'),
       client.get('/catalogos/modelos'),
       client.get('/catalogos/actividades-indirectas'),
+      client.get('/empleados'),
     ]);
 
     const areas = Array.isArray(areasRes.data) ? areasRes.data : [];
@@ -265,6 +266,12 @@ router.get('/asignar', async (req, res, next) => {
     const modelos = Array.isArray(modRes.data) ? modRes.data : [];
     const asignaciones = Array.isArray(asnRes.data) ? asnRes.data : [];
     const actividadesIndirectas = Array.isArray(actIndRes.data) ? actIndRes.data : [];
+    const empleados = (Array.isArray(empRes.data) ? empRes.data : []).map((e) => ({
+      uuid: e.uuidQr,
+      nombre: e.nombre,
+      apellidos: e.apellidos || '',
+      areaNombre: e.vita?.area || '',
+    }));
 
     let areaFija = null;
     let areasFiltradas = areas;
@@ -287,6 +294,7 @@ router.get('/asignar', async (req, res, next) => {
       actividadesIndirectas,
       areaFija,
       lockArea: scope.isScoped,
+      empleados,
     });
   } catch (err) {
     next(err);

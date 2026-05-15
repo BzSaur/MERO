@@ -72,6 +72,18 @@
                       >
                     </div>
 
+                    <div class="form-group users-controls__field" id="fieldBuscarNombre" style="display:none; position:relative;">
+                      <label class="form-label" for="buscarNombre">Nombre del empleado</label>
+                      <input
+                        class="form-control"
+                        type="text"
+                        id="buscarNombre"
+                        placeholder="Buscar nombre..."
+                        autocomplete="off"
+                      >
+                      <ul id="empleadoDropdown" style="display:none; position:absolute; z-index:1000; top:100%; left:0; right:0; margin:4px 0 0; padding:4px 0; list-style:none; background:#fff; border:1px solid rgba(30,58,138,.22); border-radius:14px; max-height:260px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,.12);"></ul>
+                    </div>
+
                     <div class="form-group users-controls__field users-controls__field--wide">
                       <label class="form-label" for="areaId">Área destino</label>
 
@@ -146,6 +158,10 @@
 
                       <button type="button" class="btn btn--ghost" id="btnScanCam">
                         <span></span><small>Escanear UUID con cámara</small>
+                      </button>
+
+                      <button type="button" class="btn btn--ghost" id="btnBuscarNombre">
+                        <small>Buscar por nombre</small>
                       </button>
                     </div>
 
@@ -311,6 +327,66 @@
       if (subSel)  subSel.addEventListener('change', updateModelo);
 
       filterOpciones();
+    })();
+  </script>
+
+  <script>
+    (function () {
+      const empleadosData = <%- JSON.stringify(empleados || []) %>;
+      const btnBuscar   = document.getElementById('btnBuscarNombre');
+      const fieldBuscar = document.getElementById('fieldBuscarNombre');
+      const inputBuscar = document.getElementById('buscarNombre');
+      const dropdown    = document.getElementById('empleadoDropdown');
+      const uuidInput   = document.getElementById('uuidQr');
+
+      function normalize(s) { return (s || '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+      function labelOf(e) {
+        return (e.nombre + ' ' + e.apellidos + (e.areaNombre ? ' — ' + e.areaNombre : '')).replace(/\s+/g, ' ').trim();
+      }
+
+      function renderDropdown(list) {
+        dropdown.innerHTML = '';
+        if (!list.length) { dropdown.style.display = 'none'; return; }
+        list.forEach(function (e) {
+          const li = document.createElement('li');
+          li.textContent = labelOf(e);
+          li.style.cssText = 'padding:10px 16px; cursor:pointer; font-size:13px; border-bottom:1px solid rgba(0,0,0,.05);';
+          li.addEventListener('mousedown', function (ev) {
+            ev.preventDefault();
+            uuidInput.value = e.uuid;
+            inputBuscar.value = labelOf(e);
+            dropdown.style.display = 'none';
+          });
+          li.addEventListener('mouseenter', function () { li.style.background = 'rgba(29,78,216,.07)'; });
+          li.addEventListener('mouseleave', function () { li.style.background = ''; });
+          dropdown.appendChild(li);
+        });
+        dropdown.style.display = '';
+      }
+
+      inputBuscar.addEventListener('input', function () {
+        const q = normalize(inputBuscar.value);
+        const filtered = q
+          ? empleadosData.filter(function (e) { return normalize(labelOf(e)).includes(q); })
+          : empleadosData;
+        renderDropdown(filtered);
+      });
+
+      inputBuscar.addEventListener('focus', function () {
+        renderDropdown(empleadosData);
+      });
+
+      inputBuscar.addEventListener('blur', function () {
+        setTimeout(function () { dropdown.style.display = 'none'; }, 150);
+      });
+
+      btnBuscar.addEventListener('click', function () {
+        const visible = fieldBuscar.style.display !== 'none';
+        fieldBuscar.style.display = visible ? 'none' : '';
+        dropdown.style.display = 'none';
+        if (!visible) { inputBuscar.value = ''; inputBuscar.focus(); }
+      });
     })();
   </script>
 
