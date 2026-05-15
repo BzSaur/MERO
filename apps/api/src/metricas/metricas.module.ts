@@ -9,6 +9,6 @@ import { MetricasSseService } from './metricas-sse.service';
   imports: [CatalogosModule, EmpleadosModule],
   controllers: [MetricasController],
   providers: [MetricasService, MetricasSseService],
-  exports: [MetricasService],
+  exports: [MetricasService, MetricasSseService],
 })
 export class MetricasModule {}

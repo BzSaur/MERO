@@ -152,7 +152,7 @@ export class MetricasService {
         empleados: new Set<number>(),
       };
 
-      entry.totalPiezas += m.cantidad;
+      entry.totalPiezas += m.cantidadNeta;
       entry.sumEficiencia += m.eficienciaPct;
       entry.countSlots += 1;
       entry.empleados.add(m.asignacionId);

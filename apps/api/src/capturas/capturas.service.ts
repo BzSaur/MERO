@@ -7,10 +7,14 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCapturaDto } from './dto/create-captura.dto';
 import { HORARIOS } from '@mero/shared';
+import { MetricasSseService } from '../metricas/metricas-sse.service';
 
 @Injectable()
 export class CapturasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly sse: MetricasSseService,
+  ) {}
 
   private getMexicoNowParts(date = new Date()) {
     const parts = new Intl.DateTimeFormat('en-US', {
@@ -106,7 +110,7 @@ export class CapturasService {
       });
     }
 
-    return this.prisma.meroCaptura.create({
+    const captura = await this.prisma.meroCaptura.create({
       data: {
         asignacionId: dto.asignacionId,
         slotHora: dto.slotHora,
@@ -115,6 +119,30 @@ export class CapturasService {
       },
       include: { encargado: { select: { id: true, nombre: true } } },
     });
+
+    const capturasAsg = await this.prisma.meroCaptura.findMany({
+      where: { asignacionId: dto.asignacionId },
+      include: { rechazos: { select: { cantidad: true } } },
+    });
+    const totalCapturado = capturasAsg.reduce((sum, c) => sum + c.cantidad, 0);
+    const totalRechazado = capturasAsg.reduce(
+      (sum, c) => sum + c.rechazos.reduce((s, r) => s + r.cantidad, 0),
+      0,
+    );
+
+    this.sse.emit({
+      type: 'captura',
+      data: {
+        asignacionId: captura.asignacionId,
+        capturaId: captura.id,
+        slotHora: captura.slotHora,
+        totalCapturado,
+        totalRechazado,
+        totalNeto: totalCapturado - totalRechazado,
+      },
+    });
+
+    return captura;
   }
 
   findByAsignacion(asignacionId: number) {
