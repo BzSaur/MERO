@@ -465,6 +465,8 @@
               return;
             }
 
+            // Leer ANTES de updateSlotState (que limpia qty.value)
+            var qtyCaptured = Number(qty.value) || (json.captura && Number(json.captura.cantidad)) || 0;
             var slotHora = Number(sel ? sel.value : form.querySelector('[name="slotHora"]').value);
             var captured = JSON.parse(form.dataset.captured || '[]');
             captured.push(slotHora);
@@ -492,8 +494,6 @@
             if (eId && json.captura) {
               var detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
               if (detailRow) {
-                var qtyCaptured = Number(qty.value) || 0;
-
                 // 1) Agregar badge display-only del slot al contenedor (creando si no existe)
                 var outerFlex = detailRow.querySelector('.cap-emp-detail');
                 if (outerFlex) {
