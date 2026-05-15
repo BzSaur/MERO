@@ -1,5 +1,5 @@
 # ─── Stage 1: Build ───
-FROM node:20-alpine AS builder
+FROM node:20-alpine3.21  AS builder
 
 RUN apk add --no-cache openssl
 RUN npm install -g pnpm@9
@@ -21,7 +21,7 @@ RUN cd apps/api && npx prisma generate
 RUN pnpm --filter @mero/api build
 
 # ─── Stage 2: Production ───
-FROM node:20-alpine AS production
+FROM node:20-alpine3.21  AS production
 
 RUN apk add --no-cache openssl
 
