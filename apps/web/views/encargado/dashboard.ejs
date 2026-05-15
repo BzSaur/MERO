@@ -173,13 +173,12 @@
                     var subareaAvg = subareaCount ? subareaSum / subareaCount : null;
 
                     // Rechazos
-                    var subareaRec = 0, subareaOkConRec = 0;
+                    var subareaRec = 0;
                     asignaciones.forEach(function(a) {
                       var aSubNombre = (a.subtarea && a.subtarea.nombre) || '';
                       if (aSubNombre === subarea) {
                         var rdata = _rechByAsig[a.id] || {};
-                        subareaRec      += rdata.totalRec    || 0;
-                        subareaOkConRec += rdata.okConRec    || 0;
+                        subareaRec += rdata.totalRec || 0;
                       }
                     });
                   %>
@@ -190,7 +189,7 @@
                           <% if (subareaRec > 0) { %>
                             <span class="dash-rec-badge">
                               <span class="dash-rec-badge__dot"></span>
-                              <%= subareaRec %> rec<% if (subareaOkConRec > 0) { %> · <%= subareaOkConRec %> OK<% } %>
+                              <%= subareaRec %> rec
                             </span>
                           <% } %>
                           <span class="eff-value <%= effClass(subareaAvg) %>"><%= fmtEff(subareaAvg) %></span>
@@ -304,12 +303,11 @@
                          const subAvg  = avgE(subRecs.map(m => m._eff));
                          const dSId    = 'dash-sub-' + dSIdx++;
                          // Rechazos de la subtarea
-                         let subTotalRec = 0, subOkConRec = 0;
+                         let subTotalRec = 0;
                          asignaciones.forEach(a => {
                            if ((a.subtarea?.nombre || '') === sub) {
                              const rd = _rechByAsig[a.id] || {};
                              subTotalRec += rd.totalRec || 0;
-                             subOkConRec += rd.okConRec || 0;
                            }
                          });
                     %>
@@ -321,7 +319,7 @@
                           <% if (subTotalRec > 0) { %>
                             <span class="dash-rec-badge" style="margin-left:.5rem;">
                               <span class="dash-rec-badge__dot"></span>
-                              <%= subTotalRec %> rec<% if (subOkConRec > 0) { %> · <%= subOkConRec %> OK<% } %>
+                              <%= subTotalRec %> rec
                             </span>
                           <% } %>
                         </td>
@@ -360,7 +358,6 @@
                            );
                            const _empRd = _asnEmp ? (_rechByAsig[_asnEmp.id] || {}) : {};
                            const empTotalRec = _empRd.totalRec || 0;
-                           const empOkConRec = _empRd.okConRec || 0;
                       %>
                         <!-- FILA EMPLEADO -->
                         <tr class="rexp-row rexp-row--sub rexp-child--<%= dSId %>" style="display:none"
@@ -373,7 +370,7 @@
                             <% if (empTotalRec > 0) { %>
                               <span class="dash-rec-badge" style="margin-left:.5rem;font-size:.72rem;">
                                 <span class="dash-rec-badge__dot"></span>
-                                <%= empTotalRec %> rec<% if (empOkConRec > 0) { %> · <%= empOkConRec %> OK<% } %>
+                                <%= empTotalRec %> rec
                               </span>
                             <% } %>
                           </td>
