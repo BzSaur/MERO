@@ -400,6 +400,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = button.closest('form');
     if (!form) return;
 
+    // Skip forms that handle their own AJAX flow (captura, rechazo, etc.)
+    if (form.matches('.js-form-captura, .js-form-rechazo, [data-skip-loading]')) return;
+
     form.addEventListener('submit', function () {
       if (form.matches('[data-validate]') && !form.checkValidity()) return;
 

@@ -117,11 +117,11 @@
                            const barClass = empPct >= 100 ? 'cap-bar--full' : empPct >= 50 ? 'cap-bar--mid' : 'cap-bar--low';
                            const nombre   = `${a.empleado?.nombre || ''} ${(a.empleado?.apellidos || '').split(' ')[0]}`.trim();
 
-                           // Rechazos totales del empleado
-                           let totalRechazos = 0;
-                           caps.forEach(c => {
-                             if (c.rechazos) totalRechazos += c.rechazos.reduce((s,r) => s + r.cantidad, 0);
-                           });
+                           // Totales por empleado (asignación)
+                           const totalCapturado = caps.reduce((s,c) => s + (c.cantidad || 0), 0);
+                           const totalRechazos  = caps.reduce((s,c) => s + ((c.rechazos || []).reduce((ss,r) => ss + r.cantidad, 0)), 0);
+                           const totalNeto      = totalCapturado - totalRechazos;
+                           const anchorCapId    = caps[0]?.id || null;
                       %>
 
                         <!-- FILA EMPLEADO (inline form) -->
@@ -198,79 +198,94 @@
                         </tr>
 
                         <!-- FILA DETALLE EMPLEADO (expandida) -->
-                        <tr class="rexp-row rexp-row--slot rexp-child--<%= eId %>" style="display:none">
+                        <tr class="rexp-row rexp-row--slot rexp-child--<%= eId %>"
+                            style="display:none"
+                            data-asignacion-id="<%= a.id %>">
                           <td></td>
                           <td colspan="3" style="padding-left:2.6rem;padding-top:.4rem;padding-bottom:.5rem;">
-                            <div style="display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;">
-                              <span class="cap-detail-label">
-                                <strong>Rechazos:</strong> <%= totalRechazos %>
-                              </span>
-                              <span class="cap-detail-label">
-                                <strong>Registros capturados:</strong> <%= empCaps %>
-                              </span>
+                            <div class="cap-emp-detail" style="display:flex;flex-direction:column;gap:.6rem;">
+
+                              <!-- 4 contadores -->
+                              <div style="display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap;">
+                                <span class="cap-detail-label" data-counter="capturado">
+                                  <strong>Capturado:</strong> <%= totalCapturado %>
+                                </span>
+                                <span class="cap-detail-label" data-counter="rechazos">
+                                  <strong>Rechazos:</strong> <%= totalRechazos %>
+                                </span>
+                                <span class="cap-detail-label" data-counter="neto">
+                                  <strong>Neto:</strong> <%= totalNeto %>
+                                </span>
+                                <span class="cap-detail-label" data-counter="registros">
+                                  <strong>Registros:</strong> <%= empCaps %>
+                                </span>
+                              </div>
+
+                              <!-- Badges de slots (solo display) -->
                               <% if (empCaps > 0) { %>
-                                <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;width:100%;">
-                                  <% caps.forEach(cap => {
-                                    const _rechazos = cap.rechazos || [];
-                                    const _totalRec = _rechazos.reduce((s,r) => s + r.cantidad, 0);
-                                    const _neto     = cap.cantidad - _totalRec;
-                                  %>
+                                <div class="cap-emp-slots" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                                  <% caps.forEach(cap => { %>
                                     <span
-                                      class="badge badge--none"
+                                      class="badge badge--none cap-slot-badge"
+                                      data-captura-id="<%= cap.id %>"
                                       style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"
-                                      title="Slot <%= cap.slotHora %>:00 — <%= cap.cantidad %> pzas<%= _totalRec ? ' · ' + _totalRec + ' rechazos' : '' %>"
+                                      title="Slot <%= cap.slotHora %>:00 — <%= cap.cantidad %> pzas"
                                     >
                                       <svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>
-                                      <%= cap.slotHora %>:00
-                                      <% if (_totalRec > 0) { %>
-                                        <span class="badge badge--danger" style="font-size:.68rem;padding:0 4px;">-<%= _totalRec %></span>
-                                      <% } %>
-                                      <button type="button"
-                                        class="btn btn--ghost"
-                                        style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"
-                                        onclick="toggleRechazo('<%= cap.id %>')">
-                                        + rec
-                                      </button>
+                                      <%= cap.slotHora %>:00 · <%= cap.cantidad %>
                                     </span>
-                                    <!-- Form de rechazo -->
-                                    <form
-                                      id="rec-form-<%= cap.id %>"
-                                      method="POST"
-                                      action="/encargado/rechazos"
-                                      class="js-form-rechazo"
-                                      style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"
-                                    >
-                                      <input type="hidden" name="capturaId" value="<%= cap.id %>">
-                                      <span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot <%= cap.slotHora %>:00</span>
-                                      <input
-                                        class="form-control slot-qty"
-                                        type="number"
-                                        name="cantidad"
-                                        min="1"
-                                        max="<%= _neto %>"
-                                        placeholder="Cant."
-                                        style="width:5rem;"
-                                        required
-                                      >
-                                      <input
-                                        class="form-control"
-                                        type="text"
-                                        name="motivo"
-                                        placeholder="Motivo (opcional)"
-                                        style="flex:1;min-width:8rem;"
-                                      >
-                                      <button type="submit" class="btn btn--slot-save" title="Guardar rechazo">
-                                        <svg class="icon"><use href="#icon-check"/></svg>
-                                      </button>
-                                      <button type="button" class="btn btn--ghost"
-                                        style="font-size:.72rem;padding:2px 8px;height:auto;"
-                                        onclick="toggleRechazo('<%= cap.id %>')">
-                                        Cancelar
-                                      </button>
-                                    </form>
                                   <% }) %>
                                 </div>
                               <% } %>
+
+                              <!-- Botón + Rechazo único + form único por empleado -->
+                              <div class="cap-emp-rec-wrap" style="display:flex;flex-direction:column;gap:.4rem;">
+                                <button type="button"
+                                  class="btn btn--ghost cap-emp-rec-btn"
+                                  data-asignacion-id="<%= a.id %>"
+                                  style="font-size:.78rem;padding:3px 10px;height:auto;align-self:flex-start;<%= totalNeto > 0 ? '' : 'display:none;' %>"
+                                  onclick="toggleRechazo('<%= a.id %>')">
+                                  + Rechazo
+                                </button>
+
+                                <form
+                                  id="rec-form-<%= a.id %>"
+                                  method="POST"
+                                  action="/encargado/rechazos"
+                                  class="js-form-rechazo"
+                                  data-asignacion-id="<%= a.id %>"
+                                  style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;"
+                                >
+                                  <input type="hidden" name="capturaId" value="<%= anchorCapId || '' %>">
+                                  <span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo</span>
+                                  <input
+                                    class="form-control slot-qty cap-emp-rec-qty"
+                                    type="number"
+                                    name="cantidad"
+                                    min="1"
+                                    max="<%= totalNeto %>"
+                                    placeholder="Cant."
+                                    style="width:5rem;"
+                                    required
+                                  >
+                                  <input
+                                    class="form-control"
+                                    type="text"
+                                    name="motivo"
+                                    placeholder="Motivo (opcional)"
+                                    style="flex:1;min-width:8rem;"
+                                  >
+                                  <button type="submit" class="btn btn--slot-save" title="Guardar rechazo">
+                                    <svg class="icon"><use href="#icon-check"/></svg>
+                                  </button>
+                                  <button type="button" class="btn btn--ghost"
+                                    style="font-size:.72rem;padding:2px 8px;height:auto;"
+                                    onclick="toggleRechazo('<%= a.id %>')">
+                                    Cancelar
+                                  </button>
+                                </form>
+                              </div>
+
                             </div>
                           </td>
                         </tr>
@@ -349,8 +364,8 @@
       }
     }
 
-    function toggleRechazo(capturaId) {
-      const form = document.getElementById('rec-form-' + capturaId);
+    function toggleRechazo(asignacionId) {
+      const form = document.getElementById('rec-form-' + asignacionId);
       if (!form) return;
       const visible = form.style.display !== 'none';
       form.style.display = visible ? 'none' : 'flex';
@@ -393,30 +408,28 @@
         }
       }
 
-      /* ── build badge HTML for a newly captured slot ── */
-      function buildSlotBadge(capturaId, slotHora) {
-        return '<span class="badge badge--none"' +
+      /* ── build display-only badge for a newly captured slot ── */
+      function buildSlotBadge(capturaId, slotHora, cantidad) {
+        return '<span class="badge badge--none cap-slot-badge"' +
+          ' data-captura-id="' + capturaId + '"' +
           ' style="font-size:.72rem;display:inline-flex;align-items:center;gap:4px;"' +
-          ' title="Slot ' + slotHora + ':00">' +
+          ' title="Slot ' + slotHora + ':00 — ' + cantidad + ' pzas">' +
           '<svg class="icon" style="width:10px;height:10px"><use href="#icon-check"/></svg>' +
-          slotHora + ':00' +
-          '<button type="button" class="btn btn--ghost"' +
-          ' style="font-size:.68rem;padding:1px 6px;height:auto;margin-left:2px;"' +
-          ' onclick="toggleRechazo(\'' + capturaId + '\')">+ rec</button>' +
-          '</span>' +
-          '<form id="rec-form-' + capturaId + '" class="js-form-rechazo"' +
-          ' style="display:none;align-items:center;gap:6px;flex-wrap:wrap;width:100%;margin-top:.3rem;"' +
-          ' data-captura-id="' + capturaId + '" data-slot-hora="' + slotHora + '">' +
-          '<input type="hidden" name="capturaId" value="' + capturaId + '">' +
-          '<span style="font-size:.78rem;color:rgba(15,23,42,.5);">Rechazo slot ' + slotHora + ':00</span>' +
-          '<input class="form-control slot-qty" type="number" name="cantidad" min="1" placeholder="Cant." style="width:5rem;" required>' +
-          '<input class="form-control" type="text" name="motivo" placeholder="Motivo (opcional)" style="flex:1;min-width:8rem;">' +
-          '<button type="submit" class="btn btn--slot-save" title="Guardar rechazo">' +
-          '<svg class="icon"><use href="#icon-check"/></svg></button>' +
-          '<button type="button" class="btn btn--ghost"' +
-          ' style="font-size:.72rem;padding:2px 8px;height:auto;"' +
-          ' onclick="toggleRechazo(\'' + capturaId + '\')">Cancelar</button>' +
-          '</form>';
+          slotHora + ':00 · ' + cantidad +
+          '</span>';
+      }
+
+      /* ── helpers contadores ── */
+      function getCounter(detailRow, name) {
+        const el = detailRow.querySelector('[data-counter="' + name + '"]');
+        if (!el) return 0;
+        return parseInt(el.textContent.replace(/[^0-9-]/g, ''), 10) || 0;
+      }
+      function setCounter(detailRow, name, value) {
+        const el = detailRow.querySelector('[data-counter="' + name + '"]');
+        if (!el) return;
+        const labels = { capturado: 'Capturado', rechazos: 'Rechazos', neto: 'Neto', registros: 'Registros' };
+        el.innerHTML = '<strong>' + labels[name] + ':</strong> ' + value;
       }
 
       /* ── captura AJAX ── */
@@ -479,33 +492,48 @@
             if (eId && json.captura) {
               var detailRow = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
               if (detailRow) {
-                var outerFlex = detailRow.querySelector('td > div');
+                var qtyCaptured = Number(qty.value) || 0;
+
+                // 1) Agregar badge display-only del slot al contenedor (creando si no existe)
+                var outerFlex = detailRow.querySelector('.cap-emp-detail');
                 if (outerFlex) {
-                  var badgeContainer = outerFlex.querySelector('div[style*="gap:.5rem"]');
+                  var badgeContainer = outerFlex.querySelector('.cap-emp-slots');
                   if (!badgeContainer) {
                     badgeContainer = document.createElement('div');
-                    badgeContainer.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem;width:100%;';
-                    outerFlex.appendChild(badgeContainer);
+                    badgeContainer.className = 'cap-emp-slots';
+                    badgeContainer.style.cssText = 'display:flex;gap:.5rem;flex-wrap:wrap;';
+                    // insertar antes del wrap de rechazo
+                    var recWrap = outerFlex.querySelector('.cap-emp-rec-wrap');
+                    if (recWrap) outerFlex.insertBefore(badgeContainer, recWrap);
+                    else outerFlex.appendChild(badgeContainer);
                   }
                   var frag = document.createElement('div');
-                  frag.innerHTML = buildSlotBadge(json.captura.id, slotHora);
+                  frag.innerHTML = buildSlotBadge(json.captura.id, slotHora, qtyCaptured);
                   while (frag.firstChild) badgeContainer.appendChild(frag.firstChild);
-                  var newRecForm = document.getElementById('rec-form-' + json.captura.id);
-                  if (newRecForm) wireRechazoForm(newRecForm);
                 }
-              }
-            }
 
-            if (eId) {
-              var detailRow2 = document.querySelector('.rexp-child--' + eId + '.rexp-row--slot');
-              if (detailRow2) {
-                var labels = detailRow2.querySelectorAll('.cap-detail-label');
-                labels.forEach(function(lbl) {
-                  if (lbl.textContent.indexOf('Registros capturados') !== -1) {
-                    var cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
-                    lbl.innerHTML = '<strong>Registros capturados:</strong> ' + (cur + 1);
-                  }
-                });
+                // 2) Actualizar contadores: capturado, neto, registros
+                var prevCap = getCounter(detailRow, 'capturado');
+                var prevRec = getCounter(detailRow, 'rechazos');
+                var prevReg = getCounter(detailRow, 'registros');
+                var newCap  = prevCap + qtyCaptured;
+                var newNeto = newCap - prevRec;
+                setCounter(detailRow, 'capturado', newCap);
+                setCounter(detailRow, 'neto', newNeto);
+                setCounter(detailRow, 'registros', prevReg + 1);
+
+                // 3) Mostrar botón + Rechazo si neto era 0 y ahora > 0
+                var recBtn = detailRow.querySelector('.cap-emp-rec-btn');
+                if (recBtn && newNeto > 0) recBtn.style.display = '';
+
+                // 4) Sincronizar max del input rechazo y anchor capturaId
+                var recForm = detailRow.querySelector('.js-form-rechazo');
+                if (recForm) {
+                  var recQty = recForm.querySelector('.cap-emp-rec-qty');
+                  if (recQty) recQty.max = String(newNeto);
+                  var anchorInput = recForm.querySelector('input[name="capturaId"]');
+                  if (anchorInput && !anchorInput.value) anchorInput.value = json.captura.id;
+                }
               }
             }
 
@@ -553,35 +581,21 @@
               return;
             }
 
-            var capturaIdEl = form.querySelector('[name="capturaId"]');
-            var capturaId   = capturaIdEl ? capturaIdEl.value : null;
-            var cantidad    = Number(qty.value);
+            var cantidad = Number(qty.value);
+            var detailRow = form.closest('tr.rexp-row--slot');
 
-            var slotBadge = form.previousElementSibling;
-            if (slotBadge && slotBadge.classList.contains('badge')) {
-              var rejBadge = slotBadge.querySelector('.badge--danger');
-              if (rejBadge) {
-                var cur = parseInt(rejBadge.textContent.replace('-', '')) || 0;
-                rejBadge.textContent = '-' + (cur + cantidad);
-              } else {
-                var recSpan = document.createElement('span');
-                recSpan.className = 'badge badge--danger';
-                recSpan.style.cssText = 'font-size:.68rem;padding:0 4px;';
-                recSpan.textContent = '-' + cantidad;
-                var recBtn = slotBadge.querySelector('button');
-                if (recBtn) slotBadge.insertBefore(recSpan, recBtn);
-              }
-            }
+            if (detailRow) {
+              var prevRec = getCounter(detailRow, 'rechazos');
+              var prevNeto = getCounter(detailRow, 'neto');
+              var newRec = prevRec + cantidad;
+              var newNeto = prevNeto - cantidad;
+              setCounter(detailRow, 'rechazos', newRec);
+              setCounter(detailRow, 'neto', newNeto);
 
-            var empRow = form.closest('tr.rexp-row--slot');
-            if (empRow) {
-              var labels = empRow.querySelectorAll('.cap-detail-label');
-              labels.forEach(function(lbl) {
-                if (lbl.textContent.indexOf('Rechazos:') !== -1) {
-                  var cur = parseInt(lbl.textContent.replace(/[^0-9]/g, '')) || 0;
-                  lbl.innerHTML = '<strong>Rechazos:</strong> ' + (cur + cantidad);
-                }
-              });
+              // actualizar max del input y ocultar botón si neto llegó a 0
+              qty.max = String(newNeto);
+              var recBtn = detailRow.querySelector('.cap-emp-rec-btn');
+              if (recBtn && newNeto <= 0) recBtn.style.display = 'none';
             }
 
             form.style.display = 'none';

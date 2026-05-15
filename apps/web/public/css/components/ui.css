@@ -3020,10 +3020,13 @@ html[data-theme="dark"] .rexp-row--slot td        { background: rgba(255,255,255
 }
 
 .cap-form--captured .cap-slot-qty {
+  width: 9.5rem !important;
   background: rgba(15,23,42,.04) !important;
   color: rgba(15,23,42,.35) !important;
   border-color: rgba(15,23,42,.10) !important;
   cursor: not-allowed !important;
+  text-align: left !important;
+  padding-left: 8px !important;
 }
 
 .cap-slot-btn:disabled {
