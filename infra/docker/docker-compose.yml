@@ -73,6 +73,7 @@ services:
     ports:
       - '8080:80'
       - '8081:8080'
+      - '8082:8090'   # ADMS checadores (CLK-980) -> /iclock -> erp_rh_app:3001
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
